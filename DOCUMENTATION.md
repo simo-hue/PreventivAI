@@ -221,3 +221,11 @@
 - [2026-05-23T20:59:00+02:00]: Eliminazione progetti area Customer
   - *Details*: Aggiunta la possibilità per i clienti di eliminare le proprie richieste (progetti) direttamente dalla propria dashboard personale. Il pulsante cestino attiva un modale di conferma personalizzato (bypassando quello nativo del browser) e procede con la cancellazione sicura dal database, inclusi i preventivi associati.
   - *Tech Notes*: Modificato `components/customer/customer-request-list.tsx` introducendo lo state management per la cancellazione e utilizzando `useTransition`. Riutilizzato il componente accessibile `<ConfirmDialog>` e la Server Action `deleteRequestAction` per mantenere DRY la logica di eliminazione. Validato senza errori TypeScript.
+
+- [2026-05-23T21:05:00+02:00]: Integrazione Chat e Domande Importanti
+  - *Details*: L'interfaccia delle "Domande Importanti" lato admin è stata trasformata. Invece di scrivere manualmente le risposte, l'admin può selezionare le domande con delle checkbox e inviarle con un clic alla chat del cliente. Il preventivo AI viene ricalcolato considerando l'intero storico della chat per dedurre le risposte fornite dal cliente.
+  - *Tech Notes*: `QuestionRow` in `scenario-dashboard.tsx` è stato sostituito da un nuovo componente integrato `ImportantQuestionsSection`. `app/api/requests/[id]/analyze/route.ts` è stato modificato per interrogare `chat_messages` in Supabase e accodare lo storico (`chatTranscript`) a `requestText`. La vecchia route `/api/requests/[id]/clarifications` è stata eliminata poiché la comunicazione passa ora interamente dal sistema di chat.
+
+- [2026-05-23T21:20:00+02:00]: Rimozione Sidebar Area Customer
+  - *Details*: Ottimizzato il layout dell'area cliente. La sidebar laterale (che risultava vuota) è stata rimossa a favore di un header superiore fisso ("sticky") più moderno e compatto.
+  - *Tech Notes*: Modificato `app/customer/[id]/layout.tsx`. Il contenitore `aside` è stato sostituito da un `<header>` che ospita il logo a sinistra e il pulsante di logout a destra, liberando così l'intera larghezza della pagina per il contenuto principale. Validazione typescript eseguita con successo.

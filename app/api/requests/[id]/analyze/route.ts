@@ -51,7 +51,7 @@ export async function POST(
     requestText = clientReq.raw_text;
   }
   
-  const textToAnalyze = requestText as string;
+  let textToAnalyze = requestText as string;
 
   try {
     const user = await requireUser();
@@ -61,6 +61,22 @@ export async function POST(
     const admin = createSupabaseAdminClient();
     if (admin) {
       await admin.from("client_requests").update({ status: "analyzing" }).eq("id", id);
+      
+      // Fetch chat messages to include in analysis
+      const { data: messages } = await admin
+        .from("chat_messages")
+        .select("content, sender_id")
+        .eq("client_request_id", id)
+        .order("created_at", { ascending: true });
+        
+      if (messages && messages.length > 0) {
+        const adminId = "5d65094f-d066-423c-a7ce-ef18a0f64368";
+        const chatTranscript = messages.map(m => {
+          const role = m.sender_id === adminId ? "Software House" : "Cliente";
+          return `${role}: ${m.content}`;
+        }).join("\n\n");
+        textToAnalyze += `\n\n--- STORICO CHAT DI CHIARIMENTO ---\n${chatTranscript}`;
+      }
     }
     
     const similarHistoricalProjects = await getSimilarHistoricalProjects({
