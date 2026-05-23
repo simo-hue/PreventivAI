@@ -2,7 +2,8 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { Download, ExternalLink, Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Download, ExternalLink, Loader2, Send } from "lucide-react";
 import { Alert } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -12,6 +13,7 @@ import { DEFAULT_PM_PERCENTAGE, officialRateCards } from "@/src/lib/demo/rate-ca
 import { recalculateScenario } from "@/src/lib/quotes/pricing-engine";
 import type { PricedScenario } from "@/src/lib/quotes/types";
 import { formatCurrency, formatNumber, formatPercent } from "@/src/lib/utils/format";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 
 type RequestInfo = {
   id: string;
@@ -37,6 +39,9 @@ export function ScenarioDetailClient({
   );
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isSendingToChat, setIsSendingToChat] = useState(false);
+  const [showSuccessDialog, setShowSuccessDialog] = useState(false);
+  const router = useRouter();
   const [pricingSettings, setPricingSettings] = useState<{
     pmPercentage: number;
     currency: string;
@@ -179,6 +184,36 @@ export function ScenarioDetailClient({
     }
   }
 
+  async function sendToChat() {
+    const display = recalculated ?? scenario;
+    if (!display) return;
+    setIsSendingToChat(true);
+    try {
+      const response = await fetch(`/api/requests/${requestId}/chat`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+           content: `Ti ho inviato il preventivo **${display.name}**. Puoi visualizzarlo o scaricarlo in PDF cliccando sui pulsanti qui sotto.`,
+           metadata: {
+              type: "quote_share",
+              scenarioId: display.id,
+              scenarioName: display.name,
+              requestTitle: requestInfo?.title || display.name
+           }
+        }),
+      });
+      if (response.ok) {
+        setShowSuccessDialog(true);
+      } else {
+        alert("Errore durante l'invio in chat.");
+      }
+    } catch {
+      alert("Errore di rete.");
+    } finally {
+      setIsSendingToChat(false);
+    }
+  }
+
   // Loading state
   if (scenario === null && initialScenario === null) {
     return (
@@ -241,9 +276,13 @@ export function ScenarioDetailClient({
             <ExternalLink className="size-4" aria-hidden="true" />
             Preview
           </ButtonLink>
-          <Button onClick={exportPdf}>
+          <Button variant="secondary" onClick={exportPdf}>
             <Download className="size-4" aria-hidden="true" />
             PDF
+          </Button>
+          <Button onClick={sendToChat} disabled={isSendingToChat || isEditing}>
+            {isSendingToChat ? <Loader2 className="size-4 animate-spin" /> : <Send className="size-4" aria-hidden="true" />}
+            Invia a cliente
           </Button>
         </div>
       </div>
@@ -418,6 +457,20 @@ export function ScenarioDetailClient({
         <ListCard title="Ipotesi / Assunzioni" items={display.assumptions} />
         <ListCard title="Esclusioni" items={display.exclusions} />
       </div>
+
+      <ConfirmDialog
+        isOpen={showSuccessDialog}
+        onClose={() => setShowSuccessDialog(false)}
+        onConfirm={() => {
+          setShowSuccessDialog(false);
+          router.push(`/admin/requests/${requestId}`);
+        }}
+        title="Preventivo Condiviso"
+        description="Il preventivo è stato inviato in chat con successo. Il cliente può ora visualizzarlo o scaricarlo in formato PDF."
+        confirmText="Vai alla Chat"
+        cancelText="Chiudi"
+        variant="success"
+      />
     </div>
   );
 }

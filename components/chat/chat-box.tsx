@@ -2,7 +2,8 @@
 
 import { useEffect, useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { MessageSquare, Send } from "lucide-react";
+import { MessageSquare, Send, FileText } from "lucide-react";
+import Link from "next/link";
 import ReactMarkdown from "react-markdown";
 import { experimental_useObject } from "@ai-sdk/react";
 import { ValidateReplySchema } from "@/src/lib/ai/schemas";
@@ -17,14 +18,15 @@ interface ChatMessage {
   content: string;
   created_at: string;
   sender_id: string;
+  metadata?: any;
   profiles: Profile | null;
 }
 
-export function ChatBox({ 
-  requestId, 
+export function ChatBox({
+  requestId,
   currentUserId,
   isAdminView = false
-}: { 
+}: {
   requestId: string;
   currentUserId: string;
   isAdminView?: boolean;
@@ -43,7 +45,7 @@ export function ChatBox({
     onFinish: (event) => {
       // Aggiorna subito i messaggi per far vedere la risposta completa
       fetchMessages();
-      
+
       if (event.object?.isValid) {
         // Il cliente ha risposto adeguatamente, ora facciamo l'analisi
         fetch(`/api/requests/${requestId}/analyze`, { method: "POST" }).catch(console.error);
@@ -92,7 +94,7 @@ export function ChatBox({
 
   const handleSend = async () => {
     if (!inputValue.trim()) return;
-    
+
     setSending(true);
     try {
       const res = await fetch(`/api/requests/${requestId}/chat`, {
@@ -100,12 +102,12 @@ export function ChatBox({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ content: inputValue }),
       });
-      
+
       if (res.ok) {
         const data = await res.json();
         setMessages((prev) => [...prev, data.message]);
         setInputValue("");
-        
+
         // Rilancia l'analisi se chi scrive non è admin, ma prima VALIDA il messaggio
         // Siccome l'admin ha id fisso:
         if (currentUserId !== "5d65094f-d066-423c-a7ce-ef18a0f64368") {
@@ -137,7 +139,7 @@ export function ChatBox({
           <div className="text-center text-sm text-slate-500 my-auto">Nessun messaggio. Scrivi qualcosa per iniziare!</div>
         ) : (
           messages.map((msg) => {
-            const isMe = isAdminView 
+            const isMe = isAdminView
               ? (msg.sender_id === currentUserId || msg.sender_id === "5d65094f-d066-423c-a7ce-ef18a0f64368")
               : (msg.sender_id === currentUserId);
             return (
@@ -146,45 +148,103 @@ export function ChatBox({
                   <div className={`h-8 w-8 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0 ${isMe ? "bg-indigo-600" : "bg-slate-600"}`}>
                     {isMe ? "TU" : msg.profiles?.full_name?.substring(0, 2).toUpperCase() || "SH"}
                   </div>
-                  <div className={`border rounded-2xl p-3 shadow-sm text-sm whitespace-pre-wrap ${
-                    isMe 
-                      ? "bg-indigo-600 text-white border-indigo-500 rounded-tr-sm" 
-                      : "bg-white text-slate-700 border-slate-200 rounded-tl-sm"
-                  }`}>
-                    <ReactMarkdown
-                      components={{
-                        p: ({node, ...props}) => <p className="m-0" {...props} />,
-                        strong: ({node, ...props}) => <strong className="font-semibold" {...props} />,
-                        ul: ({node, ...props}) => <ul className="list-disc pl-4 m-0" {...props} />,
-                        ol: ({node, ...props}) => <ol className="list-decimal pl-4 m-0" {...props} />,
-                      }}
-                    >
-                      {msg.content}
-                    </ReactMarkdown>
+                  <div className={`border rounded-2xl p-3 shadow-sm text-sm whitespace-pre-wrap ${isMe
+                    ? "bg-indigo-600 text-white border-indigo-500 rounded-tr-sm"
+                    : "bg-white text-slate-700 border-slate-200 rounded-tl-sm"
+                    }`}>
+                    {msg.metadata?.type === "quote_share" ? (
+                      <div className="flex flex-col gap-3 min-w-[200px]">
+                        <div className="flex items-center gap-2">
+                          <div className={`flex h-8 w-8 items-center justify-center rounded-full ${isMe ? 'bg-indigo-500 text-white' : 'bg-indigo-100 text-indigo-600'}`}>
+                            <FileText className="h-4 w-4" />
+                          </div>
+                          <div>
+                            <span className="font-bold block">{msg.metadata.scenarioName}</span>
+                            <span className="text-xs opacity-80">Preventivo generato</span>
+                          </div>
+                        </div>
+                        <div className="flex gap-2 mt-1">
+                          <Link href={`?previewQuoteId=${msg.metadata.scenarioId}`} className={`flex-1 flex items-center justify-center py-1.5 px-3 rounded-md text-xs font-semibold transition-colors ${isMe ? 'bg-indigo-500 hover:bg-indigo-400 text-white' : 'bg-white border border-slate-200 hover:bg-slate-50 text-slate-700'}`}>
+                            Apri preview
+                          </Link>
+                          <Button 
+                            variant={isMe ? "default" : "outline"} 
+                            size="sm"
+                            className={`flex-1 h-[30px] text-xs font-semibold ${isMe ? 'bg-indigo-700 hover:bg-indigo-800 text-white border-none' : ''}`}
+                            onClick={async () => {
+                              try {
+                                const res = await fetch(`/api/quote-scenarios/${msg.metadata.scenarioId}`);
+                                if (!res.ok) throw new Error();
+                                const data = await res.json();
+                                const exportRes = await fetch(`/api/quote-scenarios/${msg.metadata.scenarioId}/export-pdf`, {
+                                  method: "POST",
+                                  headers: { "Content-Type": "application/json" },
+                                  body: JSON.stringify({ requestTitle: msg.metadata.requestTitle || msg.metadata.scenarioName, scenario: data.scenario }),
+                                });
+                                if (!exportRes.ok) throw new Error();
+                                const blob = await exportRes.blob();
+                                const url = URL.createObjectURL(blob);
+                                const a = document.createElement("a");
+                                a.href = url;
+                                a.download = `${data.scenario.slug || msg.metadata.scenarioName}.pdf`;
+                                a.click();
+                                URL.revokeObjectURL(url);
+                              } catch (e) {
+                                alert("Errore durante il download del PDF");
+                              }
+                            }}
+                          >
+                            Scarica PDF
+                          </Button>
+                        </div>
+                        <div className="mt-2 text-xs opacity-90 border-t pt-2 border-current/20">
+                          <ReactMarkdown
+                            components={{
+                              p: ({ node, ...props }) => <p className="m-0" {...props} />,
+                              strong: ({ node, ...props }) => <strong className="font-semibold" {...props} />,
+                              ul: ({ node, ...props }) => <ul className="list-disc pl-4 m-0" {...props} />,
+                              ol: ({ node, ...props }) => <ol className="list-decimal pl-4 m-0" {...props} />,
+                            }}
+                          >
+                            {msg.content}
+                          </ReactMarkdown>
+                        </div>
+                      </div>
+                    ) : (
+                      <ReactMarkdown
+                        components={{
+                          p: ({ node, ...props }) => <p className="m-0" {...props} />,
+                          strong: ({ node, ...props }) => <strong className="font-semibold" {...props} />,
+                          ul: ({ node, ...props }) => <ul className="list-disc pl-4 m-0" {...props} />,
+                          ol: ({ node, ...props }) => <ol className="list-decimal pl-4 m-0" {...props} />,
+                        }}
+                      >
+                        {msg.content}
+                      </ReactMarkdown>
+                    )}
                   </div>
                 </div>
               </div>
             );
           })
         )}
-        
+
         {isStreamLoading && object?.aiResponse && (
           <div className={`flex w-full ${isAdminView ? "justify-end" : "justify-start"}`}>
             <div className={`flex items-start gap-3 max-w-[85%] ${isAdminView ? "flex-row-reverse" : "flex-row"}`}>
               <div className={`h-8 w-8 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0 ${isAdminView ? "bg-indigo-600" : "bg-slate-600"}`}>
                 {isAdminView ? "TU" : "SH"}
               </div>
-              <div className={`border rounded-2xl p-3 shadow-sm text-sm whitespace-pre-wrap ${
-                isAdminView 
-                  ? "bg-indigo-600 text-white border-indigo-500 rounded-tr-sm" 
-                  : "bg-white text-slate-700 border-slate-200 rounded-tl-sm"
-              }`}>
+              <div className={`border rounded-2xl p-3 shadow-sm text-sm whitespace-pre-wrap ${isAdminView
+                ? "bg-indigo-600 text-white border-indigo-500 rounded-tr-sm"
+                : "bg-white text-slate-700 border-slate-200 rounded-tl-sm"
+                }`}>
                 <ReactMarkdown
                   components={{
-                    p: ({node, ...props}) => <p className="m-0" {...props} />,
-                    strong: ({node, ...props}) => <strong className="font-semibold" {...props} />,
-                    ul: ({node, ...props}) => <ul className="list-disc pl-4 m-0" {...props} />,
-                    ol: ({node, ...props}) => <ol className="list-decimal pl-4 m-0" {...props} />,
+                    p: ({ node, ...props }) => <p className="m-0" {...props} />,
+                    strong: ({ node, ...props }) => <strong className="font-semibold" {...props} />,
+                    ul: ({ node, ...props }) => <ul className="list-disc pl-4 m-0" {...props} />,
+                    ol: ({ node, ...props }) => <ol className="list-decimal pl-4 m-0" {...props} />,
                   }}
                 >
                   {object.aiResponse}
@@ -200,11 +260,10 @@ export function ChatBox({
               <div className={`h-8 w-8 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0 ${isAdminView ? "bg-indigo-600" : "bg-slate-600"}`}>
                 {isAdminView ? "TU" : "SH"}
               </div>
-              <div className={`border rounded-2xl p-4 shadow-sm flex items-center gap-1.5 h-[46px] ${
-                isAdminView
-                  ? "bg-indigo-600 text-white border-indigo-500 rounded-tr-sm"
-                  : "bg-white text-slate-700 border-slate-200 rounded-tl-sm"
-              }`}>
+              <div className={`border rounded-2xl p-4 shadow-sm flex items-center gap-1.5 h-[46px] ${isAdminView
+                ? "bg-indigo-600 text-white border-indigo-500 rounded-tr-sm"
+                : "bg-white text-slate-700 border-slate-200 rounded-tl-sm"
+                }`}>
                 <div className={`w-1.5 h-1.5 rounded-full animate-bounce [animation-delay:-0.3s] ${isAdminView ? "bg-indigo-200" : "bg-slate-400"}`}></div>
                 <div className={`w-1.5 h-1.5 rounded-full animate-bounce [animation-delay:-0.15s] ${isAdminView ? "bg-indigo-200" : "bg-slate-400"}`}></div>
                 <div className={`w-1.5 h-1.5 rounded-full animate-bounce ${isAdminView ? "bg-indigo-200" : "bg-slate-400"}`}></div>
@@ -217,9 +276,9 @@ export function ChatBox({
       {/* Input */}
       <div className="p-4 border-t border-slate-200 bg-white mt-auto">
         <div className="flex gap-2 items-end">
-          <textarea 
+          <textarea
             ref={textareaRef}
-            placeholder="Scrivi un messaggio..." 
+            placeholder="Scrivi un messaggio..."
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             onKeyDown={(e) => {
@@ -232,13 +291,12 @@ export function ChatBox({
             rows={1}
             className="flex-1 resize-none rounded-2xl border border-slate-300 px-4 py-3 text-sm focus:outline-none focus:border-[var(--primary)] disabled:bg-slate-50 disabled:text-slate-400 overflow-y-auto min-h-[44px] max-h-[120px] shadow-sm transition-colors"
           />
-          <Button 
-            onClick={handleSend} 
-            disabled={!inputValue.trim() || sending} 
+          <Button
+            onClick={handleSend}
+            disabled={!inputValue.trim() || sending}
             className="rounded-full px-4 h-11 shrink-0 shadow-sm"
           >
             <Send className="h-4 w-4 sm:mr-2" />
-            <span className="hidden sm:inline">Invia</span>
           </Button>
         </div>
         <div className="text-xs text-slate-400 text-center mt-2 hidden sm:block">
