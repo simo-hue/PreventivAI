@@ -4,6 +4,8 @@ import { useEffect, useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { MessageSquare, Send } from "lucide-react";
 import ReactMarkdown from "react-markdown";
+import { experimental_useObject } from "@ai-sdk/react";
+import { ValidateReplySchema } from "@/src/lib/ai/schemas";
 
 interface Profile {
   full_name: string;
@@ -20,19 +22,34 @@ interface ChatMessage {
 
 export function ChatBox({ 
   requestId, 
-  currentUserId 
+  currentUserId,
+  isAdminView = false
 }: { 
   requestId: string;
   currentUserId: string;
+  isAdminView?: boolean;
 }) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [loading, setLoading] = useState(true);
   const [inputValue, setInputValue] = useState("");
   const [sending, setSending] = useState(false);
-  const [isTyping, setIsTyping] = useState(false);
   const [requestStatus, setRequestStatus] = useState<string>("draft");
   const scrollRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  const { object, submit: submitValidate, isLoading: isStreamLoading } = experimental_useObject({
+    api: `/api/requests/${requestId}/chat/validate-reply`,
+    schema: ValidateReplySchema,
+    onFinish: (event) => {
+      // Aggiorna subito i messaggi per far vedere la risposta completa
+      fetchMessages();
+      
+      if (event.object?.isValid) {
+        // Il cliente ha risposto adeguatamente, ora facciamo l'analisi
+        fetch(`/api/requests/${requestId}/analyze`, { method: "POST" }).catch(console.error);
+      }
+    }
+  });
 
   const fetchMessages = async () => {
     try {
@@ -58,7 +75,7 @@ export function ChatBox({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [requestId]);
 
-  const showTypingIndicator = isTyping || requestStatus === "analyzing";
+  const showTypingIndicator = requestStatus === "analyzing" || (isStreamLoading && !object?.aiResponse);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -92,24 +109,7 @@ export function ChatBox({
         // Rilancia l'analisi se chi scrive non è admin, ma prima VALIDA il messaggio
         // Siccome l'admin ha id fisso:
         if (currentUserId !== "5d65094f-d066-423c-a7ce-ef18a0f64368") {
-          setIsTyping(true);
-          try {
-            const valRes = await fetch(`/api/requests/${requestId}/chat/validate-reply`, { method: "POST" });
-            if (valRes.ok) {
-              const valData = await valRes.json();
-              // Aggiorna subito i messaggi per far vedere la risposta dell'AI (sia in caso di successo che di fallimento)
-              await fetchMessages();
-              
-              if (valData.triggerAnalyze) {
-                // Il cliente ha risposto adeguatamente, ora facciamo l'analisi
-                fetch(`/api/requests/${requestId}/analyze`, { method: "POST" }).catch(console.error);
-              }
-            }
-          } catch (valError) {
-            console.error("Errore durante la validazione del messaggio:", valError);
-          } finally {
-            setIsTyping(false);
-          }
+          submitValidate({});
         }
       }
     } catch (e) {
@@ -137,7 +137,9 @@ export function ChatBox({
           <div className="text-center text-sm text-slate-500 my-auto">Nessun messaggio. Scrivi qualcosa per iniziare!</div>
         ) : (
           messages.map((msg) => {
-            const isMe = msg.sender_id === currentUserId;
+            const isMe = isAdminView 
+              ? (msg.sender_id === currentUserId || msg.sender_id === "5d65094f-d066-423c-a7ce-ef18a0f64368")
+              : (msg.sender_id === currentUserId);
             return (
               <div key={msg.id} className={`flex w-full ${isMe ? "justify-end" : "justify-start"}`}>
                 <div className={`flex items-start gap-3 max-w-[85%] ${isMe ? "flex-row-reverse" : "flex-row"}`}>
@@ -166,16 +168,46 @@ export function ChatBox({
           })
         )}
         
-        {showTypingIndicator && (
-          <div className="flex w-full justify-start">
-            <div className="flex items-start gap-3 flex-row">
-              <div className="h-8 w-8 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0 bg-slate-600">
-                SH
+        {isStreamLoading && object?.aiResponse && (
+          <div className={`flex w-full ${isAdminView ? "justify-end" : "justify-start"}`}>
+            <div className={`flex items-start gap-3 max-w-[85%] ${isAdminView ? "flex-row-reverse" : "flex-row"}`}>
+              <div className={`h-8 w-8 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0 ${isAdminView ? "bg-indigo-600" : "bg-slate-600"}`}>
+                {isAdminView ? "TU" : "SH"}
               </div>
-              <div className="bg-white border border-slate-200 rounded-2xl rounded-tl-sm p-4 shadow-sm flex items-center gap-1.5 h-[46px]">
-                <div className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
-                <div className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
-                <div className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce"></div>
+              <div className={`border rounded-2xl p-3 shadow-sm text-sm whitespace-pre-wrap ${
+                isAdminView 
+                  ? "bg-indigo-600 text-white border-indigo-500 rounded-tr-sm" 
+                  : "bg-white text-slate-700 border-slate-200 rounded-tl-sm"
+              }`}>
+                <ReactMarkdown
+                  components={{
+                    p: ({node, ...props}) => <p className="m-0" {...props} />,
+                    strong: ({node, ...props}) => <strong className="font-semibold" {...props} />,
+                    ul: ({node, ...props}) => <ul className="list-disc pl-4 m-0" {...props} />,
+                    ol: ({node, ...props}) => <ol className="list-decimal pl-4 m-0" {...props} />,
+                  }}
+                >
+                  {object.aiResponse}
+                </ReactMarkdown>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {showTypingIndicator && (
+          <div className={`flex w-full ${isAdminView ? "justify-end" : "justify-start"}`}>
+            <div className={`flex items-start gap-3 ${isAdminView ? "flex-row-reverse" : "flex-row"}`}>
+              <div className={`h-8 w-8 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0 ${isAdminView ? "bg-indigo-600" : "bg-slate-600"}`}>
+                {isAdminView ? "TU" : "SH"}
+              </div>
+              <div className={`border rounded-2xl p-4 shadow-sm flex items-center gap-1.5 h-[46px] ${
+                isAdminView
+                  ? "bg-indigo-600 text-white border-indigo-500 rounded-tr-sm"
+                  : "bg-white text-slate-700 border-slate-200 rounded-tl-sm"
+              }`}>
+                <div className={`w-1.5 h-1.5 rounded-full animate-bounce [animation-delay:-0.3s] ${isAdminView ? "bg-indigo-200" : "bg-slate-400"}`}></div>
+                <div className={`w-1.5 h-1.5 rounded-full animate-bounce [animation-delay:-0.15s] ${isAdminView ? "bg-indigo-200" : "bg-slate-400"}`}></div>
+                <div className={`w-1.5 h-1.5 rounded-full animate-bounce ${isAdminView ? "bg-indigo-200" : "bg-slate-400"}`}></div>
               </div>
             </div>
           </div>

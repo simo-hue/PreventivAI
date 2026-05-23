@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { generateObject } from "ai";
+import { streamObject } from "ai";
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { requireUser } from "@/src/lib/auth/require-user";
 import { createSupabaseAdminClient } from "@/src/lib/supabase/admin";
@@ -58,36 +58,37 @@ export async function POST(
     
     const model = google("gemini-2.5-flash");
 
-    const result = await generateObject({
+    const result = streamObject({
       model,
       system: validateReplyPrompt,
       prompt: `Cronologia della chat:\n\n${chatTranscript}\n\nValuta l'ultimo messaggio del cliente.`,
       schema: ValidateReplySchema,
       maxRetries: 2,
+      onFinish: async ({ object }) => {
+        if (object?.aiResponse) {
+          // Insert AI response into chat
+          const { error: insertError } = await admin
+            .from("chat_messages")
+            .insert({
+              organization_id: user.organizationId,
+              client_request_id: id,
+              sender_id: ADMIN_USER_ID,
+              content: object.aiResponse,
+            });
+
+          if (insertError) {
+            console.error("Failed to save AI response to chat:", insertError);
+          }
+        }
+      }
     });
 
-    const { isValid, aiResponse } = result.object;
-
-    // Insert AI response into chat
-    const { error: insertError } = await admin
-      .from("chat_messages")
-      .insert({
-        organization_id: user.organizationId,
-        client_request_id: id,
-        sender_id: ADMIN_USER_ID,
-        content: aiResponse,
-      });
-
-    if (insertError) {
-      console.error("Failed to save AI response to chat:", insertError);
-    }
-
-    return NextResponse.json({ triggerAnalyze: isValid });
+    return result.toTextStreamResponse();
   } catch (error) {
     console.error("Validation error:", error);
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Error validating reply" },
-      { status: 500 }
+    return new Response(
+      JSON.stringify({ error: error instanceof Error ? error.message : "Error validating reply" }),
+      { status: 500, headers: { 'Content-Type': 'application/json' } }
     );
   }
 }
