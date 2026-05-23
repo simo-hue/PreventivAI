@@ -34,10 +34,36 @@ export async function createQuoteRun(args: {
     completed_at: new Date().toISOString(),
   });
 
-  // Aggiorna lo stato della richiesta
-  await admin.from("client_requests").update({ 
-    status: status === "completed" ? "quoted" : "needs_clarification" 
-  }).eq("id", args.clientRequestId);
+  // Aggiorna lo stato della richiesta e scrive i dati estratti dall'analisi AI
+  const clientRequestUpdate: Record<string, unknown> = {
+    status: status === "completed" ? "quoted" : "needs_clarification",
+    normalized_text: args.analysis.summary || null,
+    updated_at: new Date().toISOString(),
+  };
+
+  // Budget rilevato dall'AI
+  if (args.analysis.detectedBudgetEur != null) {
+    clientRequestUpdate.client_budget_eur = args.analysis.detectedBudgetEur;
+  }
+
+  // Deadline rilevata dall'AI (formato ISO date string)
+  if (args.analysis.detectedDeadline != null) {
+    clientRequestUpdate.client_deadline = args.analysis.detectedDeadline;
+  }
+
+  // Timeline testuale rilevata dall'AI
+  if (args.analysis.detectedTimelineText != null) {
+    clientRequestUpdate.client_timeline_text = args.analysis.detectedTimelineText;
+  }
+
+  const { error: updateError } = await admin
+    .from("client_requests")
+    .update(clientRequestUpdate)
+    .eq("id", args.clientRequestId);
+
+  if (updateError) {
+    console.error("[QuoteRepo] Errore aggiornamento client_requests:", updateError.message);
+  }
 
   // 3. Domande di chiarimento
   const questions = [

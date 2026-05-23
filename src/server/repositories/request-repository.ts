@@ -85,7 +85,7 @@ export async function getAllClientRequests() {
       sourceType: row.source_type,
       status: row.status,
       createdAt: row.created_at,
-      updatedAt: row.created_at,
+      updatedAt: row.updated_at,
       analysis: quoteRun?.llm_raw_response ?? undefined,
     };
   });

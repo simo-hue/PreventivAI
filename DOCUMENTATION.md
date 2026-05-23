@@ -90,3 +90,11 @@
     - **`app/(dashboard)/requests/[id]/scenarios/[scenarioId]/page.tsx`**: Aggiornato per passare le nuove props al client component.
     - **`app/api/quote-scenarios/[id]/route.ts`**: Aggiunta `GET` handler che ritorna il scenario completo dal DB — usata come fallback client-side se `initialScenario` è null.
     - Build: ✅ Zero errori TS, zero errori di build.
+
+- [2026-05-23 17:03:00 CEST]: Fix campi null in client_requests (normalized_text, budget, deadline, timeline)
+  - *Details*: I campi `normalized_text`, `client_budget_eur`, `client_deadline` e `client_timeline_text` della tabella `client_requests` risultavano sempre `null` perché il codice non scriveva mai questi dati estratti dall'AI sul database. L'analisi AI produce correttamente `summary`, `detectedBudgetEur`, `detectedDeadline` e `detectedTimelineText` ma la funzione `createQuoteRun` aggiornava solo lo `status` della richiesta, ignorando tutti gli altri campi.
+  - *Tech Notes*:
+    - **`src/server/repositories/quote-repository.ts`**: Aggiornata la funzione `createQuoteRun` per scrivere `normalized_text` (dal campo AI `summary`), `client_budget_eur`, `client_deadline` e `client_timeline_text` nella tabella `client_requests` insieme all'aggiornamento di stato. Aggiunto error logging esplicito.
+    - **`src/server/repositories/request-repository.ts`**: Corretto `getAllClientRequests` che restituiva `created_at` come `updatedAt` invece di usare `updated_at`.
+    - **`supabase/migrations/20260523170000_backfill_client_request_fields.sql`**: Creata migrazione SQL di backfill che estrae i valori dai `quote_runs.llm_raw_response` (JSON) e li scrive retroattivamente nei campi null delle righe `client_requests` esistenti.
+    - Build TypeScript: ✅ Zero errori.
