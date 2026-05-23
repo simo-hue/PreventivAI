@@ -8,17 +8,19 @@ export async function createClientRequest(args: {
   title: string;
   rawText: string;
   sourceType: "text" | "audio" | "document" | "mixed";
+  customerId?: string;
 }) {
   const admin = createSupabaseAdminClient();
   if (!admin) throw new Error("Supabase non configurato");
 
   const user = await requireUser();
+  const createdBy = args.customerId || (user.id === "demo-user" ? null : user.id);
 
   const { data, error } = await admin
     .from("client_requests")
     .insert({
       organization_id: user.organizationId,
-      created_by: user.id === "demo-user" ? null : user.id,
+      created_by: createdBy,
       title: args.title,
       raw_text: args.rawText,
       source_type: args.sourceType,

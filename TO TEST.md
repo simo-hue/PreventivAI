@@ -5,9 +5,3 @@
 [ ] Controllare bontà del preventivo generato
 [ ] Leggibilità del testo nel pop up durante generazione preventivo
 [ ] 
-[ ] 
-
-
----
-
-GOALS è ultimo funzionane

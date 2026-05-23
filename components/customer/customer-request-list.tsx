@@ -43,6 +43,7 @@ export function CustomerRequestList({
           title,
           rawText: description,
           sourceType: "text",
+          customerId: userId,
         }),
       });
 

@@ -94,6 +94,7 @@ export function SignupModal({
           title: companyName,
           rawText: projectDescription,
           sourceType: "text",
+          customerId: user.id,
         }),
       });
 
