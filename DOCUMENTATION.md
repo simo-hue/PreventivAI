@@ -147,3 +147,22 @@
     - Created `components/public/client-landing.tsx` and `components/public/signup-modal.tsx`.
     - Modal uses `createSupabaseBrowserClient()` to register the user, then calls `POST /api/requests` and `POST /api/requests/[id]/analyze` to generate the quote immediately.
     - Added migration `20260523191800_add_is_customer_to_profiles.sql` with a Postgres trigger `on_auth_user_created`.
+
+- [2026-05-23T19:31:00+02:00]: Customer Personal Page & Registration Flow Update
+  - *Details*: Modified the client registration flow to bypass automatic quote generation UI. Now, upon signup and project submission, clients are immediately redirected to their personal dashboard at `/customer/[id]`. This new page features a split layout (2/3 left for project details and future quotes, 1/3 right for future chat).
+  - *Tech Notes*:
+    - Removed `/api/requests/[id]/analyze` call and `isGenerating` state from `components/public/signup-modal.tsx`.
+    - Created `app/customer/[id]/page.tsx` with a responsive grid layout. Fetches user's latest request via `createSupabaseServerClient`.
+    - Typecheck passed successfully (`pnpm typecheck`).
+
+- [2026-05-23T19:34:00+02:00]: Fix Signup Modal Email Already in Use Error
+  - *Details*: Fixed a bug where signing up with an already registered email resulted in a "ID non trovato" error. Now, the system detects if the email is already in use and seamlessly attempts to log the user in with the provided password, continuing the flow.
+  - *Tech Notes*:
+    - Modified `components/public/signup-modal.tsx` to handle `authData.user` being null or having empty identities, triggering a fallback to `supabase.auth.signInWithPassword`.
+    - Fixed reference to `user.id` during the redirect.
+
+- [2026-05-23T19:37:00+02:00]: Refactor Auth Flow to Prevent Email Rate Limits
+  - *Details*: Resolves the `email rate limit exceeded` error from Supabase during testing with existing emails. The signup modal now proactively attempts to log the user in first. If the login fails due to invalid credentials, it falls back to creating a new account.
+  - *Tech Notes*:
+    - Inverted the auth logic in `components/public/signup-modal.tsx`: `signInWithPassword` is called first, catching `Invalid login credentials` to trigger `signUp`.
+    - Translated the Supabase rate limit error to a friendly Italian message for true new signups.
