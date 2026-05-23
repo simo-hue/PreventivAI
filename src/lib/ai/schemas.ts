@@ -26,8 +26,8 @@ export const RoleEffortSchema = z
 
 export const QuoteTaskSchema = z.object({
   title: z.string().min(1),
-  description: z.string().optional(),
-  userStory: z.string().optional(),
+  description: z.string().optional().nullable(),
+  userStory: z.string().optional().nullable(),
   acceptanceCriteria: z.array(z.string()).default([]),
   efforts: z.array(RoleEffortSchema).min(1),
 });
@@ -38,8 +38,8 @@ export const QuoteModuleSchema = z.object({
   complexity: z.enum(["low", "medium", "high"]),
   isOptional: z.boolean(),
   isIncludedByDefault: z.boolean(),
-  dependencyNotes: z.string().optional(),
-  riskNotes: z.string().optional(),
+  dependencyNotes: z.string().optional().nullable(),
+  riskNotes: z.string().optional().nullable(),
   tasks: z.array(QuoteTaskSchema).min(1),
 });
 
@@ -48,7 +48,7 @@ export const ClarificationQuestionSchema = z.object({
   reason: z.string().min(1),
   impact: z.string().min(1),
   priority: z.enum(["blocking", "important", "nice_to_have"]),
-  answer: z.string().optional(),
+  answer: z.string().optional().nullable(),
 });
 
 export const QuoteScenarioSchema = z

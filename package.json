@@ -19,9 +19,11 @@
   },
   "dependencies": {
     "@hookform/resolvers": "latest",
+    "@openrouter/ai-sdk-provider": "^2.9.0",
     "@supabase/ssr": "latest",
     "@supabase/supabase-js": "latest",
     "@tanstack/react-query": "latest",
+    "ai": "^6.0.190",
     "clsx": "latest",
     "date-fns": "latest",
     "lucide-react": "latest",

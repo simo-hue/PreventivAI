@@ -24,8 +24,8 @@ export type RoleEffort = {
 
 export type QuoteTask = {
   title: string;
-  description?: string;
-  userStory?: string;
+  description?: string | null;
+  userStory?: string | null;
   acceptanceCriteria: string[];
   efforts: RoleEffort[];
 };
@@ -36,8 +36,8 @@ export type QuoteModule = {
   complexity: "low" | "medium" | "high";
   isOptional: boolean;
   isIncludedByDefault: boolean;
-  dependencyNotes?: string;
-  riskNotes?: string;
+  dependencyNotes?: string | null;
+  riskNotes?: string | null;
   tasks: QuoteTask[];
 };
 
@@ -110,7 +110,7 @@ export type ClarificationQuestion = {
   reason: string;
   impact: string;
   priority: "blocking" | "important" | "nice_to_have";
-  answer?: string;
+  answer?: string | null;
 };
 
 export type AnalysisOutput = {

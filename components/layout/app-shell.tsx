@@ -44,7 +44,6 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
               PreventivAI
             </Link>
             <div className="hidden text-sm text-[var(--muted)] sm:block">
-              Demo interna con pricing deterministico e fallback senza API key
             </div>
             <div className="rounded-full border border-[var(--border)] px-3 py-1 text-xs font-semibold text-slate-700">
               {user.email}

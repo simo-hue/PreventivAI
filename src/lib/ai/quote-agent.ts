@@ -1,6 +1,7 @@
 import "server-only";
 
-import { zodResponseFormat } from "openai/helpers/zod";
+import { generateObject } from "ai";
+import { createOpenRouter } from "@openrouter/ai-sdk-provider";
 import { createHash } from "node:crypto";
 import { AnalysisOutputSchema } from "@/src/lib/ai/schemas";
 import {
@@ -13,7 +14,7 @@ import {
   shouldUseDemoAnalysis,
 } from "@/src/lib/demo/sample-analysis";
 import type { RateCard } from "@/src/lib/quotes/types";
-import { createOpenRouterClient } from "./openrouter-client";
+// createOpenRouterClient is no longer used here as we use Vercel AI SDK directly
 
 export type PromptContext = {
   requestText: string;
@@ -48,43 +49,35 @@ export type PromptContext = {
 };
 
 export async function analyzeQuoteRequest(context: PromptContext) {
-  const client = createOpenRouterClient();
+  const apiKey = process.env.OPENROUTER_API_KEY;
 
-  if (!client) {
+  if (!apiKey) {
     return shouldUseDemoAnalysis(context.requestText)
       ? demoAnalysis
       : buildBlockingClarificationAnalysis(context.requestText);
   }
 
-  const model = process.env.OPENROUTER_MODEL ?? "anthropic/claude-sonnet-4.5";
-  const payload = JSON.stringify(context);
+  const openrouter = createOpenRouter({
+    apiKey,
+  });
 
-  for (let attempt = 0; attempt < 2; attempt += 1) {
-    const response = await client.chat.completions.create({
-      model,
-      messages: [
-        { role: "system", content: QUOTE_ANALYSIS_SYSTEM_PROMPT },
-        { role: "user", content: payload },
-      ],
+  const modelId = process.env.OPENROUTER_MODEL ?? "anthropic/claude-sonnet-4.5";
+
+  try {
+    const { object } = await generateObject({
+      model: openrouter(modelId),
+      schema: AnalysisOutputSchema,
+      system: QUOTE_ANALYSIS_SYSTEM_PROMPT,
+      prompt: JSON.stringify(context),
       temperature: 0.2,
-      response_format: zodResponseFormat(
-        AnalysisOutputSchema,
-        "analysis_output",
-      ),
+      maxRetries: 3,
     });
 
-    const content = response.choices[0]?.message?.content;
-    if (!content) {
-      continue;
-    }
-
-    const parsed = AnalysisOutputSchema.safeParse(JSON.parse(content));
-    if (parsed.success) {
-      return parsed.data;
-    }
+    return object;
+  } catch (error) {
+    console.error("[QuoteAgent] Vercel AI SDK generation failed:", error);
+    throw new Error("Generazione del preventivo fallita: il modello non ha restituito un JSON valido. Riprova.");
   }
-
-  throw new Error("OpenRouter returned invalid quote analysis JSON twice.");
 }
 
 export function createPromptContext(args: {

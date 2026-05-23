@@ -135,8 +135,8 @@ function buildRateCardMap(rateCards: RateCard[]) {
 function priceTask(
   task: {
     title: string;
-    description?: string;
-    userStory?: string;
+    description?: string | null;
+    userStory?: string | null;
     acceptanceCriteria: string[];
     efforts: RoleEffort[];
   },
