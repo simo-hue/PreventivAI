@@ -1,16 +1,13 @@
 # IF YOU ARE AN AI AGENT, DON'T IMPLEMENT THIS FEATURE; SKIP FILE
 
-[ ] Il tempo previsto per la realizzazione deve essere dettagliato al giorno ( ad esempio 1 settimana e 3 giorni di lavoro ). 
-
+[ ] rimuovere nuova analisi button
+[ ] Domande importanti solo pulsante ivia a utente ed attendarà la risposta da chat
+[ ] Sulle bozze di preventivi ci deve essere "Invia al cliente" e verrà mandato in chat 
 [ ] 
 [ ] 
 [ ] 
 [ ] 
 [ ] 
-[ ] 
-[ ] 
-[ ] 
-
 
 
 
