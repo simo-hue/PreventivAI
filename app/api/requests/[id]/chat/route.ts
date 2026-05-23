@@ -32,6 +32,7 @@ export async function GET(
       .select(`
         id,
         content,
+        metadata,
         created_at,
         sender_id,
         profiles!chat_messages_sender_id_fkey(full_name, role)
@@ -54,6 +55,7 @@ export async function GET(
 
 const PostMessageSchema = z.object({
   content: z.string().min(1),
+  metadata: z.any().optional(),
 });
 
 export async function POST(
@@ -126,10 +128,12 @@ export async function POST(
         client_request_id: id,
         sender_id: user.id,
         content: parsed.data.content,
+        metadata: parsed.data.metadata || null,
       })
       .select(`
         id,
         content,
+        metadata,
         created_at,
         sender_id,
         profiles!chat_messages_sender_id_fkey(full_name, role)

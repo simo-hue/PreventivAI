@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { AlertTriangle, Loader2 } from "lucide-react";
+import { AlertTriangle, Loader2, CheckCircle2, Info } from "lucide-react";
 import { Button } from "./button";
 import { cn } from "@/src/lib/utils/cn";
 
@@ -14,7 +14,7 @@ interface ConfirmDialogProps {
   confirmText?: string;
   cancelText?: string;
   isPending?: boolean;
-  variant?: "danger" | "warning" | "info";
+  variant?: "danger" | "warning" | "info" | "success";
 }
 
 export function ConfirmDialog({
@@ -74,10 +74,17 @@ export function ConfirmDialog({
     info: {
       iconBg: "bg-blue-50 text-blue-600 dark:bg-blue-950/30 dark:text-blue-400 ring-4 ring-blue-50 dark:ring-blue-950/10",
       confirmBtn: "bg-[var(--primary)] hover:bg-[var(--primary-dark)] text-white border-transparent focus:ring-zinc-500",
+      icon: Info,
+    },
+    success: {
+      iconBg: "bg-emerald-50 text-emerald-600 dark:bg-emerald-950/30 dark:text-emerald-400 ring-4 ring-emerald-50 dark:ring-emerald-950/10",
+      confirmBtn: "bg-emerald-600 hover:bg-emerald-700 text-white border-transparent focus:ring-emerald-500",
+      icon: CheckCircle2,
     },
   };
 
   const colors = variantColors[variant];
+  const Icon = colors.icon || AlertTriangle;
 
   return (
     <div
@@ -96,7 +103,7 @@ export function ConfirmDialog({
         {/* Icon & Accent */}
         <div className="flex flex-col items-center text-center">
           <div className={cn("flex h-12 w-12 items-center justify-center rounded-full transition-transform duration-300 hover:scale-110", colors.iconBg)}>
-            <AlertTriangle className="h-6 w-6" aria-hidden="true" />
+            <Icon className="h-6 w-6" aria-hidden="true" />
           </div>
 
           {/* Typography */}

@@ -10,3 +10,10 @@ Esegui questa query nel SQL Editor del tuo progetto Supabase:
 ALTER TABLE public.quote_scenarios 
 ADD COLUMN display_options JSONB NOT NULL DEFAULT '{"showHours": true, "showHourlyRate": true}'::jsonb;
 ```
+
+Esegui anche quest'altra query per aggiungere il supporto ai metadati nella chat (necessario per l'invio dei preventivi in chat):
+
+```sql
+ALTER TABLE public.chat_messages
+ADD COLUMN metadata JSONB DEFAULT NULL;
+```

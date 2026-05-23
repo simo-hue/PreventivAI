@@ -1,11 +1,13 @@
 import { notFound } from "next/navigation";
 import { getClientRequestByIdAndUserId } from "@/src/server/repositories/request-repository";
+import { getScenarioById } from "@/src/server/repositories/quote-repository";
 import { FileText, ArrowLeft } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { ChatBox } from "@/components/chat/chat-box";
 import { ResizableLayout } from "@/components/layout/resizable-layout";
+import { QuotePreviewClient } from "@/components/quote/quote-preview-client";
 
 export const metadata = {
   title: "Dettaglio Progetto | Italians quote it better",
@@ -13,18 +15,50 @@ export const metadata = {
 
 export default async function CustomerProjectDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string; requestId: string }>;
+  searchParams: Promise<{ previewQuoteId?: string }>;
 }) {
   const { id, requestId } = await params;
+  const { previewQuoteId } = await searchParams;
 
   // Fetch the specific request making sure it belongs to the user
   const request = await getClientRequestByIdAndUserId(requestId, id);
 
   if (!request) return notFound();
 
-  const leftContent = (
-    <section className="bg-white p-6 sm:p-10 relative h-full">
+  let previewScenario = null;
+  if (previewQuoteId) {
+    previewScenario = await getScenarioById(previewQuoteId);
+  }
+
+  const leftContent = previewQuoteId && previewScenario ? (
+    <section className="relative h-full flex flex-col bg-slate-50">
+      <div className="p-4 border-b border-slate-200 bg-white flex items-center justify-between z-10 shadow-sm relative">
+        <Link 
+          href="?" 
+          className="flex items-center text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors"
+        >
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          Chiudi preview e torna al progetto
+        </Link>
+      </div>
+      <div className="flex-1 overflow-y-auto">
+        <QuotePreviewClient 
+           scenarioId={previewQuoteId} 
+           initialScenario={previewScenario} 
+           initialRequest={{
+             id: request.id,
+             title: request.title,
+             status: request.status,
+             analysis: { summary: request.normalizedText || request.rawText }
+           } as any} 
+        />
+      </div>
+    </section>
+  ) : (
+    <section className="bg-white p-6 sm:p-10 relative h-full overflow-y-auto">
       <Link 
         href={`/customer/${id}`}
         className="absolute top-6 left-6 sm:top-10 sm:left-10 flex items-center text-sm font-medium text-[var(--muted)] hover:text-[var(--primary)] transition-colors"

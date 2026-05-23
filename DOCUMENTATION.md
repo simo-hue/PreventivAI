@@ -368,3 +368,15 @@
 - [2026-05-24T01:18:00+02:00]: Modifica Ruolo Manuale Account Admin (Database)
   - *Details*: L'account utilizzato per accedere all'ambiente di amministrazione (`admin@gmail.com`) veniva erroneamente considerato dal sistema un normale cliente, in quanto il trigger predefinito assegna il ruolo di "cliente" a tutte le registrazioni. L'account è stato elevato manualmente al grado di admin all'interno del database.
   - *Tech Notes*: Il trigger Postgres `on_auth_user_created` (creato in `20260523191800_add_is_customer_to_profiles.sql`) forza `is_customer = true` a garanzia che chiunque si iscriva dalla landing page finisca nell'area protetta dei clienti. Tramite uno script server-side (usando le Service Role keys di Supabase) è stato rintracciato l'account `admin@gmail.com` ed è stato forzato il campo `is_customer = false` nella tabella `profiles`. Da questo momento, il layout admin lo riconoscerà sempre correttamente bypassando la vista utente.
+
+- [2026-05-24T01:30:00+02:00]: Condivisione Preventivo in Chat e Split Screen Preview
+  - *Details*: Aggiunta la funzionalità che permette all'admin di condividere un preventivo generato direttamente all'interno della chat col cliente. Il cliente vedrà una card speciale da cui potrà scaricare istantaneamente il PDF o aprire una preview completa a tutto schermo nella metà sinistra dell'interfaccia, senza perdere il contesto della chat.
+  - *Tech Notes*:
+    - Creata migration `20260524013000_add_metadata_to_chat_messages.sql` per aggiungere la colonna `metadata` (JSONB) alla tabella `chat_messages`.
+    - Modificato `app/api/requests/[id]/chat/route.ts` per leggere e scrivere `metadata`.
+    - Aggiunto il pulsante "Invia a cliente" in `components/quote/scenario-detail-client.tsx` che invia un payload con `metadata.type = "quote_share"`.
+    - Implementato rendering condizionale in `components/chat/chat-box.tsx` per visualizzare una card personalizzata con pulsanti "Scarica PDF" (tramite API proxy) e "Apri preview".
+    - Modificato il layout in `app/customer/[id]/requests/[requestId]/page.tsx` per intercettare il parametro `searchParams.previewQuoteId` e sostituire dinamicamente la colonna di sinistra con il componente `QuotePreviewClient`, permettendo una navigazione fluida ed in-place.
+
+- [2026-05-24T01:35:00+02:00]: Custom Success Modal for Quote Sharing
+  - *Details*: Replaced the native browser alert with a custom success modal (ConfirmDialog) that redirects the admin back to the chat view upon confirmation.
