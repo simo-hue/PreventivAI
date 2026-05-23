@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button, ButtonLink } from "@/components/ui/button";
 import { Card, CardBody } from "@/components/ui/card";
 import { formatCurrency } from "@/src/lib/utils/format";
-import { deleteRequestAction } from "@/app/(dashboard)/requests/actions";
+import { deleteRequestAction } from "@/app/(dashboard)/admin/requests/actions";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 
 const statusLabel: Record<string, string> = {
@@ -82,7 +82,7 @@ export function RequestListClient({
             <RefreshCcw className={`h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`} />
           </Button>
           {showNewButton && (
-            <ButtonLink href="/requests/new">
+            <ButtonLink href="/admin/requests/new">
               <Plus className="size-4" aria-hidden="true" />
               Nuova richiesta
             </ButtonLink>
@@ -146,7 +146,7 @@ export function RequestListClient({
                         <ArrowRight className="size-4" aria-hidden="true" />
                       </Button>
                     ) : (
-                      <ButtonLink href={`/requests/${request.id}`} variant="secondary">
+                      <ButtonLink href={`/admin/requests/${request.id}`} variant="secondary">
                         Apri
                         <ArrowRight className="size-4" aria-hidden="true" />
                       </ButtonLink>

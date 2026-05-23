@@ -307,3 +307,11 @@
     - Modificato `components/public/login-modal.tsx`.
     - Aggiunta interrogazione alla tabella `profiles` per recuperare il campo `is_customer`.
     - Aggiornata la logica di redirect (`router.push`) in base al ruolo.
+
+- [2026-05-24T00:37:00+02:00]: Protezione Route Amministrazione e Refactoring URL
+  - *Details*: Tutte le pagine riservate agli amministratori (es. Storico, Tariffe, Impostazioni, e la gestione Richieste) sono ora protette. Gli utenti non autenticati vengono reindirizzati al login, mentre i clienti autenticati ("customer") vengono forzatamente reindirizzati alla loro area personale. Inoltre, la root `/requests` è stata spostata coerentemente sotto `/admin/requests`.
+  - *Tech Notes*:
+    - Spostata la cartella `app/(dashboard)/requests` in `app/(dashboard)/admin/requests`.
+    - Sostituiti tutti i riferimenti a `/requests` con `/admin/requests` nei vari componenti (`app-shell.tsx`, listini, azioni server, modali di login/signup, ecc.).
+    - Creato il file `app/(dashboard)/admin/layout.tsx` (Server Component) che effettua un controllo esplicito su `supabase.auth.getUser()`: se assente ridireziona a `/home`, se loggato controlla `is_customer` da `profiles` e se true lo manda in `/customer/[id]`.
+    - Nessun requisito manuale aggiunto, in quanto l'RLS e la protezione via Server Component coprono la sicurezza globalmente.

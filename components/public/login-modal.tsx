@@ -61,7 +61,7 @@ export function LoginModal({
       if (profile?.is_customer) {
         router.push(`/customer/${user.id}`);
       } else {
-        router.push("/requests");
+        router.push("/admin/requests");
       }
       
     } catch (err) {

@@ -212,7 +212,7 @@ export function ScenarioDetailClient({
       <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
         <div>
           <Link
-            href={`/requests/${requestId}`}
+            href={`/admin/requests/${requestId}`}
             className="text-sm font-semibold text-[var(--primary)]"
           >
             ← Torna alla richiesta

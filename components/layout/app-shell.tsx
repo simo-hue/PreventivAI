@@ -3,7 +3,7 @@ import { FileText, History, Settings, Table2 } from "lucide-react";
 import { requireUser } from "@/src/lib/auth/require-user";
 
 const navItems = [
-  { href: "/requests", label: "Richieste", icon: FileText },
+  { href: "/admin/requests", label: "Richieste", icon: FileText },
   { href: "/admin/rate-card", label: "Tariffe", icon: Table2 },
   { href: "/admin/history", label: "Cronologia", icon: History },
   { href: "/admin/settings", label: "Impostazioni", icon: Settings },
@@ -16,7 +16,7 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
     <div className="min-h-screen">
       <aside className="fixed inset-y-0 left-0 z-20 hidden w-64 border-r border-[var(--border)] bg-[var(--surface-strong)] lg:block">
         <div className="flex h-20 items-center border-b border-[var(--border)] px-5">
-          <Link href="/requests" className="flex items-center gap-2 text-lg font-bold text-[var(--primary)]">
+          <Link href="/admin/requests" className="flex items-center gap-2 text-lg font-bold text-[var(--primary)]">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/logo.png" alt="PreventivAI Logo" className="h-14 w-auto object-contain" />
           </Link>
@@ -40,7 +40,7 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
       <div className="lg:pl-64">
         <header className="sticky top-0 z-10 border-b border-[var(--border)] bg-white/80 backdrop-blur-md">
           <div className="flex min-h-20 items-center justify-between gap-4 px-4 sm:px-6">
-            <Link href="/requests" className="flex items-center gap-2 font-bold text-[var(--primary)] lg:hidden">
+            <Link href="/admin/requests" className="flex items-center gap-2 font-bold text-[var(--primary)] lg:hidden">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/logo.png" alt="PreventivAI Logo" className="h-14 w-auto object-contain" />
             </Link>

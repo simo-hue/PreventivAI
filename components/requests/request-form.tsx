@@ -174,7 +174,7 @@ export function RequestForm() {
     // Breve pausa per visualizzare il successo
     await new Promise((resolve) => setTimeout(resolve, 800));
 
-    router.push(`/requests/${requestId}`);
+    router.push(`/admin/requests/${requestId}`);
   }
 
   async function handleAnalyze() {

@@ -57,7 +57,7 @@ export function ClarificationForm({ requestId }: { requestId: string }) {
     };
 
     upsertStoredRequest(nextRequest);
-    router.push("/requests/new");
+    router.push("/admin/requests/new");
   }
 
   if (!request?.analysis?.blockingQuestions.length) {

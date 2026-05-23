@@ -15,7 +15,7 @@ export default async function RequestDetailPage({
   
   const clientReq = await getClientRequestById(id);
   if (!clientReq) {
-    redirect("/requests");
+    redirect("/admin/requests");
   }
 
   const quoteRun = await getQuoteRunForRequest(id);

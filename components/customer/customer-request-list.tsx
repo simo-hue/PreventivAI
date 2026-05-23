@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button, ButtonLink } from "@/components/ui/button";
 import { Card, CardBody } from "@/components/ui/card";
 import { useRouter } from "next/navigation";
-import { deleteRequestAction } from "@/app/(dashboard)/requests/actions";
+import { deleteRequestAction } from "@/app/(dashboard)/admin/requests/actions";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 
 const statusLabel: Record<string, string> = {

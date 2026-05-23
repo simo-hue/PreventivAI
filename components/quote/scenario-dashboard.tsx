@@ -145,7 +145,7 @@ export function ScenarioDashboard({ initialData: request }: { initialData: Store
                     ) : null}
                   </div>
                   <div className="mt-auto flex gap-2">
-                    <ButtonLink href={`/requests/${request.id}/scenarios/${scenario.id}`} className="flex-1">
+                    <ButtonLink href={`/admin/requests/${request.id}/scenarios/${scenario.id}`} className="flex-1">
                       Dettaglio
                       <ArrowRight className="size-4" aria-hidden="true" />
                     </ButtonLink>

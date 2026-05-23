@@ -13,7 +13,7 @@ export default function LoginPage() {
           In demo mode l'accesso e' simulato. Configura Supabase Auth per usare
           login reale e RLS in produzione.
         </p>
-        <ButtonLink href="/requests" className="mt-6 w-full">
+        <ButtonLink href="/admin/requests" className="mt-6 w-full">
           Entra in demo
         </ButtonLink>
       </section>
