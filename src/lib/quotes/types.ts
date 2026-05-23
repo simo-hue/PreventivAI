@@ -63,18 +63,20 @@ export type QuoteScenarioFromAi = {
 };
 
 export type PricedEffort = RoleEffort & {
+  id?: string;
   roleRateCardId: string;
   hourlyRateEur: number;
   costEur: number;
 };
 
 export type PricedTask = Omit<QuoteTask, "efforts"> & {
+  id?: string;
   efforts: PricedEffort[];
   subtotalEur: number;
 };
 
 export type PricedModule = Omit<QuoteModule, "tasks"> & {
-  id: string;
+  id?: string;
   isIncluded: boolean;
   tasks: PricedTask[];
   subtotalEur: number;

@@ -27,6 +27,8 @@ export function ScenarioDetailClient({
   const [request, setRequest] = useState<StoredRequest | null>(null);
   const [scenario, setScenario] = useState<PricedScenario | null>(null);
   const [overrides, setOverrides] = useState<Record<string, boolean>>({});
+  const [isEditing, setIsEditing] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [pricingSettings, setPricingSettings] = useState<{
     pmPercentage: number;
     currency: string;
@@ -49,6 +51,8 @@ export function ScenarioDetailClient({
   }, []);
 
   useEffect(() => {
+    // In un'app reale questo arriva dalle props dal Server Component
+    // Per ora usiamo il fallback del findStoredScenario locale se arriva dalle vecchie richieste
     const found = findStoredScenario(scenarioId);
     setRequest(found?.request ?? null);
     setScenario(found?.scenario ?? null);
@@ -125,6 +129,52 @@ export function ScenarioDetailClient({
     setScenario(nextScenario);
   }
 
+  function updateEffortHours(moduleId: string, taskId: string, effortId: string, newHours: number) {
+    if (!scenario) return;
+    const nextScenario = { ...scenario };
+    const mod = nextScenario.modules.find(m => m.id === moduleId);
+    if (!mod) return;
+    const tsk = mod.tasks.find(t => t.id === taskId);
+    if (!tsk) return;
+    const eff = tsk.efforts.find(e => e.id === effortId);
+    if (!eff) return;
+    eff.estimatedHoursExpected = newHours;
+    setScenario(nextScenario);
+  }
+
+  function updateTaskTitle(moduleId: string, taskId: string, newTitle: string) {
+    if (!scenario) return;
+    const nextScenario = { ...scenario };
+    const mod = nextScenario.modules.find(m => m.id === moduleId);
+    if (!mod) return;
+    const tsk = mod.tasks.find(t => t.id === taskId);
+    if (!tsk) return;
+    tsk.title = newTitle;
+    setScenario(nextScenario);
+  }
+
+  async function saveEdits() {
+    if (!recalculated) return;
+    setIsSaving(true);
+    try {
+      const response = await fetch(`/api/quote-scenarios/${recalculated.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ scenario: recalculated }),
+      });
+      if (response.ok) {
+        setIsEditing(false);
+      } else {
+        alert("Errore durante il salvataggio.");
+      }
+    } catch (e) {
+      console.error(e);
+      alert("Errore di rete.");
+    } finally {
+      setIsSaving(false);
+    }
+  }
+
   if (!request || !scenario || !recalculated) {
     return (
       <Alert title="Scenario non trovato" variant="warning">
@@ -149,6 +199,15 @@ export function ScenarioDetailClient({
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
+          {isEditing ? (
+            <Button onClick={saveEdits} disabled={isSaving}>
+              {isSaving ? "Salvataggio..." : "Salva Modifiche"}
+            </Button>
+          ) : (
+            <Button variant="secondary" onClick={() => setIsEditing(true)}>
+              Modifica Preventivo
+            </Button>
+          )}
           <ButtonLink href={`/quotes/${recalculated.id}/preview`} variant="secondary">
             <ExternalLink className="size-4" aria-hidden="true" />
             Preview
@@ -190,12 +249,12 @@ export function ScenarioDetailClient({
                   {module.isOptional ? (
                     <label className="flex cursor-pointer items-center gap-2 text-sm font-semibold">
                       <input
-                        type="checkbox"
-                        checked={overrides[module.id] ?? module.isIncluded}
-                        onChange={(event) =>
-                          updateModuleInclusion(module.id, event.target.checked)
-                        }
-                        className="size-4"
+                         type="checkbox"
+                         checked={overrides[module.id!] ?? module.isIncluded}
+                         onChange={(event) =>
+                           updateModuleInclusion(module.id!, event.target.checked)
+                         }
+                         className="size-4"
                       />
                       Incluso
                     </label>
@@ -216,11 +275,19 @@ export function ScenarioDetailClient({
                   <tbody>
                     {module.tasks.flatMap((task) =>
                       task.efforts.map((effort, index) => (
-                        <tr key={`${task.title}-${effort.roleRateCardId}`} className="border-t border-[var(--border)]">
+                        <tr key={`${task.id}-${effort.roleRateCardId}`} className="border-t border-[var(--border)]">
                           <td className="px-4 py-3">
                             {index === 0 ? (
                               <div>
-                                <p className="font-semibold">{task.title}</p>
+                                {isEditing ? (
+                                  <input 
+                                    className="w-full rounded border border-[var(--border)] px-2 py-1 text-sm font-semibold"
+                                    value={task.title}
+                                    onChange={(e) => updateTaskTitle(module.id!, task.id!, e.target.value)}
+                                  />
+                                ) : (
+                                  <p className="font-semibold">{task.title}</p>
+                                )}
                                 <p className="mt-1 text-xs leading-5 text-[var(--muted)]">
                                   {task.description}
                                 </p>
@@ -231,7 +298,20 @@ export function ScenarioDetailClient({
                             {effort.roleName} <span className="text-[var(--muted)]">{effort.seniority}</span>
                           </td>
                           <td className="px-4 py-3">
-                            {formatNumber(effort.estimatedHoursExpected)}h
+                            {isEditing ? (
+                              <div className="flex items-center gap-1">
+                                <input 
+                                  type="number" 
+                                  min="0"
+                                  className="w-16 rounded border border-[var(--border)] px-2 py-1 text-sm"
+                                  value={effort.estimatedHoursExpected}
+                                  onChange={(e) => updateEffortHours(module.id!, task.id!, effort.id!, parseFloat(e.target.value) || 0)}
+                                />
+                                <span>h</span>
+                              </div>
+                            ) : (
+                              <span>{formatNumber(effort.estimatedHoursExpected)}h</span>
+                            )}
                           </td>
                           <td className="px-4 py-3">
                             {formatCurrency(effort.hourlyRateEur, pricingSettings?.currency)}/h

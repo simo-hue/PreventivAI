@@ -3,7 +3,7 @@
 import { AlertTriangle, ArrowRight, CheckCircle2, HelpCircle, RefreshCw } from "lucide-react";
 import { Alert } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
-import { ButtonLink } from "@/components/ui/button";
+import { Button, ButtonLink } from "@/components/ui/button";
 import { Card, CardBody, CardHeader } from "@/components/ui/card";
 import { evaluateScenarioRisk } from "@/src/lib/quotes/risk-engine";
 import { formatCurrency, formatPercent } from "@/src/lib/utils/format";
@@ -34,24 +34,43 @@ export function ScenarioDashboard({ initialData: request }: { initialData: Store
             <h1 className="text-2xl font-bold tracking-normal">{request.title}</h1>
             <Badge
               variant={
-                request.status === "quoted"
+                request.status === "delivered"
                   ? "success"
-                  : request.status === "needs_clarification"
-                    ? "warning"
-                    : "neutral"
+                  : request.status === "quoted"
+                    ? "success"
+                    : request.status === "needs_clarification"
+                      ? "warning"
+                      : "neutral"
               }
             >
-              {request.status === "quoted" ? "Quoted" : "Needs clarification"}
+              {request.status === "quoted" ? "Quoted" : request.status === "delivered" ? "Delivered" : "Needs clarification"}
             </Badge>
           </div>
           <p className="mt-2 max-w-4xl text-sm leading-6 text-[var(--muted)]">
             {analysis?.summary ?? request.rawText}
           </p>
         </div>
-        <ButtonLink href="/requests/new" variant="secondary">
-          <RefreshCw className="size-4" aria-hidden="true" />
-          Nuova analisi
-        </ButtonLink>
+        <div className="flex flex-wrap gap-2">
+          {request.status === "quoted" && (
+            <Button
+              variant="primary"
+              onClick={async () => {
+                const res = await fetch(`/api/requests/${request.id}/status`, {
+                  method: 'PUT',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ status: 'delivered' })
+                });
+                if (res.ok) window.location.reload();
+              }}
+            >
+              Segna come Consegnato
+            </Button>
+          )}
+          <ButtonLink href="/requests/new" variant="secondary">
+            <RefreshCw className="size-4" aria-hidden="true" />
+            Nuova analisi
+          </ButtonLink>
+        </div>
       </div>
 
       {analysis?.blockingQuestions.length ? (
@@ -93,7 +112,7 @@ export function ScenarioDashboard({ initialData: request }: { initialData: Store
           />
           <CardBody className="space-y-3">
             {analysis.blockingQuestions.map((question) => (
-              <QuestionRow key={question.question} question={question.question} reason={question.reason} />
+              <QuestionRow key={question.question} question={question.question} reason={question.reason} requestId={request.id} />
             ))}
           </CardBody>
         </Card>
@@ -104,7 +123,7 @@ export function ScenarioDashboard({ initialData: request }: { initialData: Store
           <CardHeader title="Domande importanti" description="Non bloccano la stima, ma delimitano lo scope." />
           <CardBody className="grid gap-3 lg:grid-cols-3">
             {analysis.importantQuestions.map((question) => (
-              <QuestionRow key={question.question} question={question.question} reason={question.impact} />
+              <QuestionRow key={question.question} question={question.question} reason={question.impact} requestId={request.id} />
             ))}
           </CardBody>
         </Card>
@@ -192,14 +211,55 @@ function MiniStat({ label, value }: { label: string; value: string }) {
   );
 }
 
-function QuestionRow({ question, reason }: { question: string; reason: string }) {
+import { useState } from "react";
+
+function QuestionRow({ question, reason, requestId }: { question: string; reason: string; requestId: string }) {
+  const [answer, setAnswer] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  async function handleAnswer() {
+    if (!answer.trim()) return;
+    setIsSubmitting(true);
+    try {
+      // 1. Salva la risposta
+      await fetch(`/api/requests/${requestId}/clarifications`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ answers: [{ question, answer }] }),
+      });
+      // 2. Rilancia l'analisi
+      await fetch(`/api/requests/${requestId}/analyze`, { method: "POST" });
+      // 3. Ricarica la pagina per vedere il nuovo preventivo
+      window.location.reload();
+    } catch (e) {
+      console.error(e);
+      setIsSubmitting(false);
+    }
+  }
+
   return (
-    <div className="rounded-md border border-[var(--border)] bg-white p-3">
+    <div className="rounded-md border border-[var(--border)] bg-white p-4">
       <div className="flex gap-2">
         <HelpCircle className="mt-0.5 size-4 shrink-0 text-[var(--primary)]" aria-hidden="true" />
-        <div>
+        <div className="w-full">
           <p className="text-sm font-semibold">{question}</p>
           <p className="mt-1 text-sm leading-6 text-[var(--muted)]">{reason}</p>
+          <div className="mt-4 flex flex-col gap-2 sm:flex-row">
+            <textarea
+              className="min-h-10 flex-1 resize-y rounded-md border border-[var(--border)] p-2 text-sm"
+              placeholder="Scrivi la tua risposta..."
+              value={answer}
+              onChange={(e) => setAnswer(e.target.value)}
+              disabled={isSubmitting}
+            />
+            <Button
+              onClick={handleAnswer}
+              disabled={!answer.trim() || isSubmitting}
+              className="sm:self-end"
+            >
+              {isSubmitting ? "Generazione..." : "Rispondi e Ricalcola"}
+            </Button>
+          </div>
         </div>
       </div>
     </div>

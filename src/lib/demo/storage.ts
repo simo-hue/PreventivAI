@@ -12,7 +12,7 @@ export type StoredRequest = {
   title: string;
   rawText: string;
   sourceType: "text" | "audio" | "document" | "mixed";
-  status: "draft" | "analyzing" | "needs_clarification" | "quoted" | "error";
+  status: "draft" | "analyzing" | "needs_clarification" | "quoted" | "delivered" | "error";
   createdAt: string;
   updatedAt: string;
   analysis?: PricedAnalysisOutput;

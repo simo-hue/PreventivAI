@@ -12,9 +12,10 @@ import { requireUser } from "@/src/lib/auth/require-user";
 import { getSimilarHistoricalProjects } from "@/src/server/repositories/history-repository";
 import { createQuoteRun } from "@/src/server/repositories/quote-repository";
 import { getAppSettings } from "@/src/server/repositories/settings-repository";
+import { createSupabaseAdminClient } from "@/src/lib/supabase/admin";
 
 const AnalyzeRequestSchema = z.object({
-  requestText: z.string().min(20),
+  requestText: z.string().min(10).optional(),
 });
 
 export async function POST(
@@ -22,15 +23,35 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params;
-  const payload = await request.json();
+  let payload = {};
+  try {
+    payload = await request.json();
+  } catch (e) {
+    // Empty payload
+  }
   const parsed = AnalyzeRequestSchema.safeParse(payload);
 
   if (!parsed.success) {
     return NextResponse.json(
-      { error: "Testo richiesta troppo corto.", details: parsed.error.flatten() },
+      { error: "Payload non valido.", details: parsed.error.flatten() },
       { status: 400 },
     );
   }
+
+  let requestText = parsed.data.requestText;
+  if (!requestText) {
+    const admin = createSupabaseAdminClient();
+    if (!admin) {
+      return NextResponse.json({ error: "Supabase error" }, { status: 500 });
+    }
+    const { data: clientReq } = await admin.from("client_requests").select("raw_text").eq("id", id).single();
+    if (!clientReq?.raw_text) {
+      return NextResponse.json({ error: "Testo richiesta non trovato." }, { status: 400 });
+    }
+    requestText = clientReq.raw_text;
+  }
+  
+  const textToAnalyze = requestText as string;
 
   try {
     const user = await requireUser();
@@ -38,10 +59,10 @@ export async function POST(
     
     const similarHistoricalProjects = await getSimilarHistoricalProjects({
       organizationId: user.organizationId,
-      requestText: parsed.data.requestText,
+      requestText: textToAnalyze,
     });
     const context = createPromptContext({
-      requestText: parsed.data.requestText,
+      requestText: textToAnalyze,
       rateCards: officialRateCards,
       similarHistoricalProjects,
       pmPercentage: settings.pmPercentage,
@@ -66,7 +87,7 @@ export async function POST(
     return NextResponse.json({
       requestId: id,
       quoteRunId: quoteRun.id,
-      inputHash: createInputHash(parsed.data.requestText),
+      inputHash: createInputHash(textToAnalyze),
       promptVersion: QUOTE_ANALYSIS_PROMPT_VERSION,
       rateCards: officialRateCards,
       pmPercentage: settings.pmPercentage,

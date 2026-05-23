@@ -18,11 +18,11 @@ Voglio che nella pagina "/requests" ci sia la possibilità di cliccare per ogni 
 [ ] 
 [ ] 
 [ ] 
-[ ] 
+[ ] Una volta che si apre un preventivo voglio che ci sia anche la possibilità di modificare i campi manualmente tramite un apposito pulsante ( voglio la stessa identica cosa che abbiamo Nella pagina "settings" ). Ovviamente in caso di salvataggio tutto deve essere aggiornato anche sul database. 
 
 
 FLUSSO BE LIKE:
 - preventivo
-- domande: con pulsante da inviare via email al cliente
+- domande da compilare con risposte del cliente 
 - preventivo deve essere modificabile manualmente
-- preventivi possibili: con pulsante da inviare via email al cliente per poi decidere il main
+- preventivi possibili: con pulsante per poi decidere il main

@@ -148,7 +148,7 @@ export function RequestForm() {
           return statuses;
         });
       }
-    }, 105); // ~10 secondi totali per raggiungere il 95% (95 * 105ms = 9975ms)
+    }, 210); // ~20 secondi totali per raggiungere il 95% (95 * 210ms = 19950ms)
 
     return () => clearInterval(interval);
   }, [isAnalyzing]);

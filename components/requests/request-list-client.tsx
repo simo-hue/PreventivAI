@@ -11,6 +11,7 @@ const statusLabel: Record<string, string> = {
   analyzing: "Analyzing",
   needs_clarification: "Needs clarification",
   quoted: "Quoted",
+  delivered: "Delivered",
   error: "Error",
 };
 
@@ -46,11 +47,13 @@ export function RequestListClient({ initialRequests }: { initialRequests: Stored
                     <h2 className="font-semibold">{request.title}</h2>
                     <Badge
                       variant={
-                        request.status === "quoted"
+                        request.status === "delivered"
                           ? "success"
-                          : request.status === "needs_clarification"
-                            ? "warning"
-                            : "neutral"
+                          : request.status === "quoted"
+                            ? "success"
+                            : request.status === "needs_clarification"
+                              ? "warning"
+                              : "neutral"
                       }
                     >
                       {statusLabel[request.status]}

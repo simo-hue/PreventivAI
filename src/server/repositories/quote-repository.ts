@@ -183,10 +183,87 @@ export async function getQuoteRunForRequest(clientRequestId: string) {
 
   if (!runData) return null;
   
-  // Il raw JSON contiene tutta l'analisi generata (che include scenari prezzati). 
-  // Per l'MVP e per riutilizzare l'interfaccia UI, ricarichiamo l'analisi dal raw JSON 
-  // anziché joinare manualmente 5 tabelle (scenarios, modules, tasks, efforts).
-  // Nota: I dati strutturati sono COMUNQUE salvati nel DB e interrogabili via SQL per la BI.
-  
+  // Ricarichiamo gli scenari direttamente dalle tabelle relazionali per supportare le modifiche manuali
+  const { data: dbScenarios } = await admin
+    .from("quote_scenarios")
+    .select(`
+      id, name, slug, description, scenario_type, assumptions, exclusions, risks,
+      confidence, estimated_weeks_min, estimated_weeks_expected, estimated_weeks_max,
+      subtotal_eur, pm_cost_eur, risk_buffer_eur, total_eur,
+      quote_modules(
+        id, name, description, complexity, is_optional, is_included, dependency_notes, risk_notes, subtotal_eur, order_index,
+        quote_tasks(
+          id, title, description, user_story, acceptance_criteria, order_index,
+          quote_task_efforts(
+            id, estimated_hours_min, estimated_hours_expected, estimated_hours_max, hourly_rate_eur, cost_eur, rationale,
+            role_rate_cards(id, role_name, seniority)
+          )
+        )
+      )
+    `)
+    .eq("quote_run_id", runData.id)
+    .order('created_at', { ascending: true });
+
+  if (dbScenarios && runData.llm_raw_response) {
+    // Mappa i dati dal DB al formato TypeScript PricedScenario
+    const mappedScenarios = dbScenarios.map((s: any) => ({
+      id: s.id,
+      name: s.name,
+      slug: s.slug,
+      scenarioType: s.scenario_type,
+      description: s.description,
+      assumptions: s.assumptions,
+      exclusions: s.exclusions,
+      risks: s.risks,
+      confidence: s.confidence,
+      estimatedWeeksMin: s.estimated_weeks_min,
+      estimatedWeeksExpected: s.estimated_weeks_expected,
+      estimatedWeeksMax: s.estimated_weeks_max,
+      totals: {
+        subtotalEur: s.subtotal_eur,
+        pmCostEur: s.pm_cost_eur,
+        riskBufferEur: s.risk_buffer_eur,
+        totalEur: s.total_eur,
+        pmHours: 0, // Calcolabile o mock per ora
+        nonPmHours: 0,
+      },
+      roleBreakdown: [], // Mock per ora
+      modules: (s.quote_modules || []).sort((a: any, b: any) => a.order_index - b.order_index).map((m: any) => ({
+        id: m.id,
+        name: m.name,
+        description: m.description,
+        complexity: m.complexity,
+        isOptional: m.is_optional,
+        isIncluded: m.is_included,
+        isIncludedByDefault: m.is_included,
+        dependencyNotes: m.dependency_notes,
+        riskNotes: m.risk_notes,
+        subtotalEur: m.subtotal_eur,
+        tasks: (m.quote_tasks || []).sort((a: any, b: any) => a.order_index - b.order_index).map((t: any) => ({
+          id: t.id,
+          title: t.title,
+          description: t.description,
+          userStory: t.user_story,
+          acceptanceCriteria: t.acceptance_criteria,
+          subtotalEur: 0, // Mock, verra ricalcolato
+          efforts: (t.quote_task_efforts || []).map((e: any) => ({
+            id: e.id,
+            roleRateCardId: e.role_rate_cards.id,
+            roleName: e.role_rate_cards.role_name,
+            seniority: e.role_rate_cards.seniority,
+            estimatedHoursMin: e.estimated_hours_min,
+            estimatedHoursExpected: e.estimated_hours_expected,
+            estimatedHoursMax: e.estimated_hours_max,
+            hourlyRateEur: e.hourly_rate_eur,
+            costEur: e.cost_eur,
+            rationale: e.rationale,
+          }))
+        }))
+      }))
+    }));
+
+    runData.llm_raw_response.scenarios = mappedScenarios;
+  }
+
   return runData;
 }

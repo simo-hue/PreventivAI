@@ -50,7 +50,7 @@ describe("pricing-engine", () => {
       scenarios: [demoAnalysis.scenarios[0]],
       rateCards: officialRateCards,
       pmPercentage: DEFAULT_PM_PERCENTAGE,
-      moduleInclusionOverrides: optional ? { [optional.id]: true } : {},
+      moduleInclusionOverrides: optional ? { [optional.id!]: true } : {},
     });
 
     expect(withOptional?.totals.totalEur).toBeGreaterThan(

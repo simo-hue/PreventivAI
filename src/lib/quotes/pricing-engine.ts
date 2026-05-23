@@ -31,15 +31,18 @@ export function normalizeRoleKey(roleName: string, seniority: string) {
 export function priceScenarios(input: PricingInput): PricedScenario[] {
   const rateMap = buildRateCardMap(input.rateCards);
 
-  return input.scenarios.map((scenario) => {
-    const modules = scenario.modules.map((module, moduleIndex) => {
-      const moduleId = `${scenario.slug}:${moduleIndex}:${slugify(module.name)}`;
+  return input.scenarios.map((scenario: any) => {
+    const modules = scenario.modules.map((module: any, moduleIndex: number) => {
+      const moduleId = module.id || `${scenario.slug}:${moduleIndex}:${slugify(module.name)}`;
       const isIncluded =
         input.moduleInclusionOverrides?.[moduleId] ??
         (!module.isOptional || module.isIncludedByDefault);
-      const tasks = module.tasks.map((task) => priceTask(task, rateMap));
+      const tasks = module.tasks.map((task: any) => {
+        const pricedTask = priceTask(task, rateMap);
+        return { ...pricedTask, id: task.id || pricedTask.id };
+      });
       const subtotalEur = roundMoney(
-        tasks.reduce((sum, task) => sum + task.subtotalEur, 0),
+        tasks.reduce((sum: any, task: any) => sum + task.subtotalEur, 0),
       );
 
       return {
@@ -48,7 +51,7 @@ export function priceScenarios(input: PricingInput): PricedScenario[] {
         isIncluded,
         tasks,
         subtotalEur,
-      } satisfies PricedModule;
+      } as PricedModule;
     });
 
     const totals = calculateScenarioTotals({
@@ -79,7 +82,9 @@ export function recalculateScenario(
     scenarios: [
       {
         ...scenario,
+        id: scenario.id,
         modules: scenario.modules.map((module) => ({
+          id: module.id,
           name: module.name,
           description: module.description,
           complexity: module.complexity,
@@ -88,11 +93,13 @@ export function recalculateScenario(
           dependencyNotes: module.dependencyNotes,
           riskNotes: module.riskNotes,
           tasks: module.tasks.map((task) => ({
+            id: task.id,
             title: task.title,
             description: task.description,
             userStory: task.userStory,
             acceptanceCriteria: task.acceptanceCriteria,
             efforts: task.efforts.map((effort) => ({
+              id: effort.id,
               roleName: effort.roleName,
               seniority: effort.seniority,
               estimatedHoursMin: effort.estimatedHoursMin,
@@ -102,7 +109,7 @@ export function recalculateScenario(
             })),
           })),
         })),
-      },
+      } as any,
     ],
     rateCards,
     pmPercentage,
@@ -133,16 +140,10 @@ function buildRateCardMap(rateCards: RateCard[]) {
 }
 
 function priceTask(
-  task: {
-    title: string;
-    description?: string | null;
-    userStory?: string | null;
-    acceptanceCriteria: string[];
-    efforts: RoleEffort[];
-  },
+  task: any,
   rateMap: Map<string, RateCard>,
 ): PricedTask {
-  const efforts = task.efforts.map((effort) => {
+  const efforts = task.efforts.map((effort: any) => {
     assertEffortBounds(effort);
     const rateCard = rateMap.get(
       normalizeRoleKey(effort.roleName, effort.seniority),
@@ -156,6 +157,7 @@ function priceTask(
 
     return {
       ...effort,
+      id: effort.id,
       roleRateCardId: rateCard.id,
       hourlyRateEur: rateCard.hourlyRateEur,
       costEur: roundMoney(effort.estimatedHoursExpected * rateCard.hourlyRateEur),
@@ -164,9 +166,10 @@ function priceTask(
 
   return {
     ...task,
+    id: task.id,
     efforts,
     subtotalEur: roundMoney(
-      efforts.reduce((sum, effort) => sum + effort.costEur, 0),
+      efforts.reduce((sum: any, effort: any) => sum + effort.costEur, 0),
     ),
   };
 }
