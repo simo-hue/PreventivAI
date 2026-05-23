@@ -26,43 +26,40 @@ export default async function CustomerDashboardPage({
     .limit(1)
     .maybeSingle();
 
-  if (error || !request) {
-    // If no request found, maybe they just landed and it's taking a second, or invalid id
-    return (
-      <main className="min-h-screen bg-slate-50 p-8 flex items-center justify-center">
-        <div className="text-center text-slate-500">
-          <p>Nessun progetto trovato o in fase di elaborazione...</p>
-        </div>
-      </main>
-    );
-  }
-
   return (
     <main className="min-h-screen bg-slate-50 flex flex-col md:flex-row">
       {/* 2/3 - Sezione Progetto / Preventivi (Left) */}
       <section className="flex-[2] border-r border-slate-200 bg-white p-6 sm:p-10">
         <div className="max-w-3xl mx-auto">
-          <div className="flex items-center justify-between mb-8">
-            <h1 className="text-3xl font-bold tracking-tight text-slate-900">Il tuo Progetto</h1>
-            <Badge variant="info" className="capitalize">{request.status}</Badge>
-          </div>
-          
-          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-6 shadow-sm mb-10">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-indigo-100 text-indigo-600">
-                <FileText className="h-5 w-5" />
-              </div>
-              <div>
-                <h2 className="text-xl font-semibold text-slate-900">{request.title}</h2>
-                <p className="text-sm text-slate-500">Inviato il {new Date(request.created_at).toLocaleDateString("it-IT")}</p>
-              </div>
+          {error || !request ? (
+            <div className="text-center text-slate-500 mt-20">
+              <p>Nessun progetto trovato o in fase di elaborazione...</p>
             </div>
-            <div className="prose prose-slate max-w-none text-slate-700">
-              <p className="whitespace-pre-wrap">{request.raw_text}</p>
-            </div>
-          </div>
+          ) : (
+            <>
+              <div className="flex items-center justify-between mb-8">
+                <h1 className="text-3xl font-bold tracking-tight text-slate-900">Il tuo Progetto</h1>
+                <Badge variant="info" className="capitalize">{request.status}</Badge>
+              </div>
+              
+              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-6 shadow-sm mb-10">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-indigo-100 text-indigo-600">
+                    <FileText className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-semibold text-slate-900">{request.title}</h2>
+                    <p className="text-sm text-slate-500">Inviato il {new Date(request.created_at).toLocaleDateString("it-IT")}</p>
+                  </div>
+                </div>
+                <div className="prose prose-slate max-w-none text-slate-700">
+                  <p className="whitespace-pre-wrap">{request.raw_text}</p>
+                </div>
+              </div>
+            </>
+          )}
 
-          <div>
+          <div className={error || !request ? "mt-20" : ""}>
             <h3 className="text-xl font-bold text-slate-900 mb-4">Preventivi Ricevuti</h3>
             <div className="rounded-xl border border-dashed border-slate-300 bg-white p-10 text-center">
               <p className="text-slate-500 mb-4">
