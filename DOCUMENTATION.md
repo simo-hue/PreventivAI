@@ -300,3 +300,10 @@
     - Modificato `components/chat/chat-box.tsx` aggiungendo un wrapper flex esterno con `w-full` e `justify-end`/`justify-start` (oltre a `flex-row-reverse` sul child) per garantire il corretto e robusto allineamento all'estrema destra in tutti i browser.
     - Aggiornata la rotta `app/api/requests/[id]/chat/route.ts` per restituire anche lo stato della richiesta (`requestStatus`).
     - Il componente indicatore di scrittura ora appare in due casi combinati (`showTypingIndicator`): sia quando l'utente locale invia un messaggio ed è in attesa della validazione locale, sia globalmente quando lo stato del progetto nel database è `"analyzing"`. Questo assicura che anche l'amministratore possa vedere i 3 pallini quando il cliente sta interagendo con l'AI.
+
+- [2026-05-24T00:35:00+02:00]: Differenziazione Login Utente/Admin
+  - *Details*: Modificato il comportamento del pulsante "Area Utente" sulla pagina `/home`. Ora, dopo il login, il sistema controlla se l'utente è un "customer". Se lo è, viene reindirizzato alla sua area personale (`/customer/[id]`); altrimenti (es. l'amministratore) viene indirizzato alla dashboard di amministrazione (`/requests`).
+  - *Tech Notes*:
+    - Modificato `components/public/login-modal.tsx`.
+    - Aggiunta interrogazione alla tabella `profiles` per recuperare il campo `is_customer`.
+    - Aggiornata la logica di redirect (`router.push`) in base al ruolo.

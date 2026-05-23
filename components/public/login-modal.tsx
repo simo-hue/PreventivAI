@@ -46,10 +46,23 @@ export function LoginModal({
       const user = signInData?.user;
       if (!user?.id) throw new Error("Login non riuscito (ID non trovato).");
 
+      const { data: profile, error: profileError } = await supabase
+        .from("profiles")
+        .select("is_customer")
+        .eq("id", user.id)
+        .single();
+
+      if (profileError) {
+        throw new Error("Errore durante il recupero del profilo.");
+      }
+
       await new Promise(r => setTimeout(r, 500));
 
-      // Redirect to the customer personal page
-      router.push(`/customer/${user.id}`);
+      if (profile?.is_customer) {
+        router.push(`/customer/${user.id}`);
+      } else {
+        router.push("/requests");
+      }
       
     } catch (err) {
       setError(err instanceof Error ? err.message : "Qualcosa e' andato storto.");
