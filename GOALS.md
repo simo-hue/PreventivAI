@@ -2,10 +2,24 @@
 
 
 [ ] generare mock data per storico dei lavori ( 20 in totale )
+
 [ ] Il tempo previsto per la realizzazione deve essere dettagliato al giorno ( ad esempio 1 settimana e 3 giorni di lavoro ). 
+
+
 [ ] Perfetto, l'errore è stato risolto ed il preventivo è stato generato con successo.
+
+
 Ora voglio implementare un altra parte dell'applicazione che richiede massima professionalità e precisione.
 Voglio che nella pagina "/requests" ci sia la possibilità di cliccare per ogni preventivo generato il pulsante "consegnato" dopodichè deve appari
+
+
+[ ] Voglio che andiamo a risolvereun problema durante l'aggiornamento dei preventivi una volta risposto alle domande perchè ho testato e la risposta ha effettivamente generato un cambiamento, però non i seguenti problemi:
+- Totale del preventivo è 0€ ( non deve mai succedere )
+- PM è 0h ( non deve mai succedere )
+
+Altrimenti il ciclo di iterazione è perfetto.
+
+
 [ ] 
 [ ] 
 [ ] 
@@ -17,7 +31,8 @@ Voglio che nella pagina "/requests" ci sia la possibilità di cliccare per ogni 
 [ ] 
 [ ] 
 [ ] 
-[ ] 
+
+
 [ ] Una volta che si apre un preventivo voglio che ci sia anche la possibilità di modificare i campi manualmente tramite un apposito pulsante ( voglio la stessa identica cosa che abbiamo Nella pagina "settings" ). Ovviamente in caso di salvataggio tutto deve essere aggiornato anche sul database. 
 
 
