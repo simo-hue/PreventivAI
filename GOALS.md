@@ -29,7 +29,7 @@
 [ ] 
 
 
-[ ] Quando si modifica un preventivo manualmente ci sono i seguenti errori da terminale: """[browser] [ScenarioDetail] recalculateScenario fallback: PricingError: Invalid effort bounds for Full-Stack / Backend Developer: min <= expected <= max is required.
+Quando si modifica un preventivo manualmente ci sono i seguenti errori da terminale: """[browser] [ScenarioDetail] recalculateScenario fallback: PricingError: Invalid effort bounds for Full-Stack / Backend Developer: min <= expected <= max is required.
     at assertEffortBounds (src/lib/quotes/pricing-engine.ts:283:11)
     at <unknown> (src/lib/quotes/pricing-engine.ts:147:5)
     at Array.map (<anonymous>)
@@ -579,18 +579,3 @@ flushSyncWorkAcrossRoots_impl @ react-dom-client.development.js:20328
 processRootScheduleInMicrotask @ react-dom-client.development.js:20367
 (anonymous) @ react-dom-client.development.js:20505
 """.
-
-
-
-
-
----
-
-
-
-
-FLUSSO BE LIKE:
-- preventivo
-- domande da compilare con risposte del cliente 
-- preventivo deve essere modificabile manualmente
-- preventivi possibili: con pulsante per poi decidere il main
