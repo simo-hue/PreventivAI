@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { createSupabaseServerClient } from "@/src/lib/supabase/server";
+import { createSupabaseAdminClient } from "@/src/lib/supabase/admin";
 
 export default async function AdminLayout({
   children,
@@ -7,15 +8,16 @@ export default async function AdminLayout({
   children: React.ReactNode;
 }) {
   const supabase = await createSupabaseServerClient();
+  const adminClient = createSupabaseAdminClient();
   
-  if (supabase) {
+  if (supabase && adminClient) {
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {
       redirect("/home");
     }
 
-    const { data: profile } = await supabase
+    const { data: profile } = await adminClient
       .from("profiles")
       .select("is_customer")
       .eq("id", user.id)

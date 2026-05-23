@@ -315,3 +315,9 @@
     - Sostituiti tutti i riferimenti a `/requests` con `/admin/requests` nei vari componenti (`app-shell.tsx`, listini, azioni server, modali di login/signup, ecc.).
     - Creato il file `app/(dashboard)/admin/layout.tsx` (Server Component) che effettua un controllo esplicito su `supabase.auth.getUser()`: se assente ridireziona a `/home`, se loggato controlla `is_customer` da `profiles` e se true lo manda in `/customer/[id]`.
     - Nessun requisito manuale aggiunto, in quanto l'RLS e la protezione via Server Component coprono la sicurezza globalmente.
+
+- [2026-05-24T00:42:00+02:00]: Fix RLS Error su Login Modal (Recupero Profilo)
+  - *Details*: Risolto un bug che causava l'errore "Errore durante il recupero del profilo." al momento del login, dovuto alle policy RLS di Supabase che bloccavano la query lato client sulla tabella `profiles`. Il controllo è stato interamente demandato al server per maggiore sicurezza e per aggirare le restrizioni RLS del client.
+  - *Tech Notes*:
+    - Rimosso il fetch della tabella `profiles` in `components/public/login-modal.tsx`. Il client esegue ora una redirect incondizionata verso `/admin/requests` subito dopo il login con successo.
+    - Il componente `app/(dashboard)/admin/layout.tsx` intercetta questa route, ed è stato modificato per utilizzare `createSupabaseAdminClient` per interrogare la tabella `profiles` bypassando il vincolo RLS, reindirizzando conseguentemente i clienti alla loro dashboard personale e consentendo l'accesso agli admin.
