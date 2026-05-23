@@ -57,6 +57,12 @@ export async function POST(
     const user = await requireUser();
     const settings = await getAppSettings(user.organizationId);
     
+    // Imposta lo stato a analyzing prima di avviare l'elaborazione pesante
+    const admin = createSupabaseAdminClient();
+    if (admin) {
+      await admin.from("client_requests").update({ status: "analyzing" }).eq("id", id);
+    }
+    
     const similarHistoricalProjects = await getSimilarHistoricalProjects({
       organizationId: user.organizationId,
       requestText: textToAnalyze,

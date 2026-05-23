@@ -10,8 +10,8 @@ import { deleteRequestAction } from "@/app/(dashboard)/requests/actions";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 
 const statusLabel: Record<string, string> = {
-  draft: "Bozza",
-  analyzing: "In analisi",
+  draft: "In elaborazione",
+  analyzing: "In elaborazione",
   needs_clarification: "Richiede chiarimenti",
   quoted: "Preventivato",
   delivered: "Consegnato",
@@ -81,6 +81,7 @@ export function RequestListClient({
       <div className="grid gap-4">
         {requests.map((request) => {
           const bestScenario = request.analysis?.scenarios[0];
+          const isProcessing = request.status === "draft" || request.status === "analyzing";
           return (
             <Card key={request.id}>
               <CardBody className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
@@ -127,10 +128,17 @@ export function RequestListClient({
                     >
                       <Trash2 className="size-4" aria-hidden="true" />
                     </Button>
-                    <ButtonLink href={`/requests/${request.id}`} variant="secondary">
-                      Apri
-                      <ArrowRight className="size-4" aria-hidden="true" />
-                    </ButtonLink>
+                    {isProcessing ? (
+                      <Button variant="secondary" disabled>
+                        Apri
+                        <ArrowRight className="size-4" aria-hidden="true" />
+                      </Button>
+                    ) : (
+                      <ButtonLink href={`/requests/${request.id}`} variant="secondary">
+                        Apri
+                        <ArrowRight className="size-4" aria-hidden="true" />
+                      </ButtonLink>
+                    )}
                   </div>
                 </div>
               </CardBody>

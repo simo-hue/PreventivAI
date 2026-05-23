@@ -9,8 +9,8 @@ import { useRouter } from "next/navigation";
 import { createSupabaseBrowserClient } from "@/src/lib/supabase/client";
 
 const statusLabel: Record<string, string> = {
-  draft: "Bozza",
-  analyzing: "In analisi",
+  draft: "In elaborazione",
+  analyzing: "In elaborazione",
   needs_clarification: "Richiede chiarimenti",
   quoted: "Preventivato",
   delivered: "Consegnato",
@@ -50,6 +50,15 @@ export function CustomerRequestList({
       if (!response.ok) {
         throw new Error("Errore durante la creazione");
       }
+
+      const created = await response.json();
+
+      // Avvia l'analisi in background senza bloccare l'utente (fire-and-forget)
+      fetch(`/api/requests/${created.id}/analyze`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ requestText: description }),
+      }).catch(console.error);
 
       setIsModalOpen(false);
       setTitle("");
@@ -92,47 +101,57 @@ export function CustomerRequestList({
         </div>
       ) : (
         <div className="grid gap-4">
-          {requests.map((request) => (
-            <Card key={request.id}>
-              <CardBody className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between p-6">
-                <div className="min-w-0 flex-1">
-                  <div className="flex flex-wrap items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-indigo-50 text-indigo-600">
-                      <FileText className="h-5 w-5" />
-                    </div>
-                    <div>
-                      <h2 className="font-semibold text-lg text-slate-900">{request.title}</h2>
-                      <div className="flex items-center gap-3 mt-1">
-                        <Badge
-                          variant={
-                            request.status === "delivered" || request.status === "quoted"
-                              ? "success"
-                              : request.status === "needs_clarification"
-                                ? "warning"
-                                : "info"
-                          }
-                        >
-                          {statusLabel[request.status] || request.status}
-                        </Badge>
-                        <span className="text-xs text-slate-500">
-                          {new Date(request.createdAt).toLocaleDateString("it-IT")}
-                        </span>
+          {requests.map((request) => {
+            const isProcessing = request.status === "draft" || request.status === "analyzing";
+            return (
+              <Card key={request.id}>
+                <CardBody className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between p-6">
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-3">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-indigo-50 text-indigo-600">
+                        <FileText className="h-5 w-5" />
+                      </div>
+                      <div>
+                        <h2 className="font-semibold text-lg text-slate-900">{request.title}</h2>
+                        <div className="flex items-center gap-3 mt-1">
+                          <Badge
+                            variant={
+                              request.status === "delivered" || request.status === "quoted"
+                                ? "success"
+                                : request.status === "needs_clarification"
+                                  ? "warning"
+                                  : "info"
+                            }
+                          >
+                            {statusLabel[request.status] || request.status}
+                          </Badge>
+                          <span className="text-xs text-slate-500">
+                            {new Date(request.createdAt).toLocaleDateString("it-IT")}
+                          </span>
+                        </div>
                       </div>
                     </div>
+                    <p className="mt-4 line-clamp-2 text-sm text-slate-600">
+                      {request.rawText}
+                    </p>
                   </div>
-                  <p className="mt-4 line-clamp-2 text-sm text-slate-600">
-                    {request.rawText}
-                  </p>
-                </div>
-                <div className="flex shrink-0 items-center sm:pl-4">
-                  <ButtonLink href={`/customer/${userId}/requests/${request.id}`} variant="secondary">
-                    Apri
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </ButtonLink>
-                </div>
-              </CardBody>
-            </Card>
-          ))}
+                  <div className="flex shrink-0 items-center sm:pl-4">
+                    {isProcessing ? (
+                      <Button variant="secondary" disabled>
+                        Apri
+                        <ArrowRight className="ml-2 h-4 w-4" />
+                      </Button>
+                    ) : (
+                      <ButtonLink href={`/customer/${userId}/requests/${request.id}`} variant="secondary">
+                        Apri
+                        <ArrowRight className="ml-2 h-4 w-4" />
+                      </ButtonLink>
+                    )}
+                  </div>
+                </CardBody>
+              </Card>
+            );
+          })}
         </div>
       )}
 

@@ -99,9 +99,17 @@ export function SignupModal({
       });
 
       if (!createResponse.ok) {
-        const payload = await createResponse.json();
-        throw new Error(payload.error || "Errore nella creazione della richiesta.");
+        throw new Error("Errore durante il salvataggio della richiesta.");
       }
+
+      const created = await createResponse.json();
+
+      // Avvia l'analisi in background senza bloccare l'utente (fire-and-forget)
+      fetch(`/api/requests/${created.id}/analyze`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ requestText: projectDescription }),
+      }).catch(console.error);
 
       // 4. Redirect alla pagina personale del cliente
       router.push(`/customer/${user.id}`);

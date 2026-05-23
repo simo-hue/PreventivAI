@@ -190,3 +190,14 @@
 - [2026-05-23T20:15:00+02:00]: Fix Customer Request DB Linkage
   - *Details*: Risolto il problema per cui i progetti creati dal cliente non comparivano nella sua area personale. Il preventivo ora viene forzatamente ed esplicitamente legato all'identificativo del cliente al momento del salvataggio nel database.
   - *Tech Notes*: Modificati `components/public/signup-modal.tsx` e `components/customer/customer-request-list.tsx` per inviare esplicitamente il `customerId` nel payload al `POST /api/requests`. Aggiornato `app/api/requests/route.ts` per accettare tale parametro e `createClientRequest` in `request-repository.ts` per utilizzarlo in modo da valorizzare correttamente la colonna `created_by` anche nel caso in cui i cookie di sessione post-auth non vengano propagati in tempo utile.
+
+- [2026-05-23T20:25:00+02:00]: Automatic AI Analysis Trigger
+  - *Details*: Implementato l'avvio automatico dell'elaborazione AI per i nuovi progetti inseriti lato cliente, allineandolo al comportamento che si aveva nel backend tramite il bottone "Genera analisi".
+  - *Tech Notes*: Modificati `components/public/signup-modal.tsx` e `components/customer/customer-request-list.tsx`. Subito dopo la corretta esecuzione del `POST /api/requests` (che ora restituisce anche l'oggetto creato col relativo `id`), viene lanciato un `fetch` in background (fire-and-forget, senza bloccare la UI) verso `/api/requests/:id/analyze`. Questo assicura che, mentre l'utente viene ridirezionato alla dashboard o il modale si chiude, il server inizi l'interrogazione all'LLM e la generazione degli scenari di preventivo.
+
+- [2026-05-23T20:34:00+02:00]: Processing State UI Update
+  - *Details*: Migliorata la User Experience durante la fase di elaborazione del preventivo. Sia la dashboard del cliente che quella dell'admin mostrano ora chiaramente lo stato "In elaborazione" e disabilitano il pulsante "Apri" finché l'analisi dell'Intelligenza Artificiale non è terminata.
+  - *Tech Notes*: 
+    - Aggiornata la mappa `statusLabel` in `components/customer/customer-request-list.tsx` e `components/requests/request-list-client.tsx` affinché `draft` e `analyzing` mostrino "In elaborazione".
+    - Reso non cliccabile e in stato visivo disabilitato il bottone "Apri" (`ButtonLink` sostituito da `Button disabled`) in entrambe le liste per impedire all'utente di accedere alla pagina di dettaglio prima che l'AI abbia concluso di popolare il database con scenari, moduli e quote_run.
+    - Aggiornato `app/api/requests/[id]/analyze/route.ts` per scrivere subito `status: "analyzing"` sul DB all'inizio dell'elaborazione, in modo che l'UI lo recepisca correttamente se interrogata.
