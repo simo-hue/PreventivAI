@@ -98,3 +98,7 @@
     - **`src/server/repositories/request-repository.ts`**: Corretto `getAllClientRequests` che restituiva `created_at` come `updatedAt` invece di usare `updated_at`.
     - **`supabase/migrations/20260523170000_backfill_client_request_fields.sql`**: Creata migrazione SQL di backfill che estrae i valori dai `quote_runs.llm_raw_response` (JSON) e li scrive retroattivamente nei campi null delle righe `client_requests` esistenti.
     - Build TypeScript: ✅ Zero errori.
+
+- [2026-05-23 17:40:00 CEST]: Fix Premium Scenario Generation with missing modules
+  - *Details*: Risolto il problema per cui lo scenario "Premium" generato dall'AI risultava vuoto (Totale 0€) avendo solo i moduli opzionali aggiuntivi e perdendo i moduli del piano base.
+  - *Tech Notes*: Modificato `src/lib/ai/prompts/quote-analysis.v1.ts` per istruire rigorosamente il LLM a generare scenari completi e autonomi, duplicando/riadattando i moduli di base anche nei piani premium e alternative, senza restituire solo un delta differenziale. Aggiornata la versione a `v1.1`.
