@@ -21,26 +21,11 @@ export type StoredRequest = {
 };
 
 export function getStoredRequests() {
-  if (typeof window === "undefined") {
-    return [];
-  }
-
-  const raw = window.localStorage.getItem(STORAGE_KEY);
-  if (!raw) {
-    const demo = buildDemoStoredRequest();
-    saveStoredRequests([demo]);
-    return [demo];
-  }
-
-  try {
-    return JSON.parse(raw) as StoredRequest[];
-  } catch {
-    return [];
-  }
+  return [];
 }
 
 export function saveStoredRequests(requests: StoredRequest[]) {
-  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(requests));
+  // Disabilitato - usiamo solo Supabase
 }
 
 export function upsertStoredRequest(request: StoredRequest) {

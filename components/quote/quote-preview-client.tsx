@@ -5,10 +5,7 @@ import { Download, Printer } from "lucide-react";
 import { Alert } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  findStoredScenario,
-  type StoredRequest,
-} from "@/src/lib/demo/storage";
+import type { StoredRequest } from "@/src/lib/demo/storage";
 import type { PricedScenario } from "@/src/lib/quotes/types";
 import { formatCurrency, formatNumber, formatPercent } from "@/src/lib/utils/format";
 
@@ -21,23 +18,8 @@ export function QuotePreviewClient({
   initialScenario?: PricedScenario | null;
   initialRequest?: StoredRequest | null;
 }) {
-  const [request, setRequest] = useState<StoredRequest | null>(initialRequest ?? null);
-  const [scenario, setScenario] = useState<PricedScenario | null>(initialScenario ?? null);
-
-  useEffect(() => {
-    if (initialScenario && initialRequest) {
-      // Entrambi provengono dal server, non usiamo il localStorage
-      return;
-    } else if (initialScenario && !initialRequest) {
-      // Fallback solo per la request se manca
-      const found = findStoredScenario(scenarioId);
-      setRequest(found?.request ?? null);
-    } else {
-      const found = findStoredScenario(scenarioId);
-      setRequest(found?.request ?? null);
-      setScenario(found?.scenario ?? null);
-    }
-  }, [scenarioId, initialScenario, initialRequest]);
+  const request = initialRequest;
+  const scenario = initialScenario;
 
   async function exportPdf() {
     if (!request || !scenario) {
@@ -71,7 +53,7 @@ export function QuotePreviewClient({
     return (
       <main className="mx-auto max-w-4xl p-6">
         <Alert title="Preventivo non trovato" variant="warning">
-          Lo scenario non e' disponibile nello storage locale.
+          Lo scenario richiesto non esiste o non è stato caricato correttamente dal database.
         </Alert>
       </main>
     );

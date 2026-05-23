@@ -380,3 +380,12 @@
 
 - [2026-05-24T01:35:00+02:00]: Custom Success Modal for Quote Sharing
   - *Details*: Replaced the native browser alert with a custom success modal (ConfirmDialog) that redirects the admin back to the chat view upon confirmation.
+
+- [2026-05-24T01:36:00+02:00]: Fix Invalid UUID Error on Quote Preview
+  - *Details*: Fixed a 500 Internal Server Error (invalid input syntax for type uuid) that occurred when attempting to open a preview of an old mock quote (e.g. lean-landing-page) from the chat. Added a regex validation to ensure getScenarioById is only called with valid UUIDs, allowing legacy local storage data to fallback safely without crashing the server.
+
+- [2026-05-24T01:40:00+02:00]: Remove localStorage Fallback
+  - *Details*: Completely disabled window.localStorage reads and writes in src/lib/demo/storage.ts and removed the fallback mechanism from QuotePreviewClient. The application now exclusively relies on the Supabase database for all quotes and requests.
+
+- [2026-05-24T01:45:00+02:00]: Fix Scenario ID Overwrite in Pricing Engine
+  - *Details*: Fixed a bug in priceScenarios where the scenario ID was being incorrectly overwritten with the scenario slug (e.g., lean-static-onepage). This caused the chat metadata to store the string slug instead of the database UUID, breaking the customer preview link. Recalculated scenarios now correctly preserve their original UUID.

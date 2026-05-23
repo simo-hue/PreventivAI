@@ -29,11 +29,13 @@ export default async function CustomerProjectDetailPage({
   if (!request) return notFound();
 
   let previewScenario = null;
-  if (previewQuoteId) {
+  const isUUID = (str: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(str);
+
+  if (previewQuoteId && isUUID(previewQuoteId)) {
     previewScenario = await getScenarioById(previewQuoteId);
   }
 
-  const leftContent = previewQuoteId && previewScenario ? (
+  const leftContent = previewQuoteId ? (
     <section className="relative h-full flex flex-col bg-slate-50">
       <div className="p-4 border-b border-slate-200 bg-white flex items-center justify-between z-10 shadow-sm relative">
         <Link 

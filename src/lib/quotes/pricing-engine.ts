@@ -64,7 +64,7 @@ export function priceScenarios(input: PricingInput): PricedScenario[] {
 
     return {
       ...scenario,
-      id: scenario.slug,
+      id: scenario.id || scenario.slug,
       modules,
       totals,
       roleBreakdown: calculateRoleBreakdown(modules),
