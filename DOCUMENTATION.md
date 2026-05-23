@@ -255,3 +255,7 @@
   - *Tech Notes*:
     - In `chat-box.tsx`, sostituito `<input>` con `<textarea>` che si ridimensiona dinamicamente calcolando lo `scrollHeight`, con gestione differenziata di Invio (per l'invio) e Shift+Invio (per l'a capo).
     - In `app/api/requests/[id]/chat/route.ts`, aggiunta la creazione on-the-fly di un profilo (nella tabella `profiles`) per i nuovi clienti (leggendo nome utente da `auth.users`), superando così l'errore di violazione del vincolo di chiave esterna su `sender_id`.
+
+- [2026-05-23T23:18:30+02:00]: Renderizzazione Markdown Chat
+  - *Details*: Aggiunto il supporto per il formato Markdown all'interno dei messaggi in chat. Ora l'output testuale restituito dall'LLM che contiene elementi di stile come il grassetto (`**testo**`), liste e paragrafi viene renderizzato in modo nativo e pulito senza esporre i caratteri speciali.
+  - *Tech Notes*: Installata la dipendenza `react-markdown`. Nel componente `components/chat/chat-box.tsx`, avvolto il contenuto del messaggio con `<ReactMarkdown>` sovrascrivendo tramite `components` il rendering di default per i tag `<p>`, `<strong>`, `<ul>` ed `<ol>` e applicando la formattazione appropriata di Tailwind CSS, garantendo compatibilità col CSS-reset globale e con i temi chiari e scuri dei balloon.

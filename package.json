@@ -35,6 +35,7 @@
     "react": "latest",
     "react-dom": "latest",
     "react-hook-form": "latest",
+    "react-markdown": "^10.1.0",
     "server-only": "latest",
     "tailwind-merge": "latest",
     "zod": "latest"

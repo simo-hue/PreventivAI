@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { MessageSquare, Send } from "lucide-react";
+import ReactMarkdown from "react-markdown";
 
 interface Profile {
   full_name: string;
@@ -125,7 +126,16 @@ export function ChatBox({
                     ? "bg-indigo-600 text-white border-indigo-500 rounded-tr-sm" 
                     : "bg-white text-slate-700 border-slate-200 rounded-tl-sm"
                 }`}>
-                  {msg.content}
+                  <ReactMarkdown
+                    components={{
+                      p: ({node: _node, ...props}) => <p className="m-0" {...props} />,
+                      strong: ({node: _node, ...props}) => <strong className="font-semibold" {...props} />,
+                      ul: ({node: _node, ...props}) => <ul className="list-disc pl-4 m-0" {...props} />,
+                      ol: ({node: _node, ...props}) => <ol className="list-decimal pl-4 m-0" {...props} />,
+                    }}
+                  >
+                    {msg.content}
+                  </ReactMarkdown>
                 </div>
               </div>
             );
