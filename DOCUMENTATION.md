@@ -259,3 +259,24 @@
 - [2026-05-23T23:18:30+02:00]: Renderizzazione Markdown Chat
   - *Details*: Aggiunto il supporto per il formato Markdown all'interno dei messaggi in chat. Ora l'output testuale restituito dall'LLM che contiene elementi di stile come il grassetto (`**testo**`), liste e paragrafi viene renderizzato in modo nativo e pulito senza esporre i caratteri speciali.
   - *Tech Notes*: Installata la dipendenza `react-markdown`. Nel componente `components/chat/chat-box.tsx`, avvolto il contenuto del messaggio con `<ReactMarkdown>` sovrascrivendo tramite `components` il rendering di default per i tag `<p>`, `<strong>`, `<ul>` ed `<ol>` e applicando la formattazione appropriata di Tailwind CSS, garantendo compatibilità col CSS-reset globale e con i temi chiari e scuri dei balloon.
+
+- [2026-05-23T23:25:00+02:00]: AI Guard per Validazione Risposte Cliente
+  - *Details*: Implementato un meccanismo di controllo preventivo via Intelligenza Artificiale per i messaggi chat inviati dai clienti. Quando un cliente risponde a una domanda bloccante, il preventivo NON viene più ricalcolato immediatamente. Gemini prima analizza l'intero contesto della chat per capire se la risposta è pertinente o se è solo "rumore" (es. un'altra domanda o una risposta evasiva). Se pertinente, l'AI risponde "Grazie, ora con queste informazioni aggiorno il preventivo" e sblocca il ricalcolo. Altrimenti, l'AI guida il cliente a fornire i dati mancanti.
+  - *Tech Notes*:
+    - Aggiunto schema `ValidateReplySchema` in `src/lib/ai/schemas.ts`.
+    - Creato prompt AI dedicato `validateReplyPrompt` in `src/lib/ai/prompts/validate-reply.ts`.
+    - Creato nuovo endpoint `POST /api/requests/[id]/chat/validate-reply/route.ts` che esegue `generateObject` (Gemini 2.5 Flash), salva la risposta generata nella tabella `chat_messages` impersonando l'admin e restituisce il flag `triggerAnalyze`.
+    - Modificato il componente client `ChatBox` (`components/chat/chat-box.tsx`) affinché i messaggi lato client invochino questo nuovo endpoint e avviino il fetch di `/api/requests/[id]/analyze` solo se validati positivamente. Verificato con `pnpm verify`.
+
+- [2026-05-23T23:30:00+02:00]: Fix 500 Internal Server Error su Invio Chat
+  - *Details*: Risolto un bug critico che causava un errore 500 quando l'amministratore (o un utente in modalità demo locale) cercava di inviare un messaggio in chat. L'errore era dovuto al fatto che l'ID temporaneo di mock assegnato era `"demo-user"`, il quale violava il constraint UUID e la Foreign Key su `profiles` del database Postgres per la colonna `sender_id`.
+  - *Tech Notes*:
+    - In `src/lib/auth/require-user.ts`, sostituito l'ID di fallback `"demo-user"` con un vero UUID valido (`"5d65094f-d066-423c-a7ce-ef18a0f64368"`), già usato in altre parti del sistema come costante `ADMIN_USER_ID`.
+    - In `app/api/requests/[id]/chat/route.ts`, modificata la logica di creazione "lazy" del profilo utente per supportare nativamente l'utente admin di fallback, inserendo automaticamente un record `profiles` valido col ruolo "admin" in caso non esista, scongiurando qualsiasi fallimento di chiave esterna.
+
+- [2026-05-23T23:35:00+02:00]: Miglioramenti UI/UX Chat Box
+  - *Details*: Perfezionato il layout della chat per renderlo simile alle applicazioni di messaggistica moderne (es. WhatsApp, iMessage). I messaggi inviati dall'utente corrente sono ora allineati a destra, mentre quelli ricevuti (compresi quelli del sistema o dell'AI) rimangono a sinistra. Inoltre, è stata inserita un'elegante animazione "Typing..." (3 puntini saltellanti) che compare ogni volta che l'Intelligenza Artificiale sta elaborando la validazione del messaggio prima di rispondere, fornendo all'utente un feedback visivo immediato di elaborazione in corso.
+  - *Tech Notes*:
+    - Modificato `components/chat/chat-box.tsx` aggiungendo un wrapper flex esterno con `w-full` e `justify-end`/`justify-start` (oltre a `flex-row-reverse` sul child) per garantire il corretto e robusto allineamento all'estrema destra in tutti i browser.
+    - Aggiornata la rotta `app/api/requests/[id]/chat/route.ts` per restituire anche lo stato della richiesta (`requestStatus`).
+    - Il componente indicatore di scrittura ora appare in due casi combinati (`showTypingIndicator`): sia quando l'utente locale invia un messaggio ed è in attesa della validazione locale, sia globalmente quando lo stato del progetto nel database è `"analyzing"`. Questo assicura che anche l'amministratore possa vedere i 3 pallini quando il cliente sta interagendo con l'AI.

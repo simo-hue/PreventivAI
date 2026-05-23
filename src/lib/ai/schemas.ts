@@ -110,3 +110,10 @@ export const AnalysisOutputSchema = z
   });
 
 export type AnalysisOutputFromSchema = z.infer<typeof AnalysisOutputSchema>;
+
+export const ValidateReplySchema = z.object({
+  isValid: z.boolean().describe("True se il cliente ha risposto alle domande, false se il messaggio è irrilevante o non contiene le risposte necessarie."),
+  aiResponse: z.string().describe("Il messaggio che l'AI manderà al cliente. Se isValid è false, spiegherà cosa manca. Se isValid è true, sarà 'Grazie, ora con queste informazioni aggiorno il preventivo'."),
+});
+
+export type ValidateReplyOutput = z.infer<typeof ValidateReplySchema>;

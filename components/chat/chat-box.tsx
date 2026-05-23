@@ -29,6 +29,8 @@ export function ChatBox({
   const [loading, setLoading] = useState(true);
   const [inputValue, setInputValue] = useState("");
   const [sending, setSending] = useState(false);
+  const [isTyping, setIsTyping] = useState(false);
+  const [requestStatus, setRequestStatus] = useState<string>("draft");
   const scrollRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -38,6 +40,9 @@ export function ChatBox({
       if (res.ok) {
         const data = await res.json();
         setMessages(data.messages);
+        if (data.status) {
+          setRequestStatus(data.status);
+        }
       }
     } catch (e) {
       console.error(e);
@@ -53,11 +58,13 @@ export function ChatBox({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [requestId]);
 
+  const showTypingIndicator = isTyping || requestStatus === "analyzing";
+
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
-  }, [messages]);
+  }, [messages, showTypingIndicator]);
 
   useEffect(() => {
     if (textareaRef.current) {
@@ -82,12 +89,27 @@ export function ChatBox({
         setMessages((prev) => [...prev, data.message]);
         setInputValue("");
         
-        // Rilancia l'analisi se chi scrive non è admin (così il nuovo testo sblocca l'analisi)
-        // O semplicemente ricarica la pagina per far vedere gli aggiornamenti se c'erano domande bloccanti
+        // Rilancia l'analisi se chi scrive non è admin, ma prima VALIDA il messaggio
         // Siccome l'admin ha id fisso:
         if (currentUserId !== "5d65094f-d066-423c-a7ce-ef18a0f64368") {
-          // Opzionale: chiamare /api/requests/{requestId}/analyze per ricalcolare il preventivo
-          fetch(`/api/requests/${requestId}/analyze`, { method: "POST" }).catch(console.error);
+          setIsTyping(true);
+          try {
+            const valRes = await fetch(`/api/requests/${requestId}/chat/validate-reply`, { method: "POST" });
+            if (valRes.ok) {
+              const valData = await valRes.json();
+              // Aggiorna subito i messaggi per far vedere la risposta dell'AI (sia in caso di successo che di fallimento)
+              await fetchMessages();
+              
+              if (valData.triggerAnalyze) {
+                // Il cliente ha risposto adeguatamente, ora facciamo l'analisi
+                fetch(`/api/requests/${requestId}/analyze`, { method: "POST" }).catch(console.error);
+              }
+            }
+          } catch (valError) {
+            console.error("Errore durante la validazione del messaggio:", valError);
+          } finally {
+            setIsTyping(false);
+          }
         }
       }
     } catch (e) {
@@ -117,29 +139,46 @@ export function ChatBox({
           messages.map((msg) => {
             const isMe = msg.sender_id === currentUserId;
             return (
-              <div key={msg.id} className={`flex items-start gap-3 ${isMe ? "flex-row-reverse" : "flex-row"}`}>
-                <div className={`h-8 w-8 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0 ${isMe ? "bg-indigo-600" : "bg-slate-600"}`}>
-                  {isMe ? "TU" : msg.profiles?.full_name?.substring(0, 2).toUpperCase() || "SH"}
-                </div>
-                <div className={`border rounded-2xl p-3 shadow-sm max-w-[85%] text-sm whitespace-pre-wrap ${
-                  isMe 
-                    ? "bg-indigo-600 text-white border-indigo-500 rounded-tr-sm" 
-                    : "bg-white text-slate-700 border-slate-200 rounded-tl-sm"
-                }`}>
-                  <ReactMarkdown
-                    components={{
-                      p: ({node: _node, ...props}) => <p className="m-0" {...props} />,
-                      strong: ({node: _node, ...props}) => <strong className="font-semibold" {...props} />,
-                      ul: ({node: _node, ...props}) => <ul className="list-disc pl-4 m-0" {...props} />,
-                      ol: ({node: _node, ...props}) => <ol className="list-decimal pl-4 m-0" {...props} />,
-                    }}
-                  >
-                    {msg.content}
-                  </ReactMarkdown>
+              <div key={msg.id} className={`flex w-full ${isMe ? "justify-end" : "justify-start"}`}>
+                <div className={`flex items-start gap-3 max-w-[85%] ${isMe ? "flex-row-reverse" : "flex-row"}`}>
+                  <div className={`h-8 w-8 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0 ${isMe ? "bg-indigo-600" : "bg-slate-600"}`}>
+                    {isMe ? "TU" : msg.profiles?.full_name?.substring(0, 2).toUpperCase() || "SH"}
+                  </div>
+                  <div className={`border rounded-2xl p-3 shadow-sm text-sm whitespace-pre-wrap ${
+                    isMe 
+                      ? "bg-indigo-600 text-white border-indigo-500 rounded-tr-sm" 
+                      : "bg-white text-slate-700 border-slate-200 rounded-tl-sm"
+                  }`}>
+                    <ReactMarkdown
+                      components={{
+                        p: ({node: _node, ...props}) => <p className="m-0" {...props} />,
+                        strong: ({node: _node, ...props}) => <strong className="font-semibold" {...props} />,
+                        ul: ({node: _node, ...props}) => <ul className="list-disc pl-4 m-0" {...props} />,
+                        ol: ({node: _node, ...props}) => <ol className="list-decimal pl-4 m-0" {...props} />,
+                      }}
+                    >
+                      {msg.content}
+                    </ReactMarkdown>
+                  </div>
                 </div>
               </div>
             );
           })
+        )}
+        
+        {showTypingIndicator && (
+          <div className="flex w-full justify-start">
+            <div className="flex items-start gap-3 flex-row">
+              <div className="h-8 w-8 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0 bg-slate-600">
+                SH
+              </div>
+              <div className="bg-white border border-slate-200 rounded-2xl rounded-tl-sm p-4 shadow-sm flex items-center gap-1.5 h-[46px]">
+                <div className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
+                <div className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
+                <div className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce"></div>
+              </div>
+            </div>
+          </div>
         )}
       </div>
 

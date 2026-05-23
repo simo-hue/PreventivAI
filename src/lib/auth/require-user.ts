@@ -47,7 +47,7 @@ export async function requireUser(): Promise<DemoUser> {
   }
 
   return {
-    id: "demo-user",
+    id: "5d65094f-d066-423c-a7ce-ef18a0f64368",
     organizationId: "00000000-0000-0000-0000-000000000001",
     email: "demo@italiansquoteitbetter.local",
     role: "admin",
