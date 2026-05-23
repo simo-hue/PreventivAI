@@ -1,7 +1,7 @@
 import "server-only";
 
 import { generateObject } from "ai";
-import { createOpenRouter } from "@openrouter/ai-sdk-provider";
+import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { createHash } from "node:crypto";
 import { AnalysisOutputSchema } from "@/src/lib/ai/schemas";
 import {
@@ -49,7 +49,7 @@ export type PromptContext = {
 };
 
 export async function analyzeQuoteRequest(context: PromptContext) {
-  const apiKey = process.env.OPENROUTER_API_KEY;
+  const apiKey = process.env.GEMINI_API_KEY;
 
   if (!apiKey) {
     return shouldUseDemoAnalysis(context.requestText)
@@ -57,15 +57,15 @@ export async function analyzeQuoteRequest(context: PromptContext) {
       : buildBlockingClarificationAnalysis(context.requestText);
   }
 
-  const openrouter = createOpenRouter({
+  const google = createGoogleGenerativeAI({
     apiKey,
   });
 
-  const modelId = process.env.OPENROUTER_MODEL ?? "anthropic/claude-sonnet-4.5";
+  const modelId = process.env.AI_MODEL ?? "gemini-3.5-flash";
 
   try {
     const { object } = await generateObject({
-      model: openrouter(modelId),
+      model: google(modelId),
       schema: AnalysisOutputSchema,
       system: QUOTE_ANALYSIS_SYSTEM_PROMPT,
       prompt: JSON.stringify(context),

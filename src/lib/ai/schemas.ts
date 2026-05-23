@@ -1,7 +1,10 @@
 import { z } from "zod";
 
-const effortBounds = z
+export const RoleEffortSchema = z
   .object({
+    roleName: z.string().min(1),
+    seniority: z.string().min(1),
+    rationale: z.string().min(1),
     estimatedHoursMin: z.number().nonnegative(),
     estimatedHoursExpected: z.number().nonnegative(),
     estimatedHoursMax: z.number().nonnegative(),
@@ -15,14 +18,6 @@ const effortBounds = z
       path: ["estimatedHoursExpected"],
     },
   );
-
-export const RoleEffortSchema = z
-  .object({
-    roleName: z.string().min(1),
-    seniority: z.string().min(1),
-    rationale: z.string().min(1),
-  })
-  .and(effortBounds);
 
 export const QuoteTaskSchema = z.object({
   title: z.string().min(1),

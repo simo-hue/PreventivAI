@@ -18,8 +18,8 @@
     "verify": "pnpm lint && pnpm typecheck && pnpm test && pnpm build"
   },
   "dependencies": {
+    "@ai-sdk/google": "^3.0.79",
     "@hookform/resolvers": "latest",
-    "@openrouter/ai-sdk-provider": "^2.9.0",
     "@supabase/ssr": "latest",
     "@supabase/supabase-js": "latest",
     "@tanstack/react-query": "latest",

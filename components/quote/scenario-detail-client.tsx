@@ -27,6 +27,26 @@ export function ScenarioDetailClient({
   const [request, setRequest] = useState<StoredRequest | null>(null);
   const [scenario, setScenario] = useState<PricedScenario | null>(null);
   const [overrides, setOverrides] = useState<Record<string, boolean>>({});
+  const [pricingSettings, setPricingSettings] = useState<{
+    pmPercentage: number;
+    currency: string;
+    riskBufferPercentage: number;
+  } | null>(null);
+
+  useEffect(() => {
+    async function fetchSettings() {
+      try {
+        const response = await fetch("/api/admin/settings");
+        if (response.ok) {
+          const data = await response.json();
+          setPricingSettings(data);
+        }
+      } catch (error) {
+        console.error("Impossibile caricare le impostazioni nella pagina dettaglio", error);
+      }
+    }
+    fetchSettings();
+  }, []);
 
   useEffect(() => {
     const found = findStoredScenario(scenarioId);
@@ -47,10 +67,11 @@ export function ScenarioDetailClient({
     return recalculateScenario(
       scenario,
       officialRateCards,
-      DEFAULT_PM_PERCENTAGE,
+      pricingSettings?.pmPercentage ?? DEFAULT_PM_PERCENTAGE,
       overrides,
+      pricingSettings?.riskBufferPercentage ?? 0,
     );
-  }, [scenario, overrides]);
+  }, [scenario, overrides, pricingSettings]);
 
   async function exportPdf() {
     if (!request || !recalculated) {
@@ -94,8 +115,9 @@ export function ScenarioDetailClient({
     const nextScenario = recalculateScenario(
       scenario,
       officialRateCards,
-      DEFAULT_PM_PERCENTAGE,
+      pricingSettings?.pmPercentage ?? DEFAULT_PM_PERCENTAGE,
       nextOverrides,
+      pricingSettings?.riskBufferPercentage ?? 0,
     );
     const nextRequest = replaceScenarioInRequest(request, nextScenario);
     upsertStoredRequest(nextRequest);
@@ -139,9 +161,9 @@ export function ScenarioDetailClient({
       </div>
 
       <div className="grid gap-4 md:grid-cols-4">
-        <Metric label="Totale" value={formatCurrency(recalculated.totals.totalEur)} />
-        <Metric label="Subtotal" value={formatCurrency(recalculated.totals.subtotalEur)} />
-        <Metric label="PM" value={`${recalculated.totals.pmHours}h / ${formatCurrency(recalculated.totals.pmCostEur)}`} />
+        <Metric label="Totale" value={formatCurrency(recalculated.totals.totalEur, pricingSettings?.currency)} />
+        <Metric label="Subtotal" value={formatCurrency(recalculated.totals.subtotalEur, pricingSettings?.currency)} />
+        <Metric label="PM" value={`${recalculated.totals.pmHours}h / ${formatCurrency(recalculated.totals.pmCostEur, pricingSettings?.currency)}`} />
         <Metric label="Confidenza" value={formatPercent(recalculated.confidence)} />
       </div>
 
@@ -164,7 +186,7 @@ export function ScenarioDetailClient({
                   </p>
                 </div>
                 <div className="flex shrink-0 items-center gap-4">
-                  <p className="text-right font-bold">{formatCurrency(module.subtotalEur)}</p>
+                  <p className="text-right font-bold">{formatCurrency(module.subtotalEur, pricingSettings?.currency)}</p>
                   {module.isOptional ? (
                     <label className="flex cursor-pointer items-center gap-2 text-sm font-semibold">
                       <input
@@ -212,10 +234,10 @@ export function ScenarioDetailClient({
                             {formatNumber(effort.estimatedHoursExpected)}h
                           </td>
                           <td className="px-4 py-3">
-                            {formatCurrency(effort.hourlyRateEur)}/h
+                            {formatCurrency(effort.hourlyRateEur, pricingSettings?.currency)}/h
                           </td>
                           <td className="px-4 py-3 text-right font-semibold">
-                            {formatCurrency(effort.costEur)}
+                            {formatCurrency(effort.costEur, pricingSettings?.currency)}
                           </td>
                         </tr>
                       )),
