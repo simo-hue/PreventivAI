@@ -1,7 +1,6 @@
 import Link from "next/link";
-import { LogOut } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { redirect } from "next/navigation";
+import { LogoutButton } from "@/components/auth/logout-button";
 import { createSupabaseServerClient } from "@/src/lib/supabase/server";
 import { createSupabaseAdminClient } from "@/src/lib/supabase/admin";
 
@@ -51,12 +50,7 @@ export default async function CustomerLayout({
             <img src="/logo.png" alt="Italians quote it better Logo" className="h-14 w-auto object-contain" />
           </Link>
           <div className="flex items-center">
-             <form action="/auth/signout" method="post">
-                <Button type="submit" variant="ghost" className="text-slate-500 hover:text-slate-900">
-                  <LogOut className="mr-2 h-4 w-4" />
-                  <span className="hidden sm:inline">Esci</span>
-                </Button>
-             </form>
+             <LogoutButton />
           </div>
         </div>
       </header>

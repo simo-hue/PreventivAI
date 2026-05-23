@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { FileText, History, Settings, Table2 } from "lucide-react";
 import { requireUser } from "@/src/lib/auth/require-user";
+import { LogoutButton } from "@/components/auth/logout-button";
 
 const navItems = [
   { href: "/admin/requests", label: "Richieste", icon: FileText },
@@ -46,8 +47,11 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
             </Link>
             <div className="hidden text-sm text-[var(--muted)] sm:block">
             </div>
-            <div className="rounded-full border border-[var(--border)] px-3 py-1 text-xs font-semibold text-slate-700">
-              {user.email}
+            <div className="flex items-center gap-4">
+              <div className="rounded-full border border-[var(--border)] px-3 py-1 text-xs font-semibold text-slate-700">
+                {user.email}
+              </div>
+              <LogoutButton />
             </div>
           </div>
         </header>
