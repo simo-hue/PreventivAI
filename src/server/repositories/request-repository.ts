@@ -64,14 +64,26 @@ export async function getClientRequestById(id: string) {
   };
 }
 
-export async function getAllClientRequests() {
+export async function getAllClientRequests(options?: {
+  status?: string;
+  excludeStatus?: string;
+}) {
   const admin = createSupabaseAdminClient();
   if (!admin) return [];
 
-  const { data, error } = await admin
+  let query = admin
     .from("client_requests")
     .select("*, quote_runs(id, llm_raw_response)")
     .order("created_at", { ascending: false });
+
+  if (options?.status) {
+    query = query.eq("status", options.status);
+  }
+  if (options?.excludeStatus) {
+    query = query.neq("status", options.excludeStatus);
+  }
+
+  const { data, error } = await query;
 
   if (error || !data) return [];
 

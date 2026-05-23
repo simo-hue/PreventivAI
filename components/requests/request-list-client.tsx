@@ -17,22 +17,37 @@ const statusLabel: Record<string, string> = {
 
 import type { StoredRequest } from "@/src/lib/demo/storage";
 
-export function RequestListClient({ initialRequests }: { initialRequests: StoredRequest[] }) {
+export function RequestListClient({
+  initialRequests,
+  title = "Richieste",
+  description = "Intake, analisi AI e preventivi modulari per il team interno.",
+  showNewButton = true,
+  customAction,
+}: {
+  initialRequests: StoredRequest[];
+  title?: string;
+  description?: string;
+  showNewButton?: boolean;
+  customAction?: React.ReactNode;
+}) {
   const requests = initialRequests;
 
   return (
     <div className="space-y-4">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-normal">Richieste</h1>
-          <p className="mt-1 text-sm text-[var(--muted)]">
-            Intake, analisi AI e preventivi modulari per il team interno.
-          </p>
+          <h1 className="text-2xl font-bold tracking-normal">{title}</h1>
+          <p className="mt-1 text-sm text-[var(--muted)]">{description}</p>
         </div>
-        <ButtonLink href="/requests/new">
-          <Plus className="size-4" aria-hidden="true" />
-          Nuova richiesta
-        </ButtonLink>
+        <div className="flex items-center gap-3">
+          {customAction}
+          {showNewButton && (
+            <ButtonLink href="/requests/new">
+              <Plus className="size-4" aria-hidden="true" />
+              Nuova richiesta
+            </ButtonLink>
+          )}
+        </div>
       </div>
 
       <div className="grid gap-4">

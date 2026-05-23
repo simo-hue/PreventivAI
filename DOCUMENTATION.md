@@ -102,3 +102,7 @@
 - [2026-05-23 17:40:00 CEST]: Fix Premium Scenario Generation with missing modules
   - *Details*: Risolto il problema per cui lo scenario "Premium" generato dall'AI risultava vuoto (Totale 0€) avendo solo i moduli opzionali aggiuntivi e perdendo i moduli del piano base.
   - *Tech Notes*: Modificato `src/lib/ai/prompts/quote-analysis.v1.ts` per istruire rigorosamente il LLM a generare scenari completi e autonomi, duplicando/riadattando i moduli di base anche nei piani premium e alternative, senza restituire solo un delta differenziale. Aggiornata la versione a `v1.1`.
+
+- [2026-05-23 17:58:00 CEST]: Move Delivered Requests to History Tab
+  - *Details*: Implementato il comportamento per cui i preventivi contrassegnati come "Delivered" vengono rimossi dalla vista "Richieste" e inseriti nella tab "History", mantenendo tutte le loro informazioni e possibilità di ispezione.
+  - *Tech Notes*: Modificato `src/server/repositories/request-repository.ts` per supportare il filtraggio per stato in `getAllClientRequests`. Aggiornato `app/(dashboard)/requests/page.tsx` per escludere lo stato `delivered`. Refattorizzato `RequestListClient` in `components/requests/request-list-client.tsx` per renderlo riutilizzabile e usato per sovrascrivere la pagina in `app/(dashboard)/admin/history/page.tsx`.
