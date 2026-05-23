@@ -134,3 +134,8 @@
 - [2026-05-23 18:48:00 CEST]: Pop-up Eliminazione Richieste Personalizzato Premium
   - *Details*: Sostituito il pop-up nativo del browser (`window.confirm`) con un modale di conferma personalizzato, moderno e coerente con il design system dell'applicazione per la rimozione delle richieste.
   - *Tech Notes*: Creato un nuovo componente riutilizzabile ed accessibile `<ConfirmDialog>` in `components/ui/confirm-dialog.tsx` con overlay scuro, effetto sfocatura (`backdrop-blur-xs`), icone animate lucide, supporto per la chiusura tramite tasto ESC o clic all'esterno e indicatore di caricamento (`Loader2`) integrato per la disattivazione temporanea dei bottoni durante le eliminazioni server-side. Integrato in `components/requests/request-list-client.tsx` modificando il flusso di gestione degli stati. Superati con successo i controlli con `pnpm typecheck` e `pnpm test`.
+
+- [2026-05-23 19:03:00 CEST]: Risoluzione bug visibilità step attivo in generazione preventivo
+  - *Details*: Risolto il bug di contrasto cromatico per cui il titolo dell'operazione corrente, la percentuale di caricamento e lo spinner nel modale di generazione preventivo risultavano invisibili (testo quasi nero su sfondo scuro) in dark mode.
+  - *Tech Notes*: Modificato `components/requests/request-form.tsx`. Sostituito l'uso indiscriminato di `text-[var(--primary)]` (che mappa sul colore scuro `#18181b`) per lo step in stato `isLoading` con la combinazione `text-cyan-600 dark:text-cyan-400 font-bold`. Applicata la stessa logica di contrasto elevato con classi Tailwind per l'icona Sparkles, la percentuale progressiva e lo spinner del cerchio di caricamento, migliorando l'accessibilità visiva sia in light mode che in dark mode.
+

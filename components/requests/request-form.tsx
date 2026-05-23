@@ -357,7 +357,7 @@ export function RequestForm() {
           <div className="w-full max-w-lg rounded-2xl border border-slate-100 bg-white p-6 shadow-2xl transition-all dark:border-slate-800 dark:bg-slate-900 sm:p-8">
             <div className="text-center">
               <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-cyan-50 dark:bg-cyan-950/30">
-                <Sparkles className="h-7 w-7 animate-pulse text-[var(--primary)]" />
+                <Sparkles className="h-7 w-7 animate-pulse text-cyan-600 dark:text-cyan-400" />
               </div>
               <h2 className="mt-4 text-xl font-bold tracking-tight text-slate-950 dark:text-white">
                 Generazione Preventivo
@@ -371,11 +371,11 @@ export function RequestForm() {
             <div className="mt-6">
               <div className="flex items-center justify-between text-xs font-semibold">
                 <span className="text-[var(--muted)]">Stato elaborazione</span>
-                <span className="font-bold text-[var(--primary)]">{progress}%</span>
+                <span className="font-bold text-cyan-600 dark:text-cyan-400">{progress}%</span>
               </div>
               <div className="mt-2 h-2.5 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
                 <div
-                  className="h-full rounded-full bg-gradient-to-r from-[var(--primary)] to-cyan-500 transition-all duration-300 ease-out"
+                  className="h-full rounded-full bg-gradient-to-r from-cyan-600 to-cyan-400 dark:from-cyan-500 dark:to-cyan-300 transition-all duration-300 ease-out"
                   style={{ width: `${progress}%` }}
                 />
               </div>
@@ -401,7 +401,7 @@ export function RequestForm() {
                       className={cn(
                         "z-10 flex h-9 w-9 shrink-0 items-center justify-center rounded-full border transition-all duration-300",
                         isCompleted && "border-emerald-200 bg-emerald-50 text-[var(--success)] dark:border-emerald-950 dark:bg-emerald-950/20",
-                        isLoading && "border-cyan-200 bg-cyan-50 text-[var(--primary)] animate-pulse dark:border-cyan-950 dark:bg-cyan-950/20",
+                        isLoading && "border-cyan-200 bg-cyan-50 text-cyan-600 dark:text-cyan-400 animate-pulse dark:border-cyan-950 dark:bg-cyan-950/20",
                         isError && "border-rose-200 bg-rose-50 text-[var(--danger)] dark:border-rose-950 dark:bg-rose-950/20",
                         isPending && "border-slate-200 bg-white text-slate-400 dark:border-slate-800 dark:bg-slate-900"
                       )}
@@ -423,7 +423,7 @@ export function RequestForm() {
                         className={cn(
                           "text-sm font-semibold transition-colors duration-300",
                           isCompleted && "text-slate-800 dark:text-slate-200",
-                          isLoading && "text-[var(--primary)]",
+                          isLoading && "text-cyan-600 dark:text-cyan-400 font-bold",
                           isError && "text-[var(--danger)]",
                           isPending && "text-slate-400 dark:text-slate-600"
                         )}
