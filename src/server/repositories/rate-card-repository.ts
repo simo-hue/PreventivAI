@@ -23,7 +23,7 @@ export async function getActiveRateCards(): Promise<EditableRateCard[]> {
     return [];
   }
 
-  return (data || []).map((row: any) => ({
+  return (data || []).map((row) => ({
     id: row.id,
     roleName: row.role_name,
     seniority: row.seniority,

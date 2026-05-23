@@ -5,7 +5,7 @@ export async function GET() {
   try {
     const rateCards = await getActiveRateCards();
     return NextResponse.json(rateCards);
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { error: "Errore durante il recupero dei rate card." },
       { status: 500 }
