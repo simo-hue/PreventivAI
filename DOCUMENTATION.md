@@ -106,3 +106,7 @@
 - [2026-05-23 17:58:00 CEST]: Move Delivered Requests to History Tab
   - *Details*: Implementato il comportamento per cui i preventivi contrassegnati come "Delivered" vengono rimossi dalla vista "Richieste" e inseriti nella tab "History", mantenendo tutte le loro informazioni e possibilità di ispezione.
   - *Tech Notes*: Modificato `src/server/repositories/request-repository.ts` per supportare il filtraggio per stato in `getAllClientRequests`. Aggiornato `app/(dashboard)/requests/page.tsx` per escludere lo stato `delivered`. Refattorizzato `RequestListClient` in `components/requests/request-list-client.tsx` per renderlo riutilizzabile e usato per sovrascrivere la pagina in `app/(dashboard)/admin/history/page.tsx`.
+
+- [2026-05-23 18:01:00 CEST]: Fix Invalid effort bounds error on manual quote editing
+  - *Details*: Risolto un bug che causava un crash invisibile del `recalculateScenario` (visibile nella console e come avviso "Avviso prezzi") quando si modificavano manualmente le ore di effort di un task dal pannello di dettaglio.
+  - *Tech Notes*: Modificato `updateEffortHours` all'interno di `components/quote/scenario-detail-client.tsx`. Quando viene modificato `estimatedHoursExpected` dalla UI, il sistema ora auto-aggiusta `estimatedHoursMin` e `estimatedHoursMax` per evitare che la validazione `min <= expected <= max` di `assertEffortBounds` (`pricing-engine.ts`) fallisca.

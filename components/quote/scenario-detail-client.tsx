@@ -140,7 +140,12 @@ export function ScenarioDetailClient({
     const mod = nextScenario.modules.find((m) => m.id === moduleId);
     const tsk = mod?.tasks.find((t) => t.id === taskId);
     const eff = tsk?.efforts.find((e) => e.id === effortId);
-    if (eff) eff.estimatedHoursExpected = newHours;
+    if (eff) {
+      eff.estimatedHoursExpected = newHours;
+      // Prevent PricingError: min <= expected <= max is required
+      eff.estimatedHoursMin = Math.min(eff.estimatedHoursMin, newHours);
+      eff.estimatedHoursMax = Math.max(eff.estimatedHoursMax, newHours);
+    }
     setScenario(nextScenario);
   }
 
