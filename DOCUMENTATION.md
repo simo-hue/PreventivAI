@@ -167,6 +167,14 @@
     - Inverted the auth logic in `components/public/signup-modal.tsx`: `signInWithPassword` is called first, catching `Invalid login credentials` to trigger `signUp`.
     - Translated the Supabase rate limit error to a friendly Italian message for true new signups.
 
+- [2026-05-23T20:56:00+02:00]: Home Page Header and Customer Login Modal
+  - *Details*: Redesigned the `/home` page structure to include a top header. The header features the software house logo on the left and a new "Area Utente" button on the right. Clicking the button opens a dedicated login modal for existing customers, allowing them to access their `/customer/[id]` dashboard directly without going through the quote request form.
+  - *Tech Notes*:
+    - Modified `components/public/client-landing.tsx` to wrap the form in a structured layout with a semantic `<header>` and `<nav>`.
+    - Created a new `components/public/login-modal.tsx` component that implements the Supabase `signInWithPassword` logic and redirects to the customer dashboard.
+    - Added the `Image` component for the `/public/logo_originale.png` logo.
+    - Removed the Sparkles icon above the main heading in `/home`.
+
 - [2026-05-23T19:50:00+02:00]: Signup Modal Dark Mode Contrast & Readability Fix
   - *Details*: Resolved visual contrast issues in the `/home` page's project submission/signup modal. The modal background converted to dark mode due to system theme preferences, but text labels, descriptions, and the cancel button remained dark slate, making them completely unreadable.
   - *Tech Notes*:
