@@ -119,3 +119,54 @@ export async function deleteClientRequest(id: string) {
 
   return true;
 }
+
+export async function getAllClientRequestsByUserId(userId: string) {
+  const admin = createSupabaseAdminClient();
+  if (!admin) return [];
+
+  const { data, error } = await admin
+    .from("client_requests")
+    .select("*, quote_runs(id, llm_raw_response)")
+    .eq("created_by", userId)
+    .order("created_at", { ascending: false });
+
+  if (error || !data) return [];
+
+  return data.map((row: any) => {
+    // Ordiniamo le quote runs per ottenere l'ultima generata
+    const quoteRun = row.quote_runs?.[row.quote_runs.length - 1];
+    return {
+      id: row.id,
+      title: row.title,
+      rawText: row.raw_text,
+      sourceType: row.source_type,
+      status: row.status,
+      createdAt: row.created_at,
+      updatedAt: row.updated_at,
+      analysis: quoteRun?.llm_raw_response ?? undefined,
+    };
+  });
+}
+
+export async function getClientRequestByIdAndUserId(requestId: string, userId: string) {
+  const admin = createSupabaseAdminClient();
+  if (!admin) return null;
+
+  const { data, error } = await admin
+    .from("client_requests")
+    .select("*")
+    .eq("id", requestId)
+    .eq("created_by", userId)
+    .maybeSingle();
+
+  if (error || !data) return null;
+
+  return {
+    id: data.id,
+    title: data.title,
+    rawText: data.raw_text,
+    sourceType: data.source_type,
+    status: data.status,
+    createdAt: data.created_at,
+  };
+}

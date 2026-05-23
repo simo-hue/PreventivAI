@@ -166,3 +166,23 @@
   - *Tech Notes*:
     - Inverted the auth logic in `components/public/signup-modal.tsx`: `signInWithPassword` is called first, catching `Invalid login credentials` to trigger `signUp`.
     - Translated the Supabase rate limit error to a friendly Italian message for true new signups.
+
+- [2026-05-23T19:50:00+02:00]: Signup Modal Dark Mode Contrast & Readability Fix
+  - *Details*: Resolved visual contrast issues in the `/home` page's project submission/signup modal. The modal background converted to dark mode due to system theme preferences, but text labels, descriptions, and the cancel button remained dark slate, making them completely unreadable.
+  - *Tech Notes*:
+    - Modified `components/public/signup-modal.tsx` to add proper responsive `dark:` styling.
+    - Updated heading `<h2>` to `text-slate-900 dark:text-white`.
+    - Updated subtitle `<p>` to `text-slate-600 dark:text-slate-400`.
+    - Updated `<label>` components to `text-slate-700 dark:text-slate-300`.
+    - Added high-contrast, beautiful dark mode backgrounds, borders, and placeholders to form inputs (`dark:bg-slate-950 dark:border-slate-700 dark:text-slate-100`).
+    - Fixed Cancel and Submit buttons to adapt beautifully to dark mode, adding premium hover states and backgrounds.
+    - Resolved a pre-existing ESLint `any` error in the `catch` block to ensure the build pipeline remains clean. Verified successfully with `pnpm verify`.
+
+
+- [2026-05-23T19:55:00+02:00]: Refactor Professional Signup Flow in Modal
+  - *Details*: Risolto un problema di architettura nel flusso di registrazione (`components/public/signup-modal.tsx`) che generava fastidiosi errori 400 (Bad Request) e successivi 429 (Too Many Requests) durante il primo tentativo di creazione di un account.
+  - *Tech Notes*: Il flusso precedente eseguiva prima un tentativo di `signInWithPassword` (che generava l'errore 400 di default su account inesistenti) per poi fare fallback su `signUp`, portando rapidamente all'esaurimento dei rate limit di Supabase locali in caso di multipli test. L'architettura è stata riscritta per rispecchiare le best practice: viene invocato prima `signUp`. Se Supabase restituisce `identities: []` (privacy mode per email già in uso) o l'errore `already registered`, il sistema effettua un fallback trasparente al login `signInWithPassword`. Inoltre è stata aggiunta la traduzione in italiano per gli errori comuni come password troppo debole o rate limit superato.
+
+- [2026-05-23T20:08:00+02:00]: Customer Area Dashboard Refactoring
+  - *Details*: L'area personale del cliente (`/customer/[id]`) è stata trasformata in una vera e propria dashboard. Ora l'utente vede l'elenco di tutte le proprie richieste (in forma di card), un pulsante per crearne di nuove, e può aprire ogni singola richiesta in una pagina di dettaglio dedicata (`/customer/[id]/requests/[requestId]`). Aggiunta inoltre la barra laterale con il logo come richiesto.
+  - *Tech Notes*: Creato `app/customer/[id]/layout.tsx` (con params estratti asincronamente tramite `Promise`) che ospita la left-sidebar col logo e un bottone logout. Riscritto `app/customer/[id]/page.tsx` per invocare il nuovo client component `components/customer/customer-request-list.tsx`, che mappa l'array di richieste fetchato via server e gestisce il modale "Nuovo Progetto". Spostata la vecchia UI (split-view del progetto e chat) nella nuova dynamic route `/customer/[id]/requests/[requestId]/page.tsx`. Aggiornato `request-repository.ts` con i metodi `getAllClientRequestsByUserId` e `getClientRequestByIdAndUserId`. Costruzione validata senza errori (TS pass).
