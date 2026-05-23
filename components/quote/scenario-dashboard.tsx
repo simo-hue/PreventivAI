@@ -1,6 +1,6 @@
 "use client";
 
-import { AlertTriangle, ArrowRight, CheckCircle2, HelpCircle, RefreshCw } from "lucide-react";
+import { AlertTriangle, ArrowRight, CheckCircle2, HelpCircle } from "lucide-react";
 import { Alert } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button, ButtonLink } from "@/components/ui/button";
@@ -66,19 +66,10 @@ export function ScenarioDashboard({ initialData: request }: { initialData: Store
               Segna come Consegnato
             </Button>
           )}
-          <ButtonLink href="/requests/new" variant="secondary">
-            <RefreshCw className="size-4" aria-hidden="true" />
-            Nuova analisi
-          </ButtonLink>
         </div>
       </div>
 
-      {analysis?.blockingQuestions.length ? (
-        <Alert title="Informazioni bloccanti" variant="warning">
-          Il sistema non genera un preventivo finale finche' queste domande non
-          sono chiarite.
-        </Alert>
-      ) : null}
+
 
       <div className="grid gap-4 md:grid-cols-3">
         <Metric
@@ -99,24 +90,7 @@ export function ScenarioDashboard({ initialData: request }: { initialData: Store
         />
       </div>
 
-      {analysis?.blockingQuestions.length ? (
-        <Card>
-          <CardHeader
-            title="Domande cliente"
-            description="Rispondi alle domande e rilancia l'analisi con il testo aggiornato."
-            action={
-              <ButtonLink href={`/requests/${request.id}/clarifications`}>
-                Rispondi
-              </ButtonLink>
-            }
-          />
-          <CardBody className="space-y-3">
-            {analysis.blockingQuestions.map((question) => (
-              <QuestionRow key={question.question} question={question.question} reason={question.reason} requestId={request.id} />
-            ))}
-          </CardBody>
-        </Card>
-      ) : null}
+
 
       {analysis?.importantQuestions.length ? (
         <Card>

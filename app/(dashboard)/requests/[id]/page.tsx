@@ -2,6 +2,7 @@ import { ScenarioDashboard } from "@/components/quote/scenario-dashboard";
 import { getClientRequestById } from "@/src/server/repositories/request-repository";
 import { getQuoteRunForRequest } from "@/src/server/repositories/quote-repository";
 import { redirect } from "next/navigation";
+import { ChatBox } from "@/components/chat/chat-box";
 
 export default async function RequestDetailPage({
   params,
@@ -31,5 +32,14 @@ export default async function RequestDetailPage({
     promptVersion: quoteRun?.prompt_version,
   };
 
-  return <ScenarioDashboard initialData={mappedRequest} />;
+  return (
+    <div className="flex flex-col xl:flex-row min-h-full gap-6 p-6">
+      <div className="flex-[2] overflow-x-auto">
+        <ScenarioDashboard initialData={mappedRequest} />
+      </div>
+      <div className="flex-1 sticky top-6 h-[calc(100vh-100px)]">
+        <ChatBox requestId={id} currentUserId="5d65094f-d066-423c-a7ce-ef18a0f64368" />
+      </div>
+    </div>
+  );
 }

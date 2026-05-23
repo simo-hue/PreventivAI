@@ -2,7 +2,6 @@ import { notFound } from "next/navigation";
 import { createSupabaseServerClient } from "@/src/lib/supabase/server";
 import { getAllClientRequestsByUserId } from "@/src/server/repositories/request-repository";
 import { CustomerRequestList } from "@/components/customer/customer-request-list";
-import Link from "next/link";
 
 export const metadata = {
   title: "Area Personale | Italians quote it better",

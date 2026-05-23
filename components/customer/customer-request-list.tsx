@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from "react";
-import { ArrowRight, FileText, Plus, Loader2, RefreshCcw } from "lucide-react";
+import { useState, useTransition } from "react";
+import { ArrowRight, FileText, Plus, Loader2, RefreshCcw, Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button, ButtonLink } from "@/components/ui/button";
 import { Card, CardBody } from "@/components/ui/card";
 import { useRouter } from "next/navigation";
-import { createSupabaseBrowserClient } from "@/src/lib/supabase/client";
+import { deleteRequestAction } from "@/app/(dashboard)/requests/actions";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 
 const statusLabel: Record<string, string> = {
   draft: "In elaborazione",
@@ -21,10 +22,15 @@ export function CustomerRequestList({
   requests,
   userId,
 }: {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   requests: any[];
   userId: string;
 }) {
   const router = useRouter();
+  const [isPending, startTransition] = useTransition();
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [requestToDelete, setRequestToDelete] = useState<{ id: string; title: string } | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -35,6 +41,27 @@ export function CustomerRequestList({
     setIsRefreshing(true);
     router.refresh();
     setTimeout(() => setIsRefreshing(false), 600);
+  };
+
+  const handleDeleteClick = (id: string, title: string) => {
+    setRequestToDelete({ id, title });
+    setIsConfirmOpen(true);
+  };
+
+  const handleConfirmDelete = () => {
+    if (!requestToDelete) return;
+    setDeletingId(requestToDelete.id);
+    startTransition(async () => {
+      try {
+        await deleteRequestAction(requestToDelete.id);
+        setIsConfirmOpen(false);
+        setRequestToDelete(null);
+      } catch (error) {
+        console.error("Errore durante l'eliminazione:", error);
+      } finally {
+        setDeletingId(null);
+      }
+    });
   };
 
   const handleCreateRequest = async (e: React.FormEvent) => {
@@ -147,7 +174,16 @@ export function CustomerRequestList({
                       {request.rawText}
                     </p>
                   </div>
-                  <div className="flex shrink-0 items-center sm:pl-4">
+                  <div className="flex shrink-0 items-center sm:pl-4 gap-2">
+                    <Button
+                      variant="ghost"
+                      className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                      onClick={() => handleDeleteClick(request.id, request.title)}
+                      disabled={isPending && deletingId === request.id}
+                      title="Elimina progetto"
+                    >
+                      <Trash2 className="size-4" aria-hidden="true" />
+                    </Button>
                     {isProcessing ? (
                       <Button variant="secondary" disabled>
                         Apri
@@ -215,6 +251,18 @@ export function CustomerRequestList({
           </div>
         </div>
       )}
+
+      <ConfirmDialog
+        isOpen={isConfirmOpen}
+        onClose={() => setIsConfirmOpen(false)}
+        onConfirm={handleConfirmDelete}
+        title="Elimina progetto"
+        description={requestToDelete ? `Sei sicuro di voler eliminare il progetto "${requestToDelete.title}"? Questa azione è irreversibile e tutti i preventivi associati verranno cancellati definitivamente.` : ""}
+        confirmText="Sì, elimina"
+        cancelText="Annulla"
+        isPending={isPending}
+        variant="danger"
+      />
     </div>
   );
 }
