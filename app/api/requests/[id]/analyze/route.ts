@@ -6,7 +6,7 @@ import {
   createPromptContext,
   QUOTE_ANALYSIS_PROMPT_VERSION,
 } from "@/src/lib/ai/quote-agent";
-import { officialRateCards } from "@/src/lib/demo/rate-card";
+import { getActiveRateCards } from "@/src/server/repositories/rate-card-repository";
 import { priceScenarios } from "@/src/lib/quotes/pricing-engine";
 import { requireUser } from "@/src/lib/auth/require-user";
 import { getSimilarHistoricalProjects } from "@/src/server/repositories/history-repository";
@@ -61,9 +61,10 @@ export async function POST(
       organizationId: user.organizationId,
       requestText: textToAnalyze,
     });
+    const activeRateCards = await getActiveRateCards();
     const context = createPromptContext({
       requestText: textToAnalyze,
-      rateCards: officialRateCards,
+      rateCards: activeRateCards,
       similarHistoricalProjects,
       pmPercentage: settings.pmPercentage,
     });
@@ -73,7 +74,7 @@ export async function POST(
       scenarios: analysis.shouldGenerateQuote
         ? priceScenarios({
             scenarios: analysis.scenarios,
-            rateCards: officialRateCards,
+            rateCards: activeRateCards,
             pmPercentage: settings.pmPercentage,
             riskBufferPercentage: settings.riskBufferPercentage,
           })
@@ -89,7 +90,7 @@ export async function POST(
       quoteRunId: quoteRun.id,
       inputHash: createInputHash(textToAnalyze),
       promptVersion: QUOTE_ANALYSIS_PROMPT_VERSION,
-      rateCards: officialRateCards,
+      rateCards: activeRateCards,
       pmPercentage: settings.pmPercentage,
       riskBufferPercentage: settings.riskBufferPercentage,
       analysis: pricedAnalysis,

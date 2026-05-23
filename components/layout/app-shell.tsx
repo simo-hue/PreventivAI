@@ -1,10 +1,9 @@
 import Link from "next/link";
-import { FileText, History, Plus, Settings, Table2 } from "lucide-react";
+import { FileText, History, Settings, Table2 } from "lucide-react";
 import { requireUser } from "@/src/lib/auth/require-user";
 
 const navItems = [
   { href: "/requests", label: "Richieste", icon: FileText },
-  { href: "/requests/new", label: "Nuova richiesta", icon: Plus },
   { href: "/admin/rate-card", label: "Tariffe", icon: Table2 },
   { href: "/admin/history", label: "Cronologia", icon: History },
   { href: "/admin/settings", label: "Impostazioni", icon: Settings },

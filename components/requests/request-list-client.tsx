@@ -7,6 +7,7 @@ import { Button, ButtonLink } from "@/components/ui/button";
 import { Card, CardBody } from "@/components/ui/card";
 import { formatCurrency } from "@/src/lib/utils/format";
 import { deleteRequestAction } from "@/app/(dashboard)/requests/actions";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 
 const statusLabel: Record<string, string> = {
   draft: "Bozza",
@@ -35,19 +36,30 @@ export function RequestListClient({
   const requests = initialRequests;
   const [isPending, startTransition] = useTransition();
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [requestToDelete, setRequestToDelete] = useState<{ id: string; title: string } | null>(null);
 
-  const handleDelete = (id: string) => {
-    if (window.confirm("Sei sicuro di voler eliminare questa richiesta? L'azione non può essere annullata.")) {
-      setDeletingId(id);
-      startTransition(async () => {
-        try {
-          await deleteRequestAction(id);
-        } finally {
-          setDeletingId(null);
-        }
-      });
-    }
+  const handleDeleteClick = (id: string, title: string) => {
+    setRequestToDelete({ id, title });
+    setIsConfirmOpen(true);
   };
+
+  const handleConfirmDelete = () => {
+    if (!requestToDelete) return;
+    setDeletingId(requestToDelete.id);
+    startTransition(async () => {
+      try {
+        await deleteRequestAction(requestToDelete.id);
+        setIsConfirmOpen(false);
+        setRequestToDelete(null);
+      } catch (error) {
+        console.error("Errore durante l'eliminazione:", error);
+      } finally {
+        setDeletingId(null);
+      }
+    });
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -109,7 +121,7 @@ export function RequestListClient({
                     <Button
                       variant="ghost"
                       className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                      onClick={() => handleDelete(request.id)}
+                      onClick={() => handleDeleteClick(request.id, request.title)}
                       disabled={isPending && deletingId === request.id}
                       title="Elimina richiesta"
                     >
@@ -126,6 +138,18 @@ export function RequestListClient({
           );
         })}
       </div>
+
+      <ConfirmDialog
+        isOpen={isConfirmOpen}
+        onClose={() => setIsConfirmOpen(false)}
+        onConfirm={handleConfirmDelete}
+        title="Elimina richiesta"
+        description={requestToDelete ? `Sei sicuro di voler eliminare la richiesta "${requestToDelete.title}"? Questa azione è irreversibile e tutti i preventivi associati verranno cancellati definitivamente.` : ""}
+        confirmText="Sì, elimina"
+        cancelText="Annulla"
+        isPending={isPending}
+        variant="danger"
+      />
     </div>
   );
 }

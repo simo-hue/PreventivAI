@@ -7,10 +7,6 @@
 
 [ ] Perfetto, l'errore è stato risolto ed il preventivo è stato generato con successo.
 
-[ ] Voglio effettuare una modifica alla pagina "/admin/rate-card". La modifica consiste nel fatto che io voglio poter aver la possibilità modificare ogni singola cella del tariffario una volta cliccato sul pulsante, che deve essere aggiunto, "Modifica". Per la colonna "stato" devo poter selezionare tra "attivo" e "inattivo".
-
-[ ] Controllare coerenza tra budget disponibile e budget proposto da preventivo
-
 [ ] 
 [ ] 
 [ ] 

@@ -118,3 +118,19 @@
 - [2026-05-23 18:16:00 CEST]: Ammodernamento estetico e traduzione italiana
   - *Details*: Eseguito il restyling globale dell'applicativo usando una palette di colori minimale e professionale (scala di grigi con alto contrasto, no rosso), in linea con le forme del nuovo logo inserito. Tradotta la Navigation Bar, gli stati delle richieste e l'interfaccia utente in lingua italiana.
   - *Tech Notes*: Rimosso tema azzurro/petrolio da `app/globals.css` in favore di variabili per un design dark slate/zinc minimale (`zinc-900` primario). Ridisegnati `components/ui/button.tsx` e `components/ui/card.tsx` introducendo angoli più morbidi (`rounded-xl` e `rounded-lg`), transizioni veloci (`active:scale-[0.98]`) e outline minimal. Rimosso border dai badges. Rinominate tutte le view e i navigation link in `components/layout/app-shell.tsx` e `components/requests/request-list-client.tsx`. Inoltre, caricato `/logo.png` nel layout, impostato altezza contenitore `h-20` (80px) e altezza logo `h-14` per renderlo visivamente più grande e leggibile. Tradotti anche gli stati e le tipologie scenario in `components/quote/scenario-dashboard.tsx` e `components/quote/scenario-detail-client.tsx`.
+
+- [2026-05-23 18:38:00 CEST]: Rimozione voce "Nuova richiesta" dalla sidebar
+  - *Details*: Rimossa la voce di navigazione "Nuova richiesta" dalla barra laterale dell'applicazione per semplificare il menu.
+  - *Tech Notes*: Modificato `components/layout/app-shell.tsx` per rimuovere la voce `Nuova richiesta` dall'array `navItems` e l'icona inutilizzata `Plus` dalle importazioni di `lucide-react`. Validato superando con successo `pnpm typecheck` e `pnpm test`.
+
+- [2026-05-23 18:47:00 CEST]: Persistenza Tariffario su DB Supabase
+  - *Details*: Modificato il funzionamento del sistema dei Rate Card affinché le modifiche fatte dall'interfaccia utente siano definitive e persistenti nel database, anziché resettarsi (per via del precedente array mock).
+  - *Tech Notes*: 
+    - Implementato `getActiveRateCards` e aggiunto `updateRateCards` in `src/server/repositories/rate-card-repository.ts` per interrogare e aggiornare la tabella `role_rate_cards` tramite Supabase Admin.
+    - Sostituiti tutti gli import di `officialRateCards` con la funzione async `getActiveRateCards()` all'interno delle route di backend `app/api/requests/[id]/analyze/route.ts` e `app/api/quote-scenarios/[id]/recalculate/route.ts` (assicurando che l'AI usi i prezzi appena salvati).
+    - Creata API Route `app/api/admin/rate-cards/route.ts` con i metodi GET e POST per la gestione.
+    - Aggiornata la UI in `RateCardPage` per caricare i dati asincronamente dall'API all'avvio e chiamare l'endpoint POST con i dati modificati salvandoli realmente sul server, con aggiunta di loader e messaggi di successo. Build verificata positivamente.
+
+- [2026-05-23 18:48:00 CEST]: Pop-up Eliminazione Richieste Personalizzato Premium
+  - *Details*: Sostituito il pop-up nativo del browser (`window.confirm`) con un modale di conferma personalizzato, moderno e coerente con il design system dell'applicazione per la rimozione delle richieste.
+  - *Tech Notes*: Creato un nuovo componente riutilizzabile ed accessibile `<ConfirmDialog>` in `components/ui/confirm-dialog.tsx` con overlay scuro, effetto sfocatura (`backdrop-blur-xs`), icone animate lucide, supporto per la chiusura tramite tasto ESC o clic all'esterno e indicatore di caricamento (`Loader2`) integrato per la disattivazione temporanea dei bottoni durante le eliminazioni server-side. Integrato in `components/requests/request-list-client.tsx` modificando il flusso di gestione degli stati. Superati con successo i controlli con `pnpm typecheck` e `pnpm test`.

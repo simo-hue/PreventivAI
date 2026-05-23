@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { officialRateCards, DEFAULT_PM_PERCENTAGE } from "@/src/lib/demo/rate-card";
+import { DEFAULT_PM_PERCENTAGE } from "@/src/lib/demo/rate-card";
+import { getActiveRateCards } from "@/src/server/repositories/rate-card-repository";
 import { recalculateScenario } from "@/src/lib/quotes/pricing-engine";
 import type { PricedScenario } from "@/src/lib/quotes/types";
 
@@ -21,9 +22,11 @@ export async function POST(request: Request) {
     );
   }
 
+  const activeRateCards = await getActiveRateCards();
+
   const scenario = recalculateScenario(
     parsed.data.scenario,
-    officialRateCards,
+    activeRateCards,
     DEFAULT_PM_PERCENTAGE,
     parsed.data.moduleInclusionOverrides,
     parsed.data.riskBufferPercentage,
