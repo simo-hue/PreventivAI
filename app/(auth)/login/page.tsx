@@ -8,7 +8,7 @@ export default function LoginPage() {
         <div className="flex size-12 items-center justify-center rounded-lg bg-[var(--surface-strong)] text-[var(--primary)]">
           <LogIn className="size-6" aria-hidden="true" />
         </div>
-        <h1 className="mt-5 text-2xl font-bold">PreventivAI</h1>
+        <h1 className="mt-5 text-2xl font-bold">Italians quote it better</h1>
         <p className="mt-2 text-sm leading-6 text-[var(--muted)]">
           In demo mode l'accesso e' simulato. Configura Supabase Auth per usare
           login reale e RLS in produzione.

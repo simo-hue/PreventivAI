@@ -24,7 +24,7 @@ export const QuoteTaskSchema = z.object({
   description: z.string().optional().nullable(),
   userStory: z.string().optional().nullable(),
   acceptanceCriteria: z.array(z.string()).default([]),
-  efforts: z.array(RoleEffortSchema).min(1),
+  efforts: z.array(RoleEffortSchema).default([]),
 });
 
 export const QuoteModuleSchema = z.object({
@@ -35,7 +35,7 @@ export const QuoteModuleSchema = z.object({
   isIncludedByDefault: z.boolean(),
   dependencyNotes: z.string().optional().nullable(),
   riskNotes: z.string().optional().nullable(),
-  tasks: z.array(QuoteTaskSchema).min(1),
+  tasks: z.array(QuoteTaskSchema).default([]),
 });
 
 export const ClarificationQuestionSchema = z.object({
@@ -67,7 +67,7 @@ export const QuoteScenarioSchema = z
     estimatedWeeksMin: z.number().positive(),
     estimatedWeeksExpected: z.number().positive(),
     estimatedWeeksMax: z.number().positive(),
-    modules: z.array(QuoteModuleSchema).min(1),
+    modules: z.array(QuoteModuleSchema).default([]),
   })
   .refine(
     (value) =>

@@ -8,7 +8,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "PreventivAI",
+  title: "Italians quote it better",
   description:
     "Web app interna per generare preventivi tecnico-economici verificabili.",
 };

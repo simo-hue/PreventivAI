@@ -1,18 +1,92 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import "server-only";
 
-import { nanoid } from "nanoid";
+import { createSupabaseAdminClient } from "@/src/lib/supabase/admin";
+import { requireUser } from "@/src/lib/auth/require-user";
 
 export async function createClientRequest(args: {
   title: string;
   rawText: string;
   sourceType: "text" | "audio" | "document" | "mixed";
 }) {
+  const admin = createSupabaseAdminClient();
+  if (!admin) throw new Error("Supabase non configurato");
+
+  const user = await requireUser();
+
+  const { data, error } = await admin
+    .from("client_requests")
+    .insert({
+      organization_id: user.organizationId,
+      created_by: user.id === "demo-user" ? null : user.id,
+      title: args.title,
+      raw_text: args.rawText,
+      source_type: args.sourceType,
+      status: "draft",
+    })
+    .select()
+    .single();
+
+  if (error) {
+    console.error("[RequestRepo] insert error:", error);
+    throw new Error("Errore durante la creazione della richiesta.");
+  }
+
   return {
-    id: nanoid(12),
-    title: args.title,
-    rawText: args.rawText,
-    sourceType: args.sourceType,
-    status: "draft" as const,
-    createdAt: new Date().toISOString(),
+    id: data.id,
+    title: data.title,
+    rawText: data.raw_text,
+    sourceType: data.source_type,
+    status: data.status,
+    createdAt: data.created_at,
   };
+}
+
+export async function getClientRequestById(id: string) {
+  const admin = createSupabaseAdminClient();
+  if (!admin) return null;
+
+  const { data, error } = await admin
+    .from("client_requests")
+    .select("*")
+    .eq("id", id)
+    .maybeSingle();
+
+  if (error || !data) return null;
+
+  return {
+    id: data.id,
+    title: data.title,
+    rawText: data.raw_text,
+    sourceType: data.source_type,
+    status: data.status,
+    createdAt: data.created_at,
+  };
+}
+
+export async function getAllClientRequests() {
+  const admin = createSupabaseAdminClient();
+  if (!admin) return [];
+
+  const { data, error } = await admin
+    .from("client_requests")
+    .select("*, quote_runs(id, llm_raw_response)")
+    .order("created_at", { ascending: false });
+
+  if (error || !data) return [];
+
+  return data.map((row: any) => {
+    // Ordiniamo le quote runs per ottenere l'ultima generata
+    const quoteRun = row.quote_runs?.[row.quote_runs.length - 1];
+    return {
+      id: row.id,
+      title: row.title,
+      rawText: row.raw_text,
+      sourceType: row.source_type,
+      status: row.status,
+      createdAt: row.created_at,
+      updatedAt: row.created_at,
+      analysis: quoteRun?.llm_raw_response ?? undefined,
+    };
+  });
 }

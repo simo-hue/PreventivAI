@@ -43,7 +43,7 @@ export async function renderQuotePdf(payload: PdfPayload) {
     }
   };
 
-  drawText("PreventivAI", { size: 18, bold: true, color: rgb(0.04, 0.22, 0.38) });
+  drawText("Italians quote it better", { size: 18, bold: true, color: rgb(0.04, 0.22, 0.38) });
   y -= 8;
   drawText(payload.requestTitle, { size: 24, bold: true });
   drawText(`Scenario: ${payload.scenario.name}`, { size: 14, bold: true });

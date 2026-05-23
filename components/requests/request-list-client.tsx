@@ -1,14 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { ArrowRight, FileText, Plus } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { ButtonLink } from "@/components/ui/button";
 import { Card, CardBody } from "@/components/ui/card";
-import { getStoredRequests, type StoredRequest } from "@/src/lib/demo/storage";
 import { formatCurrency } from "@/src/lib/utils/format";
 
-const statusLabel: Record<StoredRequest["status"], string> = {
+const statusLabel: Record<string, string> = {
   draft: "Draft",
   analyzing: "Analyzing",
   needs_clarification: "Needs clarification",
@@ -16,12 +14,10 @@ const statusLabel: Record<StoredRequest["status"], string> = {
   error: "Error",
 };
 
-export function RequestListClient() {
-  const [requests, setRequests] = useState<StoredRequest[]>([]);
+import type { StoredRequest } from "@/src/lib/demo/storage";
 
-  useEffect(() => {
-    setRequests(getStoredRequests());
-  }, []);
+export function RequestListClient({ initialRequests }: { initialRequests: StoredRequest[] }) {
+  const requests = initialRequests;
 
   return (
     <div className="space-y-4">

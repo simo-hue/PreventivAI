@@ -40,7 +40,7 @@ export async function requireUser(): Promise<DemoUser> {
         organizationId: parsedProfile.success
           ? parsedProfile.data.organization_id
           : "00000000-0000-0000-0000-000000000001",
-        email: user.email ?? "utente@preventivai.local",
+        email: user.email ?? "utente@italiansquoteitbetter.local",
         role: parsedProfile.success ? parsedProfile.data.role : "admin",
       };
     }
@@ -49,7 +49,7 @@ export async function requireUser(): Promise<DemoUser> {
   return {
     id: "demo-user",
     organizationId: "00000000-0000-0000-0000-000000000001",
-    email: "demo@preventivai.local",
+    email: "demo@italiansquoteitbetter.local",
     role: "admin",
   };
 }

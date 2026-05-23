@@ -58,7 +58,10 @@ export async function POST(
           })
         : [],
     };
-    const quoteRun = await createQuoteRun(pricedAnalysis);
+    const quoteRun = await createQuoteRun({
+      clientRequestId: id,
+      analysis: pricedAnalysis
+    });
 
     return NextResponse.json({
       requestId: id,

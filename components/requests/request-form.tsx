@@ -17,15 +17,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Alert } from "@/components/ui/alert";
 import { DEMO_BRIEF_TEXT } from "@/src/lib/demo/sample-analysis";
-import { upsertStoredRequest, type StoredRequest } from "@/src/lib/demo/storage";
 import { cn } from "@/src/lib/utils/cn";
-
-type AnalyzeResponse = {
-  requestId: string;
-  quoteRunId: string;
-  promptVersion: string;
-  analysis: StoredRequest["analysis"];
-};
 
 const STEPS = [
   {
@@ -161,7 +153,7 @@ export function RequestForm() {
     return () => clearInterval(interval);
   }, [isAnalyzing]);
 
-  async function fastForwardAndRedirect(storedData: StoredRequest) {
+  async function fastForwardAndRedirect(requestId: string) {
     const current = activeStepRef.current;
     
     // Avanzamento rapido degli step rimanenti per gratificazione visiva
@@ -182,8 +174,7 @@ export function RequestForm() {
     // Breve pausa per visualizzare il successo
     await new Promise((resolve) => setTimeout(resolve, 800));
 
-    upsertStoredRequest(storedData);
-    router.push(`/requests/${storedData.id}`);
+    router.push(`/requests/${requestId}`);
   }
 
   async function handleAnalyze() {
@@ -224,24 +215,7 @@ export function RequestForm() {
         throw new Error(payload.error ?? "Analisi non riuscita.");
       }
 
-      const analyzed = (await analyzeResponse.json()) as AnalyzeResponse;
-      const status = analyzed.analysis?.shouldGenerateQuote
-        ? "quoted"
-        : "needs_clarification";
-      const stored: StoredRequest = {
-        id: created.id,
-        title,
-        rawText: textToAnalyze,
-        sourceType: audioTranscript ? "mixed" : "text",
-        status,
-        createdAt: created.createdAt,
-        updatedAt: new Date().toISOString(),
-        analysis: analyzed.analysis,
-        quoteRunId: analyzed.quoteRunId,
-        promptVersion: analyzed.promptVersion,
-      };
-
-      await fastForwardAndRedirect(stored);
+      await fastForwardAndRedirect(created.id);
     } catch (caught) {
       const errMsg = caught instanceof Error ? caught.message : "Errore inatteso.";
       setError(errMsg);

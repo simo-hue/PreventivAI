@@ -18,7 +18,7 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
       <aside className="fixed inset-y-0 left-0 z-20 hidden w-64 border-r border-[var(--border)] bg-white lg:block">
         <div className="flex h-16 items-center border-b border-[var(--border)] px-5">
           <Link href="/requests" className="text-lg font-bold text-[var(--primary)]">
-            PreventivAI
+            Italians quote it better
           </Link>
         </div>
         <nav className="space-y-1 p-3">
@@ -41,7 +41,7 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
         <header className="sticky top-0 z-10 border-b border-[var(--border)] bg-white/95 backdrop-blur">
           <div className="flex min-h-16 items-center justify-between gap-4 px-4 sm:px-6">
             <Link href="/requests" className="font-bold text-[var(--primary)] lg:hidden">
-              PreventivAI
+              Italians quote it better
             </Link>
             <div className="hidden text-sm text-[var(--muted)] sm:block">
             </div>

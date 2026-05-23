@@ -43,3 +43,14 @@
 - [2026-05-23 15:09:00 CEST]: Settings Read-Only Text Color Contrast Fix
   - *Details*: Risolto il problema di contrasto visivo in cui i valori della griglia di sola lettura (PM percentage, Valuta, Risk Buffer) risultavano quasi invisibili (testo bianco su sfondo chiaro) in modalità dark mode a causa dell'applicazione indiscriminata del selettore `dark:text-slate-100` su contenitori a sfondo statico chiaro (`bg-[var(--surface-strong)]`).
   - *Tech Notes*: Modificato `app/(dashboard)/admin/settings/page.tsx`. Rimosse le classi `dark:text-slate-100` e `dark:border-slate-800` per i contenitori interni. Forzato il colore del testo a `text-slate-900` e il bordo a `border-[var(--border)]` per garantire un contrasto elevato, leggibile e del tutto coerente con il design system globale dell'applicazione. Validato con `pnpm verify`.
+
+- [2026-05-23 15:49:00 CEST]: Supabase Database Persistence Migration
+  - *Details*: Migrato l'intero sistema di intake e generazione preventivi dal mock locale (`localStorage`) alla persistenza permanente su database relazionale Supabase.
+  - *Tech Notes*: Modificati i file `request-repository.ts` e `quote-repository.ts` per usare il client `SupabaseAdmin` bypassando temporaneamente l'RLS per il salvataggio. L'albero complesso restituito da Gemini viene unrollato in memoria per gli ID generati (`quote_runs`, `quote_scenarios`, `quote_modules`, `quote_tasks`, `quote_task_efforts`) e salvato atomicamente tramite batch insertions sul database, permettendo analytics SQL. Le componenti UI sono state migrate ai React Server Components o alimentate via props. Validazione completa della codebase superata tramite `pnpm verify`.
+
+- [2026-05-23 16:01:00 CEST]: Relaxed AI array schema constraints
+  - *Details*: Risolto errore di validazione dell'intelligenza artificiale (`Too small: expected array to have >=1 items`) sostituendo i vincoli minimi sugli array interni con default vuoti.
+  - *Tech Notes*: Nel file `src/lib/ai/schemas.ts`, rimossi `.min(1)` da `modules`, `tasks` ed `efforts` e rimpiazzati con `.default([])`. Questo impedisce crash nel momento in cui l'LLM omette o svuota gli array per logiche errate di ragionamento, mantenendo tolleranza agli errori durante il parsing Zod dell'AI SDK. Validato con `pnpm test`.
+- [2026-05-23 15:55:00 CEST]: Italians quote it better Rebranding
+  - *Details*: Eseguito il rebranding completo e coerente dell'intera web app da "PreventivAI" a "Italians quote it better".
+  - *Tech Notes*: Modificati i file `app/layout.tsx` (metadati globali), `components/layout/app-shell.tsx` (logo sidebar e header mobile), `app/(auth)/login/page.tsx` (schermata di login), `components/quote/quote-preview-client.tsx` (subtitle preview cliente), `src/lib/pdf/render-quote-pdf.ts` (intestazione PDF generato), `src/lib/auth/require-user.ts` (domini email fittizi) e `package.json` (nome pacchetto). Validato con successo tramite `pnpm verify`.

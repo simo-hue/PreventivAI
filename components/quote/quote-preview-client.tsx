@@ -64,7 +64,7 @@ export function QuotePreviewClient({ scenarioId }: { scenarioId: string }) {
     <main className="bg-white">
       <div className="no-print sticky top-0 z-20 border-b border-[var(--border)] bg-white/95 px-4 py-3 backdrop-blur">
         <div className="mx-auto flex max-w-5xl items-center justify-between gap-3">
-          <p className="text-sm font-semibold text-[var(--primary)]">PreventivAI preview cliente</p>
+          <p className="text-sm font-semibold text-[var(--primary)]">Italians quote it better - Preview</p>
           <div className="flex gap-2">
             <Button variant="secondary" onClick={() => window.print()}>
               <Printer className="size-4" aria-hidden="true" />

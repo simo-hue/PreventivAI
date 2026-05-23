@@ -1,22 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { AlertTriangle, ArrowRight, CheckCircle2, HelpCircle, RefreshCw } from "lucide-react";
 import { Alert } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { ButtonLink } from "@/components/ui/button";
 import { Card, CardBody, CardHeader } from "@/components/ui/card";
-import { getStoredRequest, type StoredRequest } from "@/src/lib/demo/storage";
 import { evaluateScenarioRisk } from "@/src/lib/quotes/risk-engine";
 import { formatCurrency, formatPercent } from "@/src/lib/utils/format";
+import type { StoredRequest } from "@/src/lib/demo/storage";
 
-export function ScenarioDashboard({ requestId }: { requestId: string }) {
-  const [request, setRequest] = useState<StoredRequest | null>(null);
-
-  useEffect(() => {
-    setRequest(getStoredRequest(requestId));
-  }, [requestId]);
-
+export function ScenarioDashboard({ initialData: request }: { initialData: StoredRequest }) {
   const scenarios = request?.analysis?.scenarios ?? [];
   const sortedScenarios = [...scenarios].sort(
     (a, b) => a.totals.totalEur - b.totals.totalEur,
