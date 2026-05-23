@@ -229,3 +229,8 @@
 - [2026-05-23T21:20:00+02:00]: Rimozione Sidebar Area Customer
   - *Details*: Ottimizzato il layout dell'area cliente. La sidebar laterale (che risultava vuota) è stata rimossa a favore di un header superiore fisso ("sticky") più moderno e compatto.
   - *Tech Notes*: Modificato `app/customer/[id]/layout.tsx`. Il contenitore `aside` è stato sostituito da un `<header>` che ospita il logo a sinistra e il pulsante di logout a destra, liberando così l'intera larghezza della pagina per il contenuto principale. Validazione typescript eseguita con successo.
+
+- [2026-05-23T21:25:00+02:00]: Rimozione Pulsante Ricalcola Preventivo
+  - *Details*: L'interfaccia dell'amministratore (dashboard della richiesta) non espone più il pulsante manuale "Ricalcola Preventivo". Il ricalcolo è ora interamente delegato e innescato dalla risposta del cliente all'interno della chat, semplificando le operazioni lato admin.
+  - *Tech Notes*: Modificato `components/quote/scenario-dashboard.tsx` eliminando la funzione `handleRecalculate`, lo stato `isRecalculating` e il bottone HTML corrispondente. La logica di ri-trigger automatico risiede già all'interno di `chat-box.tsx`.
+  - *Tech Notes*: Modificato `components/quote/scenario-dashboard.tsx` eliminando la funzione `handleRecalculate`, lo stato `isRecalculating` e il bottone HTML corrispondente. La logica di ri-trigger automatico risiede già all'interno di `chat-box.tsx`.

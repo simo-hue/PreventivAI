@@ -187,7 +187,6 @@ import { useState } from "react";
 function ImportantQuestionsSection({ questions, requestId }: { questions: any[]; requestId: string }) {
   const [selected, setSelected] = useState<string[]>([]);
   const [isSending, setIsSending] = useState(false);
-  const [isRecalculating, setIsRecalculating] = useState(false);
 
   const toggle = (q: string) => {
     setSelected(prev => prev.includes(q) ? prev.filter(x => x !== q) : [...prev, q]);
@@ -215,17 +214,6 @@ function ImportantQuestionsSection({ questions, requestId }: { questions: any[];
     }
   }
 
-  const handleRecalculate = async () => {
-    setIsRecalculating(true);
-    try {
-      await fetch(`/api/requests/${requestId}/analyze`, { method: "POST" });
-      window.location.reload();
-    } catch (e) {
-      console.error(e);
-      setIsRecalculating(false);
-    }
-  }
-
   return (
     <Card>
       <CardHeader 
@@ -238,13 +226,6 @@ function ImportantQuestionsSection({ questions, requestId }: { questions: any[];
               disabled={selected.length === 0 || isSending}
             >
               {isSending ? "Invio..." : "Invia all'utente"}
-            </Button>
-            <Button 
-              variant="secondary"
-              onClick={handleRecalculate} 
-              disabled={isRecalculating}
-            >
-              {isRecalculating ? "Ricalcolo..." : "Ricalcola Preventivo"}
             </Button>
           </div>
         }
