@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ArrowRight, FileText, Plus, Loader2 } from "lucide-react";
+import { ArrowRight, FileText, Plus, Loader2, RefreshCcw } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button, ButtonLink } from "@/components/ui/button";
 import { Card, CardBody } from "@/components/ui/card";
@@ -29,6 +29,13 @@ export function CustomerRequestList({
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const handleRefresh = () => {
+    setIsRefreshing(true);
+    router.refresh();
+    setTimeout(() => setIsRefreshing(false), 600);
+  };
 
   const handleCreateRequest = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -79,10 +86,15 @@ export function CustomerRequestList({
           <h1 className="text-3xl font-bold tracking-tight text-slate-900">I tuoi Progetti</h1>
           <p className="mt-1 text-slate-500">Visualizza o aggiungi nuove richieste di preventivo.</p>
         </div>
-        <Button onClick={() => setIsModalOpen(true)}>
-          <Plus className="mr-2 h-4 w-4" />
-          Nuovo Progetto
-        </Button>
+        <div className="flex items-center gap-3">
+          <Button variant="secondary" onClick={handleRefresh} disabled={isRefreshing} title="Aggiorna stato">
+            <RefreshCcw className={`h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`} />
+          </Button>
+          <Button onClick={() => setIsModalOpen(true)}>
+            <Plus className="mr-2 h-4 w-4" />
+            Nuovo Progetto
+          </Button>
+        </div>
       </div>
 
       {requests.length === 0 ? (

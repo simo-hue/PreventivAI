@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { ArrowRight, FileText, Plus, Trash2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { ArrowRight, FileText, Plus, Trash2, RefreshCcw } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button, ButtonLink } from "@/components/ui/button";
 import { Card, CardBody } from "@/components/ui/card";
@@ -33,11 +34,19 @@ export function RequestListClient({
   showNewButton?: boolean;
   customAction?: React.ReactNode;
 }) {
+  const router = useRouter();
   const requests = initialRequests;
   const [isPending, startTransition] = useTransition();
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [requestToDelete, setRequestToDelete] = useState<{ id: string; title: string } | null>(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const handleRefresh = () => {
+    setIsRefreshing(true);
+    router.refresh();
+    setTimeout(() => setIsRefreshing(false), 600);
+  };
 
   const handleDeleteClick = (id: string, title: string) => {
     setRequestToDelete({ id, title });
@@ -69,6 +78,9 @@ export function RequestListClient({
         </div>
         <div className="flex items-center gap-3">
           {customAction}
+          <Button variant="secondary" onClick={handleRefresh} disabled={isRefreshing} title="Aggiorna stato">
+            <RefreshCcw className={`h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`} />
+          </Button>
           {showNewButton && (
             <ButtonLink href="/requests/new">
               <Plus className="size-4" aria-hidden="true" />

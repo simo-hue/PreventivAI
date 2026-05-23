@@ -201,3 +201,7 @@
     - Aggiornata la mappa `statusLabel` in `components/customer/customer-request-list.tsx` e `components/requests/request-list-client.tsx` affinché `draft` e `analyzing` mostrino "In elaborazione".
     - Reso non cliccabile e in stato visivo disabilitato il bottone "Apri" (`ButtonLink` sostituito da `Button disabled`) in entrambe le liste per impedire all'utente di accedere alla pagina di dettaglio prima che l'AI abbia concluso di popolare il database con scenari, moduli e quote_run.
     - Aggiornato `app/api/requests/[id]/analyze/route.ts` per scrivere subito `status: "analyzing"` sul DB all'inizio dell'elaborazione, in modo che l'UI lo recepisca correttamente se interrogata.
+
+- [2026-05-23T20:40:00+02:00]: Manual Refresh Button
+  - *Details*: Aggiunto un bottone di ricaricamento (Refresh) sulle viste lista progetti del cliente e dell'amministratore. Questo bottone permette di scaricare gli stati aggiornati dei progetti in background senza costringere a ricaricare l'intera pagina del browser, migliorando la percezione di professionalità e fluidità dell'app (Single Page Application feel).
+  - *Tech Notes*: Sfruttato `router.refresh()` di Next.js lato Client Component (`components/customer/customer-request-list.tsx` e `components/requests/request-list-client.tsx`). Il bottone implementa anche un'animazione spin sull'icona durante il refresh (per 600ms) al fine di fornire un chiaro e piacevole feedback visivo all'utente.
