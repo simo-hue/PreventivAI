@@ -32,7 +32,7 @@ WHERE qr.client_request_id = cr.id
   AND qr.llm_raw_response ->> 'detectedTimelineText' != 'null';
 
 -- 4. Backfill client_deadline (= detectedDeadline from AI analysis)
--- Note: detectedDeadline is a date string like "2026-08-23" from the AI
+-- Only for values that are valid ISO dates (YYYY-MM-DD)
 UPDATE public.client_requests cr
 SET client_deadline = (qr.llm_raw_response ->> 'detectedDeadline')::date
 FROM public.quote_runs qr
@@ -41,7 +41,19 @@ WHERE qr.client_request_id = cr.id
   AND qr.llm_raw_response IS NOT NULL
   AND qr.llm_raw_response ->> 'detectedDeadline' IS NOT NULL
   AND qr.llm_raw_response ->> 'detectedDeadline' != 'null'
-  AND qr.llm_raw_response ->> 'detectedDeadline' ~ '^\d{4}-\d{2}-\d{2}';
+  AND qr.llm_raw_response ->> 'detectedDeadline' ~ '^\d{4}-\d{2}-\d{2}$';
+
+-- 4b. Backfill non-ISO detectedDeadline (e.g. "3 mesi") into client_timeline_text
+UPDATE public.client_requests cr
+SET client_timeline_text = COALESCE(cr.client_timeline_text || ' (deadline: ' || (qr.llm_raw_response ->> 'detectedDeadline') || ')', qr.llm_raw_response ->> 'detectedDeadline')
+FROM public.quote_runs qr
+WHERE qr.client_request_id = cr.id
+  AND cr.client_deadline IS NULL
+  AND cr.client_timeline_text IS NULL
+  AND qr.llm_raw_response IS NOT NULL
+  AND qr.llm_raw_response ->> 'detectedDeadline' IS NOT NULL
+  AND qr.llm_raw_response ->> 'detectedDeadline' != 'null'
+  AND qr.llm_raw_response ->> 'detectedDeadline' !~ '^\d{4}-\d{2}-\d{2}$';
 
 -- 5. Update updated_at timestamp for all backfilled rows
 UPDATE public.client_requests

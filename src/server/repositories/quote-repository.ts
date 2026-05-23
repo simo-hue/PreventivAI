@@ -46,13 +46,24 @@ export async function createQuoteRun(args: {
     clientRequestUpdate.client_budget_eur = args.analysis.detectedBudgetEur;
   }
 
-  // Deadline rilevata dall'AI (formato ISO date string)
+  // Deadline rilevata dall'AI — la colonna è di tipo date, quindi accettiamo solo ISO (YYYY-MM-DD).
+  // Se l'AI restituisce testo libero (es. "3 mesi") lo salviamo in client_timeline_text.
   if (args.analysis.detectedDeadline != null) {
-    clientRequestUpdate.client_deadline = args.analysis.detectedDeadline;
+    const isoDateRegex = /^\d{4}-\d{2}-\d{2}$/;
+    if (isoDateRegex.test(args.analysis.detectedDeadline)) {
+      clientRequestUpdate.client_deadline = args.analysis.detectedDeadline;
+    } else {
+      // Non è una data ISO valida — salvalo come timeline testuale (fallback)
+      const existing = args.analysis.detectedTimelineText || "";
+      const fallbackTimeline = existing
+        ? `${existing} (deadline: ${args.analysis.detectedDeadline})`
+        : args.analysis.detectedDeadline;
+      clientRequestUpdate.client_timeline_text = fallbackTimeline;
+    }
   }
 
   // Timeline testuale rilevata dall'AI
-  if (args.analysis.detectedTimelineText != null) {
+  if (args.analysis.detectedTimelineText != null && !clientRequestUpdate.client_timeline_text) {
     clientRequestUpdate.client_timeline_text = args.analysis.detectedTimelineText;
   }
 
