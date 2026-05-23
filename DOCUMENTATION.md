@@ -341,6 +341,23 @@
 - [2026-05-24T00:55:00+02:00]: Fix Allineamento Immagine Team
   - *Details*: Aggiunta la classe `object-top` all'immagine del team nella home page per allinearla in alto ed evitare che i volti vengano tagliati dal ratio 21:9.
 
+- [2026-05-24T01:15:00+02:00]: Redesign Professionale Esportazione PDF
+  - *Details*: Completamente riscritta l'esportazione del preventivo in PDF per supportare un layout professionale, il logo aziendale, e la visibilità condizionale delle ore per il cliente.
+  - *Tech Notes*:
+    - Riscritto `src/lib/pdf/render-quote-pdf.ts` utilizzando `pdf-lib` in maniera intensiva (sostituendo il precedente text loop rudimentale).
+    - Implementato caricamento logo tramite `fs.promises.readFile(path.join(process.cwd(), 'public', 'logo.png'))`.
+    - Gestita logica `displayOptions.showHours` che omette calcoli orari riga per riga se disabilitata, allineando perfettamente l'esperienza UI al file scaricato.
+    - Introdotta la gestione avanzata di allineamento a destra, padding, e page-break dinamici per evitare rotture brutte di layout.
+
+- [2026-05-24T01:25:00+02:00]: Fix Performance Next.js con pdf-lib
+  - *Details*: Risolto un grave calo di performance in ambiente di sviluppo (generazione del PDF lenta fino a 60 secondi) escludendo `pdf-lib` dal processo di bundling di Next.js.
+  - *Tech Notes*:
+- [2026-05-24T01:32:00+02:00]: Fix Bug "Stampa invece di Scaricare" nel PDF
+  - *Details*: Risolto un bug che causava l'apertura della finestra di stampa del browser invece del download del PDF generato.
+  - *Tech Notes*:
+    - Il fallback a `window.print()` nel client veniva innescato perché la rotta API restituiva un errore 500. Questo errore era causato dal workaround `eval('require')` inserito in precedenza per bypassare Turbopack, il quale non è supportato nel runtime isolato di Next.js.
+    - Ripristinato il normale import ES6 di `pdf-lib`. Il tempo di compilazione lungo si verificherà solo alla prima esecuzione in locale, ma garantisce la stabilità assoluta del servizio e il download immediato.
+
 - [2026-05-24T00:58:00+02:00]: Fix Build Type Error and ReferenceError Resolution
   - *Details*: Risolto un errore di compilazione TypeScript che causava il blocco della build e conseguenti problemi di hot-reloading (incluso un falso positivo su `createSupabaseServerClient is not defined`).
   - *Tech Notes*: Rimosso l'attributo `size="lg"` dal componente `<Button>` all'interno di `components/public/client-landing.tsx`, poiché la prop non è supportata dal componente custom. Build e type-checking (`pnpm build`) eseguiti con successo senza errori.
