@@ -24,3 +24,13 @@ npx supabase migration up
 **Oppure**, se preferisci applicarla manualmente, puoi copiare ed eseguire il contenuto SQL del file `supabase/migrations/20260523170000_backfill_client_request_fields.sql` direttamente dalla dashboard SQL di Supabase.
 
 I nuovi preventivi generati da ora in poi popoleranno automaticamente tutti questi campi.
+
+## Azione Richiesta: Applicazione Migrazione Profilo Cliente (is_customer)
+
+Ho creato la migrazione `20260523191800_add_is_customer_to_profiles.sql` che aggiunge la colonna `is_customer` alla tabella `profiles` e un trigger per creare automaticamente il profilo quando un utente si registra dalla landing page `/home`.
+
+**Esegui questo comando sul tuo terminale locale:**
+
+```bash
+npx supabase migration up
+```

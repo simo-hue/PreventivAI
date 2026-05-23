@@ -139,3 +139,11 @@
   - *Details*: Risolto il bug di contrasto cromatico per cui il titolo dell'operazione corrente, la percentuale di caricamento e lo spinner nel modale di generazione preventivo risultavano invisibili (testo quasi nero su sfondo scuro) in dark mode.
   - *Tech Notes*: Modificato `components/requests/request-form.tsx`. Sostituito l'uso indiscriminato di `text-[var(--primary)]` (che mappa sul colore scuro `#18181b`) per lo step in stato `isLoading` con la combinazione `text-cyan-600 dark:text-cyan-400 font-bold`. Applicata la stessa logica di contrasto elevato con classi Tailwind per l'icona Sparkles, la percentuale progressiva e lo spinner del cerchio di caricamento, migliorando l'accessibilità visiva sia in light mode che in dark mode.
 
+
+- [2026-05-23T19:22:00+02:00]: Public Home Page and Client Registration Flow
+  - *Details*: Added a `/home` public route to act as a landing page for potential clients. This page contains a form to submit a new project request. Submitting the form opens a modal that allows clients to create an account. A database migration was added to include an `is_customer` column in the `profiles` table, which defaults to true, and a trigger to auto-create profiles for new users under the default organization `00000000-0000-0000-0000-000000000001`.
+  - *Tech Notes*:
+    - Created `app/home/page.tsx`.
+    - Created `components/public/client-landing.tsx` and `components/public/signup-modal.tsx`.
+    - Modal uses `createSupabaseBrowserClient()` to register the user, then calls `POST /api/requests` and `POST /api/requests/[id]/analyze` to generate the quote immediately.
+    - Added migration `20260523191800_add_is_customer_to_profiles.sql` with a Postgres trigger `on_auth_user_created`.
