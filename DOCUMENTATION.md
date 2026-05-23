@@ -281,7 +281,13 @@
   - *Tech Notes*:
     - In `src/lib/auth/require-user.ts`, sostituito l'ID di fallback `"demo-user"` con un vero UUID valido (`"5d65094f-d066-423c-a7ce-ef18a0f64368"`), già usato in altre parti del sistema come costante `ADMIN_USER_ID`.
     - In `app/api/requests/[id]/chat/route.ts`, modificata la logica di creazione "lazy" del profilo utente per supportare nativamente l'utente admin di fallback, inserendo automaticamente un record `profiles` valido col ruolo "admin" in caso non esista, scongiurando qualsiasi fallimento di chiave esterna.
-
+- [2026-05-23T23:48:00+02:00]: Aggiunta Slider Ridimensionabile tra Progetto e Chat
+  - *Details*: È stato introdotto un layout a pannelli ridimensionabili (split view) nelle pagine di dettaglio del progetto, sia per il Cliente che per l'Admin. Ora è possibile regolare liberamente quanto spazio dedicare alla colonna di sinistra (preventivi e info progetto) e quanto alla colonna di destra (chat) trascinando lo slider intermedio.
+  - *Tech Notes*:
+    - Installata la libreria `react-resizable-panels` (versione `4.x`, utilizzando i componenti `Group`, `Panel` e `Separator`).
+    - Creato il componente client `components/layout/resizable-layout.tsx` che racchiude i pannelli. Il componente rileva automaticamente se l'utente è su mobile o desktop; su mobile i pannelli vengono impilati normalmente senza funzionalità di resize (poiché lo slider laterale non ha senso su schermi stretti), mentre da `xl` in poi usa il layout orizzontale a due pannelli.
+    - Sostituiti i classici flex container statici (`flex-[2]` e `flex-1`) in `app/(dashboard)/requests/[id]/page.tsx` e `app/customer/[id]/requests/[requestId]/page.tsx` con `<ResizableLayout leftContent={...} rightContent={...} />`.
+    - Risolti alcuni warning ESLint minori e fixato un bug in `login-modal.tsx` (il catch error era de-tipizzato e falliva i controlli Typescript più stringenti).
 - [2026-05-23T23:35:00+02:00]: Miglioramenti UI/UX Chat Box
   - *Details*: Perfezionato il layout della chat per renderlo simile alle applicazioni di messaggistica moderne (es. WhatsApp, iMessage). I messaggi inviati dall'utente corrente sono ora allineati a destra, mentre quelli ricevuti (compresi quelli del sistema o dell'AI) rimangono a sinistra. Inoltre, è stata inserita un'elegante animazione "Typing..." (3 puntini saltellanti) che compare ogni volta che l'Intelligenza Artificiale sta elaborando la validazione del messaggio prima di rispondere, fornendo all'utente un feedback visivo immediato di elaborazione in corso.
   - *Tech Notes*:

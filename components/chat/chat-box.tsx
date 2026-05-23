@@ -151,10 +151,10 @@ export function ChatBox({
                   }`}>
                     <ReactMarkdown
                       components={{
-                        p: ({node: _node, ...props}) => <p className="m-0" {...props} />,
-                        strong: ({node: _node, ...props}) => <strong className="font-semibold" {...props} />,
-                        ul: ({node: _node, ...props}) => <ul className="list-disc pl-4 m-0" {...props} />,
-                        ol: ({node: _node, ...props}) => <ol className="list-decimal pl-4 m-0" {...props} />,
+                        p: ({node, ...props}) => <p className="m-0" {...props} />,
+                        strong: ({node, ...props}) => <strong className="font-semibold" {...props} />,
+                        ul: ({node, ...props}) => <ul className="list-disc pl-4 m-0" {...props} />,
+                        ol: ({node, ...props}) => <ol className="list-decimal pl-4 m-0" {...props} />,
                       }}
                     >
                       {msg.content}

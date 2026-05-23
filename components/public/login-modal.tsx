@@ -51,8 +51,8 @@ export function LoginModal({
       // Redirect to the customer personal page
       router.push(`/customer/${user.id}`);
       
-    } catch (err: any) {
-      setError(err.message || "Qualcosa e' andato storto.");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Qualcosa e' andato storto.");
       setIsSubmitting(false);
     }
   };

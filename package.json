@@ -36,6 +36,7 @@
     "react-dom": "latest",
     "react-hook-form": "latest",
     "react-markdown": "^10.1.0",
+    "react-resizable-panels": "^4.11.1",
     "server-only": "latest",
     "tailwind-merge": "latest",
     "zod": "latest"
