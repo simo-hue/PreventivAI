@@ -213,3 +213,32 @@
 - [2026-05-23T20:40:00+02:00]: Manual Refresh Button
   - *Details*: Aggiunto un bottone di ricaricamento (Refresh) sulle viste lista progetti del cliente e dell'amministratore. Questo bottone permette di scaricare gli stati aggiornati dei progetti in background senza costringere a ricaricare l'intera pagina del browser, migliorando la percezione di professionalità e fluidità dell'app (Single Page Application feel).
   - *Tech Notes*: Sfruttato `router.refresh()` di Next.js lato Client Component (`components/customer/customer-request-list.tsx` e `components/requests/request-list-client.tsx`). Il bottone implementa anche un'animazione spin sull'icona durante il refresh (per 600ms) al fine di fornire un chiaro e piacevole feedback visivo all'utente.
+
+- [2026-05-23T20:50:00+02:00]: Implementazione Chat Bidirezionale per Informazioni Bloccanti
+  - *Details*: È stato rimosso l'alert statico delle "Informazioni bloccanti" e sostituito con un sistema di chat bidirezionale tra cliente e amministratore in tempo reale (polling-based). Le domande sollevate dall'IA vengono inserite in modo automatico nella chat figurando come messaggio di sistema dell'amministratore, avviando un thread di dialogo direttamente accessibile sia dall'area personale del cliente che dalla dashboard dell'amministratore.
+  - *Tech Notes*: 
+    - Aggiunta tabella `chat_messages` con migration DB `20260523204500_create_chat_messages.sql` e RLS policies. 
+    - Modificato `createQuoteRun` in `src/server/repositories/quote-repository.ts` per formattare e inserire un record automatico in `chat_messages` se presenti `blockingQuestions`.
+    - Create API `GET` e `POST` `/api/requests/[id]/chat` per interfacciarsi con i messaggi tramite `SupabaseAdminClient`.
+    - Creato il Client Component `ChatBox` in `components/chat/chat-box.tsx` con polling (10s), auto-scroll e gestione input.
+    - Sostituito il layout statico in `app/customer/[id]/requests/[requestId]/page.tsx` (lato utente) e `components/quote/scenario-dashboard.tsx` (lato admin) per integrare il componente `ChatBox`.
+    - Aggiunte note per eseguire manual migration in `TO_SIMO_DO.md`. Costruzione e lint validati con successo.
+    - Aggiornato il layout della view admin `app/(dashboard)/requests/[id]/page.tsx` implementando uno split orizzontale (`flex-row` in desktop) coerente con l'interfaccia customer, in modo che la chat appaia in una colonna laterale fissa (`sticky`) a destra.
+    - Rimosso il pulsante "Nuova analisi" dalla vista `ScenarioDashboard` per semplificare l'interfaccia amministrativa.
+
+- [2026-05-23T20:59:00+02:00]: Eliminazione progetti area Customer
+  - *Details*: Aggiunta la possibilità per i clienti di eliminare le proprie richieste (progetti) direttamente dalla propria dashboard personale. Il pulsante cestino attiva un modale di conferma personalizzato (bypassando quello nativo del browser) e procede con la cancellazione sicura dal database, inclusi i preventivi associati.
+  - *Tech Notes*: Modificato `components/customer/customer-request-list.tsx` introducendo lo state management per la cancellazione e utilizzando `useTransition`. Riutilizzato il componente accessibile `<ConfirmDialog>` e la Server Action `deleteRequestAction` per mantenere DRY la logica di eliminazione. Validato senza errori TypeScript.
+
+- [2026-05-23T21:05:00+02:00]: Integrazione Chat e Domande Importanti
+  - *Details*: L'interfaccia delle "Domande Importanti" lato admin è stata trasformata. Invece di scrivere manualmente le risposte, l'admin può selezionare le domande con delle checkbox e inviarle con un clic alla chat del cliente. Il preventivo AI viene ricalcolato considerando l'intero storico della chat per dedurre le risposte fornite dal cliente.
+  - *Tech Notes*: `QuestionRow` in `scenario-dashboard.tsx` è stato sostituito da un nuovo componente integrato `ImportantQuestionsSection`. `app/api/requests/[id]/analyze/route.ts` è stato modificato per interrogare `chat_messages` in Supabase e accodare lo storico (`chatTranscript`) a `requestText`. La vecchia route `/api/requests/[id]/clarifications` è stata eliminata poiché la comunicazione passa ora interamente dal sistema di chat.
+
+- [2026-05-23T21:20:00+02:00]: Rimozione Sidebar Area Customer
+  - *Details*: Ottimizzato il layout dell'area cliente. La sidebar laterale (che risultava vuota) è stata rimossa a favore di un header superiore fisso ("sticky") più moderno e compatto.
+  - *Tech Notes*: Modificato `app/customer/[id]/layout.tsx`. Il contenitore `aside` è stato sostituito da un `<header>` che ospita il logo a sinistra e il pulsante di logout a destra, liberando così l'intera larghezza della pagina per il contenuto principale. Validazione typescript eseguita con successo.
+
+- [2026-05-23T21:25:00+02:00]: Rimozione Pulsante Ricalcola Preventivo
+  - *Details*: L'interfaccia dell'amministratore (dashboard della richiesta) non espone più il pulsante manuale "Ricalcola Preventivo". Il ricalcolo è ora interamente delegato e innescato dalla risposta del cliente all'interno della chat, semplificando le operazioni lato admin.
+  - *Tech Notes*: Modificato `components/quote/scenario-dashboard.tsx` eliminando la funzione `handleRecalculate`, lo stato `isRecalculating` e il bottone HTML corrispondente. La logica di ri-trigger automatico risiede già all'interno di `chat-box.tsx`.
+  - *Tech Notes*: Modificato `components/quote/scenario-dashboard.tsx` eliminando la funzione `handleRecalculate`, lo stato `isRecalculating` e il bottone HTML corrispondente. La logica di ri-trigger automatico risiede già all'interno di `chat-box.tsx`.

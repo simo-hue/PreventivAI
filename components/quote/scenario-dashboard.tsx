@@ -1,6 +1,6 @@
 "use client";
 
-import { AlertTriangle, ArrowRight, CheckCircle2, HelpCircle, RefreshCw } from "lucide-react";
+import { AlertTriangle, ArrowRight, CheckCircle2 } from "lucide-react";
 import { Alert } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button, ButtonLink } from "@/components/ui/button";
@@ -66,19 +66,10 @@ export function ScenarioDashboard({ initialData: request }: { initialData: Store
               Segna come Consegnato
             </Button>
           )}
-          <ButtonLink href="/requests/new" variant="secondary">
-            <RefreshCw className="size-4" aria-hidden="true" />
-            Nuova analisi
-          </ButtonLink>
         </div>
       </div>
 
-      {analysis?.blockingQuestions.length ? (
-        <Alert title="Informazioni bloccanti" variant="warning">
-          Il sistema non genera un preventivo finale finche' queste domande non
-          sono chiarite.
-        </Alert>
-      ) : null}
+
 
       <div className="grid gap-4 md:grid-cols-3">
         <Metric
@@ -99,34 +90,13 @@ export function ScenarioDashboard({ initialData: request }: { initialData: Store
         />
       </div>
 
-      {analysis?.blockingQuestions.length ? (
-        <Card>
-          <CardHeader
-            title="Domande cliente"
-            description="Rispondi alle domande e rilancia l'analisi con il testo aggiornato."
-            action={
-              <ButtonLink href={`/requests/${request.id}/clarifications`}>
-                Rispondi
-              </ButtonLink>
-            }
-          />
-          <CardBody className="space-y-3">
-            {analysis.blockingQuestions.map((question) => (
-              <QuestionRow key={question.question} question={question.question} reason={question.reason} requestId={request.id} />
-            ))}
-          </CardBody>
-        </Card>
-      ) : null}
+
 
       {analysis?.importantQuestions.length ? (
-        <Card>
-          <CardHeader title="Domande importanti" description="Non bloccano la stima, ma delimitano lo scope." />
-          <CardBody className="grid gap-3 lg:grid-cols-3">
-            {analysis.importantQuestions.map((question) => (
-              <QuestionRow key={question.question} question={question.question} reason={question.impact} requestId={request.id} />
-            ))}
-          </CardBody>
-        </Card>
+        <ImportantQuestionsSection 
+          questions={analysis.importantQuestions} 
+          requestId={request.id} 
+        />
       ) : null}
 
       {sortedScenarios.length ? (
@@ -213,55 +183,69 @@ function MiniStat({ label, value }: { label: string; value: string }) {
 
 import { useState } from "react";
 
-function QuestionRow({ question, reason, requestId }: { question: string; reason: string; requestId: string }) {
-  const [answer, setAnswer] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function ImportantQuestionsSection({ questions, requestId }: { questions: any[]; requestId: string }) {
+  const [selected, setSelected] = useState<string[]>([]);
+  const [isSending, setIsSending] = useState(false);
 
-  async function handleAnswer() {
-    if (!answer.trim()) return;
-    setIsSubmitting(true);
+  const toggle = (q: string) => {
+    setSelected(prev => prev.includes(q) ? prev.filter(x => x !== q) : [...prev, q]);
+  }
+
+  const handleSend = async () => {
+    if (!selected.length) return;
+    setIsSending(true);
     try {
-      // 1. Salva la risposta
-      await fetch(`/api/requests/${requestId}/clarifications`, {
+      const content = `Ciao, per elaborare al meglio il preventivo abbiamo bisogno di queste informazioni:\n\n${selected.map(q => `- ${q}`).join('\n')}`;
+      
+      await fetch(`/api/requests/${requestId}/chat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ answers: [{ question, answer }] }),
+        body: JSON.stringify({ 
+          content,
+          senderId: "5d65094f-d066-423c-a7ce-ef18a0f64368"
+        }),
       });
-      // 2. Rilancia l'analisi
-      await fetch(`/api/requests/${requestId}/analyze`, { method: "POST" });
-      // 3. Ricarica la pagina per vedere il nuovo preventivo
-      window.location.reload();
+      setSelected([]);
     } catch (e) {
       console.error(e);
-      setIsSubmitting(false);
+    } finally {
+      setIsSending(false);
     }
   }
 
   return (
-    <div className="rounded-md border border-[var(--border)] bg-white p-4">
-      <div className="flex gap-2">
-        <HelpCircle className="mt-0.5 size-4 shrink-0 text-[var(--primary)]" aria-hidden="true" />
-        <div className="w-full">
-          <p className="text-sm font-semibold">{question}</p>
-          <p className="mt-1 text-sm leading-6 text-[var(--muted)]">{reason}</p>
-          <div className="mt-4 flex flex-col gap-2 sm:flex-row">
-            <textarea
-              className="min-h-10 flex-1 resize-y rounded-md border border-[var(--border)] p-2 text-sm"
-              placeholder="Scrivi la tua risposta..."
-              value={answer}
-              onChange={(e) => setAnswer(e.target.value)}
-              disabled={isSubmitting}
-            />
-            <Button
-              onClick={handleAnswer}
-              disabled={!answer.trim() || isSubmitting}
-              className="sm:self-end"
+    <Card>
+      <CardHeader 
+        title="Domande importanti" 
+        description="Seleziona le domande da inviare al cliente via chat."
+        action={
+          <div className="flex gap-2">
+            <Button 
+              onClick={handleSend} 
+              disabled={selected.length === 0 || isSending}
             >
-              {isSubmitting ? "Generazione..." : "Rispondi e Ricalcola"}
+              {isSending ? "Invio..." : "Invia all'utente"}
             </Button>
           </div>
-        </div>
-      </div>
-    </div>
+        }
+      />
+      <CardBody className="grid gap-3 lg:grid-cols-2">
+        {questions.map(q => (
+          <label key={q.question} className="flex items-start gap-3 rounded-md border border-[var(--border)] bg-white p-4 cursor-pointer hover:bg-[var(--surface-strong)] transition-colors">
+            <input 
+              type="checkbox" 
+              className="mt-1 h-4 w-4 rounded border-slate-300 text-[var(--primary)] focus:ring-[var(--primary)]"
+              checked={selected.includes(q.question)}
+              onChange={() => toggle(q.question)}
+            />
+            <div className="w-full">
+              <p className="text-sm font-semibold">{q.question}</p>
+              <p className="mt-1 text-xs text-[var(--muted)]">{q.impact}</p>
+            </div>
+          </label>
+        ))}
+      </CardBody>
+    </Card>
   );
 }

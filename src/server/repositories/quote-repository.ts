@@ -95,6 +95,23 @@ export async function createQuoteRun(args: {
     await admin.from("clarification_questions").insert(qInserts);
   }
 
+  // 3.5 Inserisci le domande bloccanti nella chat del customer
+  if (args.analysis.blockingQuestions.length > 0) {
+    const adminId = "5d65094f-d066-423c-a7ce-ef18a0f64368";
+    let chatContent = "Ciao! Abbiamo analizzato la tua richiesta, ma per poterti fornire un preventivo accurato abbiamo bisogno di alcune informazioni aggiuntive:\n\n";
+    
+    args.analysis.blockingQuestions.forEach((q, i) => {
+      chatContent += `${i + 1}. **${q.question}**\n_${q.reason}_\n\n`;
+    });
+    
+    await admin.from("chat_messages").insert({
+      organization_id: orgId,
+      client_request_id: args.clientRequestId,
+      sender_id: adminId,
+      content: chatContent.trim(),
+    });
+  }
+
   // 4. Inserimento Scenari, Moduli, Task, Efforts in batch
   if (args.analysis.shouldGenerateQuote && args.analysis.scenarios.length > 0) {
     // Costruiamo la mappa roleName|seniority → rate_card_id
