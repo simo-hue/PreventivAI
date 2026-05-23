@@ -174,6 +174,12 @@
     - Created a new `components/public/login-modal.tsx` component that implements the Supabase `signInWithPassword` logic and redirects to the customer dashboard.
     - Added the `Image` component for the `/public/logo_originale.png` logo.
     - Removed the Sparkles icon above the main heading in `/home`.
+    - Removed `dark:` tailwind classes from `LoginModal` to prevent unreadable contrast when the OS is in dark mode, forcing it to remain in light theme like the rest of the page.
+
+- [2026-05-23T22:27:00+02:00]: Fix Missing Signout Route
+  - *Details*: Resolved a 404 error that occurred when a customer attempted to log out from their personal dashboard.
+  - *Tech Notes*:
+    - Created `app/auth/signout/route.ts` to handle the `POST` request from the logout form, destroy the Supabase session via `supabase.auth.signOut()`, and intelligently redirect the user (to `/home` if logged out from the customer dashboard, or `/login` as a default fallback).
 
 - [2026-05-23T19:50:00+02:00]: Signup Modal Dark Mode Contrast & Readability Fix
   - *Details*: Resolved visual contrast issues in the `/home` page's project submission/signup modal. The modal background converted to dark mode due to system theme preferences, but text labels, descriptions, and the cancel button remained dark slate, making them completely unreadable.

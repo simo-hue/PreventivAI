@@ -30,7 +30,7 @@ export function ClientLanding() {
               <span className="sr-only">Italians quote it better</span>
               <div className="relative h-12 w-48 sm:h-14 sm:w-56">
                 <Image
-                  src="/logo_originale.png"
+                  src="/logo.png"
                   alt="Italians quote it better Logo"
                   fill
                   className="object-contain object-left"
@@ -40,8 +40,8 @@ export function ClientLanding() {
             </a>
           </div>
           <div className="flex flex-1 justify-end">
-            <Button 
-              variant="secondary" 
+            <Button
+              variant="secondary"
               onClick={() => setIsLoginModalOpen(true)}
               className="gap-2"
             >

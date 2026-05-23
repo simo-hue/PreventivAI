@@ -61,7 +61,7 @@ export function LoginModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-md transition-all duration-300">
-      <div className="w-full max-w-md rounded-2xl border border-slate-100 bg-white p-6 shadow-2xl dark:border-slate-800 dark:bg-slate-900 sm:p-8">
+      <div className="w-full max-w-md rounded-2xl border border-slate-100 bg-white p-6 shadow-2xl sm:p-8">
         <div>
           <div className="text-center">
             <h2 className="text-2xl font-bold tracking-tight text-slate-900">Area Utente</h2>
