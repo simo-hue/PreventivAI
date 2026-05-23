@@ -67,7 +67,6 @@ export function ClientLanding() {
           </p>
           <div className="flex justify-center gap-4">
             <Button 
-              size="lg" 
               className="rounded-full px-8 h-14 text-lg shadow-lg hover:shadow-xl transition-all bg-blue-600 text-white hover:bg-blue-700"
               onClick={() => {
                 document.getElementById('preventivo-form')?.scrollIntoView({ behavior: 'smooth' });

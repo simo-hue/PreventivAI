@@ -340,3 +340,7 @@
 
 - [2026-05-24T00:55:00+02:00]: Fix Allineamento Immagine Team
   - *Details*: Aggiunta la classe `object-top` all'immagine del team nella home page per allinearla in alto ed evitare che i volti vengano tagliati dal ratio 21:9.
+
+- [2026-05-24T00:58:00+02:00]: Fix Build Type Error and ReferenceError Resolution
+  - *Details*: Risolto un errore di compilazione TypeScript che causava il blocco della build e conseguenti problemi di hot-reloading (incluso un falso positivo su `createSupabaseServerClient is not defined`).
+  - *Tech Notes*: Rimosso l'attributo `size="lg"` dal componente `<Button>` all'interno di `components/public/client-landing.tsx`, poiché la prop non è supportata dal componente custom. Build e type-checking (`pnpm build`) eseguiti con successo senza errori.
