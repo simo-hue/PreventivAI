@@ -66,3 +66,27 @@
     - **Manual Editing**: L'UI in `ScenarioDetailClient` ricalcola in locale totali e sub-totali tramite i toggle e i nuovi campi (usando la non-null assertion per i check di ID su dati già fetchati dal db). L'endpoint `PUT /api/quote-scenarios/[id]` cancella ricorsivamente la vecchia gerarchia (effort, task, module) dello scenario ed inserisce l'albero aggiornato. Per coerenza coi dati del DB, `getQuoteRunForRequest` non legge più dal raw JSON del DB, ma riesegue una mega-join per idratare l'UI sempre con l'ultima verità relazionale.
     - **Delivered**: Aggiunto stato `delivered` agli enum locali. Inserita file di migrazione SQL `20260523141500_add_delivered_status.sql` per far rilasciare il `CHECK` constraint a Postgres. Implementato l'endpoint `PUT /api/requests/[id]/status` per transizionare verso il nuovo stato.
     - **Verifica**: Verificato che i file e i tipi siano allineati, aggiunto `id` mancante in `PricedEffort` e `PricedTask`. Typechecking superato con `pnpm tsc --noEmit`.
+
+- [2026-05-23 16:35:00 CEST]: Fix Totale 0€ e PM 0h dopo risposta a domande di chiarimento
+  - *Details*: Risolti tre bug critici che causavano Totale = 0€ e PM = 0h in fase di generazione e aggiornamento del preventivo.
+    1. **`cost_eur` mancante nel salvataggio efforts** – Nel `createQuoteRun`, l'insert di `quote_task_efforts` non includeva il campo `cost_eur`, rendendo il valore `null` al reload e azzerando subtotali e totali.
+    2. **`pmHours` e `nonPmHours` hardcodati a 0** – Nel `getQuoteRunForRequest` e `getScenarioById`, i campi `pmHours` e `nonPmHours` erano impostati a 0 invece di essere ricalcolati dagli efforts del DB.
+    3. **Architettura localStorage-first per scenario/preview** – `ScenarioDetailClient` e `QuotePreviewClient` leggevano solo da `localStorage`, che non veniva aggiornato dopo una ri-analisi post-clarification. Ora i dati arrivano dal Server Component come props `initialScenario`/`initialRequest`, con `localStorage` come fallback solo per la demo.
+  - *Tech Notes*:
+    - `src/server/repositories/quote-repository.ts`: Aggiunto `cost_eur` nell'insert di `quote_task_efforts`; aggiunta funzione `getScenarioById`; `subtotalEur` dei task ricalcolato dal lato server invece di usare il mock `0`; `pmHours`/`nonPmHours` calcolati dagli efforts del DB (fallback 10% se non rilevabile).
+    - `app/(dashboard)/requests/[id]/scenarios/[scenarioId]/page.tsx`: Ora fetcha scenario e request dal DB e li passa come `initialScenario`/`initialRequest` al client.
+    - `app/quotes/[scenarioId]/preview/page.tsx`: Ora fetcha lo scenario dal DB e lo passa come `initialScenario` al `QuotePreviewClient`.
+    - `components/quote/scenario-detail-client.tsx`: Accetta `initialScenario?` e `initialRequest?` come props dal server; preferisce questi dati se disponibili.
+    - `components/quote/quote-preview-client.tsx`: Accetta `initialScenario?` dal server come fonte di verità principale.
+    - Build Next.js: ✅ Zero errori TS, zero errori di build.
+
+- [2026-05-23 16:48:00 CEST]: Fix pagina "Dettaglio" preventivo completamente vuota
+  - *Details*: La pagina di dettaglio scenario mostrava un alert vuoto a causa di 3 problemi combinati:
+    1. Il guard `!request || !scenario || !recalculated` richiedeva `request` (localStorage) per renderizzare — ma `request` era sempre null per scenari dal DB.
+    2. `recalculateScenario` poteva lanciare eccezione (role mismatch) dentro `useMemo` senza error handling, rendendo `recalculated` null.
+    3. Il componente dipendeva ancora da localStorage anche dopo l'introduzione delle server props.
+  - *Tech Notes*:
+    - **`components/quote/scenario-detail-client.tsx`**: Refactoring completo. Rimosso `request` come requisito per il rendering. Aggiunto `try/catch` attorno a `recalculateScenario` con fallback al scenario grezzo dal DB. Props semplificate: `scenarioId`, `requestId`, `initialScenario`, `requestInfo`. Aggiunto stato di loading. Nessuna dipendenza da localStorage per i dati di scenario.
+    - **`app/(dashboard)/requests/[id]/scenarios/[scenarioId]/page.tsx`**: Aggiornato per passare le nuove props al client component.
+    - **`app/api/quote-scenarios/[id]/route.ts`**: Aggiunta `GET` handler che ritorna il scenario completo dal DB — usata come fallback client-side se `initialScenario` è null.
+    - Build: ✅ Zero errori TS, zero errori di build.

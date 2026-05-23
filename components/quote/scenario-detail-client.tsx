@@ -2,31 +2,39 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { Download, ExternalLink } from "lucide-react";
+import { Download, ExternalLink, Loader2 } from "lucide-react";
 import { Alert } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ButtonLink } from "@/components/ui/button";
 import { Card, CardBody, CardHeader } from "@/components/ui/card";
-import {
-  findStoredScenario,
-  replaceScenarioInRequest,
-  upsertStoredRequest,
-  type StoredRequest,
-} from "@/src/lib/demo/storage";
 import { DEFAULT_PM_PERCENTAGE, officialRateCards } from "@/src/lib/demo/rate-card";
 import { recalculateScenario } from "@/src/lib/quotes/pricing-engine";
 import type { PricedScenario } from "@/src/lib/quotes/types";
 import { formatCurrency, formatNumber, formatPercent } from "@/src/lib/utils/format";
 
+type RequestInfo = {
+  id: string;
+  title: string;
+};
+
 export function ScenarioDetailClient({
   scenarioId,
+  requestId,
+  initialScenario,
+  requestInfo,
 }: {
   scenarioId: string;
+  requestId: string;
+  initialScenario: PricedScenario | null;
+  requestInfo: RequestInfo | null;
 }) {
-  const [request, setRequest] = useState<StoredRequest | null>(null);
-  const [scenario, setScenario] = useState<PricedScenario | null>(null);
-  const [overrides, setOverrides] = useState<Record<string, boolean>>({});
+  const [scenario, setScenario] = useState<PricedScenario | null>(initialScenario);
+  const [overrides, setOverrides] = useState<Record<string, boolean>>(() =>
+    Object.fromEntries(
+      initialScenario?.modules.map((m) => [m.id, m.isIncluded]) ?? [],
+    ),
+  );
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [pricingSettings, setPricingSettings] = useState<{
@@ -34,68 +42,71 @@ export function ScenarioDetailClient({
     currency: string;
     riskBufferPercentage: number;
   } | null>(null);
+  const [recalcError, setRecalcError] = useState<string | null>(null);
 
+  // Carica le impostazioni di pricing dal server
   useEffect(() => {
-    async function fetchSettings() {
-      try {
-        const response = await fetch("/api/admin/settings");
-        if (response.ok) {
-          const data = await response.json();
-          setPricingSettings(data);
-        }
-      } catch (error) {
-        console.error("Impossibile caricare le impostazioni nella pagina dettaglio", error);
-      }
-    }
-    fetchSettings();
+    fetch("/api/admin/settings")
+      .then((r) => r.ok ? r.json() : null)
+      .then((data) => { if (data) setPricingSettings(data); })
+      .catch(() => {});
   }, []);
 
+  // Se non arrivano dal server, tenta di ricaricare dal DB via API
   useEffect(() => {
-    // In un'app reale questo arriva dalle props dal Server Component
-    // Per ora usiamo il fallback del findStoredScenario locale se arriva dalle vecchie richieste
-    const found = findStoredScenario(scenarioId);
-    setRequest(found?.request ?? null);
-    setScenario(found?.scenario ?? null);
-    setOverrides(
-      Object.fromEntries(
-        found?.scenario.modules.map((module) => [module.id, module.isIncluded]) ?? [],
-      ),
-    );
-  }, [scenarioId]);
-
-  const recalculated = useMemo(() => {
-    if (!scenario) {
-      return null;
+    if (initialScenario) {
+      setScenario(initialScenario);
+      setOverrides(
+        Object.fromEntries(initialScenario.modules.map((m) => [m.id, m.isIncluded])),
+      );
+      return;
     }
+    // Fallback: fetch dalla API
+    fetch(`/api/quote-scenarios/${scenarioId}`, { method: "GET" })
+      .then((r) => r.ok ? r.json() : null)
+      .then((data) => {
+        if (data?.scenario) {
+          setScenario(data.scenario);
+          setOverrides(
+            Object.fromEntries(data.scenario.modules.map((m: any) => [m.id, m.isIncluded])),
+          );
+        }
+      })
+      .catch(() => {});
+  }, [scenarioId, initialScenario]);
 
-    return recalculateScenario(
-      scenario,
-      officialRateCards,
-      pricingSettings?.pmPercentage ?? DEFAULT_PM_PERCENTAGE,
-      overrides,
-      pricingSettings?.riskBufferPercentage ?? 0,
-    );
+  // Ricalcolo con error handling robusto
+  const recalculated = useMemo(() => {
+    if (!scenario) return null;
+    try {
+      setRecalcError(null);
+      return recalculateScenario(
+        scenario,
+        officialRateCards,
+        pricingSettings?.pmPercentage ?? DEFAULT_PM_PERCENTAGE,
+        overrides,
+        pricingSettings?.riskBufferPercentage ?? 0,
+      );
+    } catch (err) {
+      // Se il ricalcolo fallisce (es. ruolo non presente in rate card), usa il scenario as-is
+      console.warn("[ScenarioDetail] recalculateScenario fallback:", err);
+      setRecalcError(err instanceof Error ? err.message : String(err));
+      // Restituisce il scenario originale con i totali già calcolati dal DB
+      return { ...scenario };
+    }
   }, [scenario, overrides, pricingSettings]);
 
   async function exportPdf() {
-    if (!request || !recalculated) {
-      return;
-    }
-
+    if (!recalculated) return;
     const response = await fetch(`/api/quote-scenarios/${recalculated.id}/export-pdf`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        requestTitle: request.title,
+        requestTitle: requestInfo?.title ?? recalculated.name,
         scenario: recalculated,
       }),
     });
-
-    if (!response.ok) {
-      window.print();
-      return;
-    }
-
+    if (!response.ok) { window.print(); return; }
     const blob = await response.blob();
     const url = URL.createObjectURL(blob);
     const anchor = document.createElement("a");
@@ -106,50 +117,39 @@ export function ScenarioDetailClient({
   }
 
   function updateModuleInclusion(moduleId: string, included: boolean) {
-    const nextOverrides = {
-      ...overrides,
-      [moduleId]: included,
-    };
+    const nextOverrides = { ...overrides, [moduleId]: included };
     setOverrides(nextOverrides);
-
-    if (!request || !scenario) {
-      return;
+    if (!scenario) return;
+    try {
+      const nextScenario = recalculateScenario(
+        scenario,
+        officialRateCards,
+        pricingSettings?.pmPercentage ?? DEFAULT_PM_PERCENTAGE,
+        nextOverrides,
+        pricingSettings?.riskBufferPercentage ?? 0,
+      );
+      setScenario(nextScenario);
+    } catch {
+      // aggiorna solo gli override se il ricalcolo fallisce
     }
-
-    const nextScenario = recalculateScenario(
-      scenario,
-      officialRateCards,
-      pricingSettings?.pmPercentage ?? DEFAULT_PM_PERCENTAGE,
-      nextOverrides,
-      pricingSettings?.riskBufferPercentage ?? 0,
-    );
-    const nextRequest = replaceScenarioInRequest(request, nextScenario);
-    upsertStoredRequest(nextRequest);
-    setRequest(nextRequest);
-    setScenario(nextScenario);
   }
 
   function updateEffortHours(moduleId: string, taskId: string, effortId: string, newHours: number) {
     if (!scenario) return;
-    const nextScenario = { ...scenario };
-    const mod = nextScenario.modules.find(m => m.id === moduleId);
-    if (!mod) return;
-    const tsk = mod.tasks.find(t => t.id === taskId);
-    if (!tsk) return;
-    const eff = tsk.efforts.find(e => e.id === effortId);
-    if (!eff) return;
-    eff.estimatedHoursExpected = newHours;
+    const nextScenario = JSON.parse(JSON.stringify(scenario)) as PricedScenario;
+    const mod = nextScenario.modules.find((m) => m.id === moduleId);
+    const tsk = mod?.tasks.find((t) => t.id === taskId);
+    const eff = tsk?.efforts.find((e) => e.id === effortId);
+    if (eff) eff.estimatedHoursExpected = newHours;
     setScenario(nextScenario);
   }
 
   function updateTaskTitle(moduleId: string, taskId: string, newTitle: string) {
     if (!scenario) return;
-    const nextScenario = { ...scenario };
-    const mod = nextScenario.modules.find(m => m.id === moduleId);
-    if (!mod) return;
-    const tsk = mod.tasks.find(t => t.id === taskId);
-    if (!tsk) return;
-    tsk.title = newTitle;
+    const nextScenario = JSON.parse(JSON.stringify(scenario)) as PricedScenario;
+    const mod = nextScenario.modules.find((m) => m.id === moduleId);
+    const tsk = mod?.tasks.find((t) => t.id === taskId);
+    if (tsk) tsk.title = newTitle;
     setScenario(nextScenario);
   }
 
@@ -167,35 +167,57 @@ export function ScenarioDetailClient({
       } else {
         alert("Errore durante il salvataggio.");
       }
-    } catch (e) {
-      console.error(e);
+    } catch {
       alert("Errore di rete.");
     } finally {
       setIsSaving(false);
     }
   }
 
-  if (!request || !scenario || !recalculated) {
+  // Loading state
+  if (scenario === null && initialScenario === null) {
+    return (
+      <div className="flex items-center gap-3 text-[var(--muted)]">
+        <Loader2 className="size-5 animate-spin" />
+        <span>Caricamento scenario…</span>
+      </div>
+    );
+  }
+
+  // Scenario non trovato
+  if (!scenario) {
     return (
       <Alert title="Scenario non trovato" variant="warning">
-        Torna alla richiesta e seleziona uno scenario disponibile.
+        Lo scenario non esiste o non è accessibile. Torna alla lista richieste.
       </Alert>
     );
   }
 
+  // Il display usa recalculated se disponibile, altrimenti il scenario grezzo dal DB
+  const display = recalculated ?? scenario;
+
   return (
     <div className="space-y-5">
+      {recalcError && (
+        <Alert title="Avviso prezzi" variant="warning">
+          {recalcError} — I totali mostrati sono quelli salvati nel database.
+        </Alert>
+      )}
+
       <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
         <div>
-          <Link href={`/requests/${request.id}`} className="text-sm font-semibold text-[var(--primary)]">
-            Torna alla richiesta
+          <Link
+            href={`/requests/${requestId}`}
+            className="text-sm font-semibold text-[var(--primary)]"
+          >
+            ← Torna alla richiesta
           </Link>
           <div className="mt-2 flex flex-wrap items-center gap-2">
-            <h1 className="text-2xl font-bold tracking-normal">{recalculated.name}</h1>
-            <Badge variant="info">{recalculated.scenarioType}</Badge>
+            <h1 className="text-2xl font-bold tracking-normal">{display.name}</h1>
+            <Badge variant="info">{display.scenarioType}</Badge>
           </div>
           <p className="mt-2 max-w-4xl text-sm leading-6 text-[var(--muted)]">
-            {recalculated.description}
+            {display.description}
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -208,7 +230,7 @@ export function ScenarioDetailClient({
               Modifica Preventivo
             </Button>
           )}
-          <ButtonLink href={`/quotes/${recalculated.id}/preview`} variant="secondary">
+          <ButtonLink href={`/quotes/${display.id}/preview`} variant="secondary">
             <ExternalLink className="size-4" aria-hidden="true" />
             Preview
           </ButtonLink>
@@ -220,16 +242,16 @@ export function ScenarioDetailClient({
       </div>
 
       <div className="grid gap-4 md:grid-cols-4">
-        <Metric label="Totale" value={formatCurrency(recalculated.totals.totalEur, pricingSettings?.currency)} />
-        <Metric label="Subtotal" value={formatCurrency(recalculated.totals.subtotalEur, pricingSettings?.currency)} />
-        <Metric label="PM" value={`${recalculated.totals.pmHours}h / ${formatCurrency(recalculated.totals.pmCostEur, pricingSettings?.currency)}`} />
-        <Metric label="Confidenza" value={formatPercent(recalculated.confidence)} />
+        <Metric label="Totale" value={formatCurrency(display.totals.totalEur, pricingSettings?.currency)} />
+        <Metric label="Subtotal" value={formatCurrency(display.totals.subtotalEur, pricingSettings?.currency)} />
+        <Metric label="PM" value={`${display.totals.pmHours}h / ${formatCurrency(display.totals.pmCostEur, pricingSettings?.currency)}`} />
+        <Metric label="Confidenza" value={formatPercent(display.confidence)} />
       </div>
 
       <Card>
         <CardHeader title="Moduli" description="I moduli opzionali aggiornano il totale in tempo reale." />
         <CardBody className="space-y-4">
-          {recalculated.modules.map((module) => (
+          {display.modules.map((module) => (
             <div key={module.id} className="rounded-lg border border-[var(--border)]">
               <div className="flex flex-col gap-3 border-b border-[var(--border)] p-4 sm:flex-row sm:items-start sm:justify-between">
                 <div>
@@ -245,16 +267,16 @@ export function ScenarioDetailClient({
                   </p>
                 </div>
                 <div className="flex shrink-0 items-center gap-4">
-                  <p className="text-right font-bold">{formatCurrency(module.subtotalEur, pricingSettings?.currency)}</p>
+                  <p className="text-right font-bold">
+                    {formatCurrency(module.subtotalEur, pricingSettings?.currency)}
+                  </p>
                   {module.isOptional ? (
                     <label className="flex cursor-pointer items-center gap-2 text-sm font-semibold">
                       <input
-                         type="checkbox"
-                         checked={overrides[module.id!] ?? module.isIncluded}
-                         onChange={(event) =>
-                           updateModuleInclusion(module.id!, event.target.checked)
-                         }
-                         className="size-4"
+                        type="checkbox"
+                        checked={overrides[module.id!] ?? module.isIncluded}
+                        onChange={(e) => updateModuleInclusion(module.id!, e.target.checked)}
+                        className="size-4"
                       />
                       Incluso
                     </label>
@@ -275,15 +297,20 @@ export function ScenarioDetailClient({
                   <tbody>
                     {module.tasks.flatMap((task) =>
                       task.efforts.map((effort, index) => (
-                        <tr key={`${task.id}-${effort.roleRateCardId}`} className="border-t border-[var(--border)]">
+                        <tr
+                          key={`${task.id}-${effort.roleRateCardId ?? effort.roleName}-${index}`}
+                          className="border-t border-[var(--border)]"
+                        >
                           <td className="px-4 py-3">
                             {index === 0 ? (
                               <div>
                                 {isEditing ? (
-                                  <input 
+                                  <input
                                     className="w-full rounded border border-[var(--border)] px-2 py-1 text-sm font-semibold"
                                     value={task.title}
-                                    onChange={(e) => updateTaskTitle(module.id!, task.id!, e.target.value)}
+                                    onChange={(e) =>
+                                      updateTaskTitle(module.id!, task.id!, e.target.value)
+                                    }
                                   />
                                 ) : (
                                   <p className="font-semibold">{task.title}</p>
@@ -295,17 +322,25 @@ export function ScenarioDetailClient({
                             ) : null}
                           </td>
                           <td className="px-4 py-3">
-                            {effort.roleName} <span className="text-[var(--muted)]">{effort.seniority}</span>
+                            {effort.roleName}{" "}
+                            <span className="text-[var(--muted)]">{effort.seniority}</span>
                           </td>
                           <td className="px-4 py-3">
                             {isEditing ? (
                               <div className="flex items-center gap-1">
-                                <input 
-                                  type="number" 
+                                <input
+                                  type="number"
                                   min="0"
                                   className="w-16 rounded border border-[var(--border)] px-2 py-1 text-sm"
                                   value={effort.estimatedHoursExpected}
-                                  onChange={(e) => updateEffortHours(module.id!, task.id!, effort.id!, parseFloat(e.target.value) || 0)}
+                                  onChange={(e) =>
+                                    updateEffortHours(
+                                      module.id!,
+                                      task.id!,
+                                      effort.id!,
+                                      parseFloat(e.target.value) || 0,
+                                    )
+                                  }
                                 />
                                 <span>h</span>
                               </div>
@@ -331,8 +366,8 @@ export function ScenarioDetailClient({
       </Card>
 
       <div className="grid gap-4 lg:grid-cols-2">
-        <ListCard title="Assumptions" items={recalculated.assumptions} />
-        <ListCard title="Exclusions" items={recalculated.exclusions} />
+        <ListCard title="Assumptions" items={display.assumptions} />
+        <ListCard title="Exclusions" items={display.exclusions} />
       </div>
     </div>
   );
@@ -353,8 +388,8 @@ function ListCard({ title, items }: { title: string; items: string[] }) {
       <CardHeader title={title} />
       <CardBody>
         <ul className="space-y-2 text-sm leading-6 text-slate-700">
-          {items.map((item) => (
-            <li key={item} className="flex gap-2">
+          {items.map((item, i) => (
+            <li key={i} className="flex gap-2">
               <span className="mt-2 size-1.5 shrink-0 rounded-full bg-[var(--primary)]" />
               <span>{item}</span>
             </li>

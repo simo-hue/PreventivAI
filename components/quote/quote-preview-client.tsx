@@ -12,15 +12,22 @@ import {
 import type { PricedScenario } from "@/src/lib/quotes/types";
 import { formatCurrency, formatNumber, formatPercent } from "@/src/lib/utils/format";
 
-export function QuotePreviewClient({ scenarioId }: { scenarioId: string }) {
+export function QuotePreviewClient({ scenarioId, initialScenario }: { scenarioId: string; initialScenario?: PricedScenario | null }) {
   const [request, setRequest] = useState<StoredRequest | null>(null);
-  const [scenario, setScenario] = useState<PricedScenario | null>(null);
+  const [scenario, setScenario] = useState<PricedScenario | null>(initialScenario ?? null);
 
   useEffect(() => {
-    const found = findStoredScenario(scenarioId);
-    setRequest(found?.request ?? null);
-    setScenario(found?.scenario ?? null);
-  }, [scenarioId]);
+    if (initialScenario) {
+      // Cerca la richiesta in localStorage per il titolo/summary, se disponibile
+      const found = findStoredScenario(scenarioId);
+      setRequest(found?.request ?? null);
+      // Il scenario viene dalla fonte di verità del server — non sovrascrivere
+    } else {
+      const found = findStoredScenario(scenarioId);
+      setRequest(found?.request ?? null);
+      setScenario(found?.scenario ?? null);
+    }
+  }, [scenarioId, initialScenario]);
 
   async function exportPdf() {
     if (!request || !scenario) {

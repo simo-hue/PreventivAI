@@ -1,7 +1,25 @@
 import { NextResponse } from "next/server";
 import { createSupabaseAdminClient } from "@/src/lib/supabase/admin";
+import { getScenarioById } from "@/src/server/repositories/quote-repository";
 import type { PricedScenario } from "@/src/lib/quotes/types";
 import crypto from "crypto";
+
+export async function GET(
+  _request: Request,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  const { id } = await params;
+  try {
+    const scenario = await getScenarioById(id);
+    if (!scenario) {
+      return NextResponse.json({ error: "Scenario non trovato." }, { status: 404 });
+    }
+    return NextResponse.json({ scenario });
+  } catch (error) {
+    console.error(error);
+    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+  }
+}
 
 export async function PUT(
   request: Request,
@@ -29,16 +47,11 @@ export async function PUT(
       total_eur: scenario.totals.totalEur,
     }).eq("id", id);
 
-    // Poiche' le dipendenze (moduli -> task -> effort) possono essere alterate 
-    // l'approccio piu sicuro per l'MVP e' eliminare i vecchi moduli e ricrearli.
-    // Il cascade delete di postgres (se configurato) o Supabase si occupera' dei children.
-    // MA per sicurezza eseguiamo i delete in ordine inverso se non c'e' il cascade.
-    
     // Otteniamo l'ID dell'organizzazione
     const { data: scenarioRow } = await admin.from("quote_scenarios").select("organization_id").eq("id", id).single();
     const orgId = scenarioRow?.organization_id;
 
-    // Per semplificare, eliminiamo tutti i moduli e figli associati per ricrearli aggiornati
+    // Eliminiamo tutti i moduli e figli associati per ricrearli aggiornati
     const { data: modules } = await admin.from("quote_modules").select("id").eq("quote_scenario_id", id);
     const moduleIds = modules?.map(m => m.id) || [];
     if (moduleIds.length > 0) {
@@ -57,7 +70,7 @@ export async function PUT(
 
     // Ricostruiamo le righe
     for (const [modIdx, mod] of scenario.modules.entries()) {
-      const moduleId = mod.id || crypto.randomUUID(); // riusa l'ID se presente per mantenere stabilita
+      const moduleId = mod.id || crypto.randomUUID();
       modulesToInsert.push({
         id: moduleId,
         organization_id: orgId,
@@ -96,15 +109,21 @@ export async function PUT(
             estimated_hours_expected: effort.estimatedHoursExpected,
             estimated_hours_max: effort.estimatedHoursMax,
             hourly_rate_eur: effort.hourlyRateEur,
-            cost_eur: effort.costEur,
+            // NOTA: cost_eur è GENERATED ALWAYS in Postgres — non inserire
             rationale: effort.rationale,
           });
         }
       }
     }
 
-    if (modulesToInsert.length > 0) await admin.from("quote_modules").insert(modulesToInsert);
-    if (tasksToInsert.length > 0) await admin.from("quote_tasks").insert(tasksToInsert);
+    if (modulesToInsert.length > 0) {
+      const { error } = await admin.from("quote_modules").insert(modulesToInsert);
+      if (error) console.error("[ScenarioPUT] Errore insert moduli:", error.message);
+    }
+    if (tasksToInsert.length > 0) {
+      const { error } = await admin.from("quote_tasks").insert(tasksToInsert);
+      if (error) console.error("[ScenarioPUT] Errore insert task:", error.message);
+    }
     if (effortsToInsert.length > 0) await admin.from("quote_task_efforts").insert(effortsToInsert);
 
     return NextResponse.json({ saved: true });

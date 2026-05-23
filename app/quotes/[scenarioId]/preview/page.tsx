@@ -1,4 +1,5 @@
 import { QuotePreviewClient } from "@/components/quote/quote-preview-client";
+import { getScenarioById } from "@/src/server/repositories/quote-repository";
 
 export default async function QuotePreviewPage({
   params,
@@ -6,5 +7,6 @@ export default async function QuotePreviewPage({
   params: Promise<{ scenarioId: string }>;
 }) {
   const { scenarioId } = await params;
-  return <QuotePreviewClient scenarioId={scenarioId} />;
+  const scenario = await getScenarioById(scenarioId);
+  return <QuotePreviewClient scenarioId={scenarioId} initialScenario={scenario} />;
 }
