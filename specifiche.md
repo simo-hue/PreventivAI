@@ -2,7 +2,7 @@
 
 **Versione:** 1.0  
 **Data:** 2026-05-23  
-**Ruolo richiesto:** Senior IT Project Manager / Technical Product Owner  
+**Ruolo richiesto:** Senior Software Developer
 **Output atteso:** web app interna per generare preventivi tecnico-economici da richieste cliente testuali o audio, con stime supportate da storico lavori aziendali, tariffario Supabase e AI via OpenRouter.
 
 ---
