@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextResponse } from "next/server";
 import { createSupabaseAdminClient } from "@/src/lib/supabase/admin";
 import { getScenarioById } from "@/src/server/repositories/quote-repository";

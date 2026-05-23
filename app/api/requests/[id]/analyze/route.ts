@@ -26,7 +26,7 @@ export async function POST(
   let payload = {};
   try {
     payload = await request.json();
-  } catch (e) {
+  } catch {
     // Empty payload
   }
   const parsed = AnalyzeRequestSchema.safeParse(payload);

@@ -17,6 +17,7 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
       <aside className="fixed inset-y-0 left-0 z-20 hidden w-64 border-r border-[var(--border)] bg-[var(--surface-strong)] lg:block">
         <div className="flex h-20 items-center border-b border-[var(--border)] px-5">
           <Link href="/requests" className="flex items-center gap-2 text-lg font-bold text-[var(--primary)]">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/logo.png" alt="PreventivAI Logo" className="h-14 w-auto object-contain" />
           </Link>
         </div>
@@ -40,6 +41,7 @@ export async function AppShell({ children }: { children: React.ReactNode }) {
         <header className="sticky top-0 z-10 border-b border-[var(--border)] bg-white/80 backdrop-blur-md">
           <div className="flex min-h-20 items-center justify-between gap-4 px-4 sm:px-6">
             <Link href="/requests" className="flex items-center gap-2 font-bold text-[var(--primary)] lg:hidden">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/logo.png" alt="PreventivAI Logo" className="h-14 w-auto object-contain" />
             </Link>
             <div className="hidden text-sm text-[var(--muted)] sm:block">

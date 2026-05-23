@@ -42,7 +42,6 @@ export function ScenarioDetailClient({
     currency: string;
     riskBufferPercentage: number;
   } | null>(null);
-  const [recalcError, setRecalcError] = useState<string | null>(null);
 
   // Carica le impostazioni di pricing dal server
   useEffect(() => {
@@ -68,31 +67,32 @@ export function ScenarioDetailClient({
         if (data?.scenario) {
           setScenario(data.scenario);
           setOverrides(
-            Object.fromEntries(data.scenario.modules.map((m: any) => [m.id, m.isIncluded])),
+            Object.fromEntries(data.scenario.modules.map((m: { id: string; isIncluded: boolean }) => [m.id, m.isIncluded])),
           );
         }
       })
       .catch(() => {});
   }, [scenarioId, initialScenario]);
 
-  // Ricalcolo con error handling robusto
-  const recalculated = useMemo(() => {
-    if (!scenario) return null;
+  const { recalculated, recalcError } = useMemo(() => {
+    if (!scenario) return { recalculated: null, recalcError: null };
     try {
-      setRecalcError(null);
-      return recalculateScenario(
+      const recalculated = recalculateScenario(
         scenario,
         officialRateCards,
         pricingSettings?.pmPercentage ?? DEFAULT_PM_PERCENTAGE,
         overrides,
         pricingSettings?.riskBufferPercentage ?? 0,
       );
+      return { recalculated, recalcError: null };
     } catch (err) {
       // Se il ricalcolo fallisce (es. ruolo non presente in rate card), usa il scenario as-is
       console.warn("[ScenarioDetail] recalculateScenario fallback:", err);
-      setRecalcError(err instanceof Error ? err.message : String(err));
       // Restituisce il scenario originale con i totali già calcolati dal DB
-      return { ...scenario };
+      return {
+        recalculated: { ...scenario },
+        recalcError: err instanceof Error ? err.message : String(err),
+      };
     }
   }, [scenario, overrides, pricingSettings]);
 
