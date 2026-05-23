@@ -321,3 +321,22 @@
   - *Tech Notes*:
     - Rimosso il fetch della tabella `profiles` in `components/public/login-modal.tsx`. Il client esegue ora una redirect incondizionata verso `/admin/requests` subito dopo il login con successo.
     - Il componente `app/(dashboard)/admin/layout.tsx` intercetta questa route, ed è stato modificato per utilizzare `createSupabaseAdminClient` per interrogare la tabella `profiles` bypassando il vincolo RLS, reindirizzando conseguentemente i clienti alla loro dashboard personale e consentendo l'accesso agli admin.
+
+- [2026-05-24T00:50:00+02:00]: Restyling Home Page (Landing Software House)
+  - *Details*: Aggiornata la pagina `/home` per trasformarla in una vera e propria landing page professionale per una software house.
+  - *Tech Notes*:
+    - Modificato `components/public/client-landing.tsx`.
+    - Aggiunta una Hero section con gradient text e nuova call to action.
+    - Inserito un placeholder SVG (`public/team.svg`) per l'immagine del team al centro della pagina. Il placeholder utilizza un layout accattivante e scalabile. L'utente lo rimpiazzerà poi con `public/team.jpg`.
+    - Aggiunta la sezione 'Le nostre competenze' con 3 card descrittive per i servizi offerti (Sviluppo Web, IA, Consulenza).
+    - Mantenuto e integrato nel design in fondo alla pagina il form per richiedere il preventivo.
+    - Utilizzate nuove icone da `lucide-react` (Rocket, Lightbulb, Code2, BrainCircuit).
+
+- [2026-05-24T00:52:00+02:00]: Aggiornamento Placeholder Immagine Team
+  - *Details*: Aggiornato il percorso dell'immagine da `team.svg` a `team.png` in `components/public/client-landing.tsx` per riflettere il nuovo asset caricato.
+
+- [2026-05-24T00:54:00+02:00]: Fix UI Bottone Landing
+  - *Details*: Corretto il contrasto del colore per il bottone "Richiedi Preventivo IA" nella Hero Section per garantirne la leggibilità sostituendo le variabili CSS con classi utility esplicite (bg-blue-600, text-white).
+
+- [2026-05-24T00:55:00+02:00]: Fix Allineamento Immagine Team
+  - *Details*: Aggiunta la classe `object-top` all'immagine del team nella home page per allinearla in alto ed evitare che i volti vengano tagliati dal ratio 21:9.
