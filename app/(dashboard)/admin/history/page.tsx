@@ -9,8 +9,8 @@ export default function HistoryPage() {
         <div>
           <h1 className="text-2xl font-bold tracking-normal">Storico lavori</h1>
           <p className="mt-1 max-w-3xl text-sm leading-6 text-[var(--muted)]">
-            Seed demo per recuperare casi simili. La migration include tabelle,
-            full-text search e pgvector.
+            Seed demo per recuperare casi simili. Nel flusso MVP lo storico viene
+            passato al modello come contesto compatto, senza ricerca vettoriale.
           </p>
         </div>
         <ButtonLink href="/admin/history/import" variant="secondary">

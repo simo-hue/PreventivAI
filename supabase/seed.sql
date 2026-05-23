@@ -61,3 +61,77 @@ values
   'Le regole KYC hanno richiesto discovery aggiuntiva.',
   array['marketplace', 'stripe', 'b2b']
 );
+
+with projects as (
+  select id, project_name
+  from public.historical_projects
+  where organization_id = '00000000-0000-0000-0000-000000000001'
+)
+insert into public.historical_project_modules
+(
+  organization_id,
+  historical_project_id,
+  module_name,
+  module_description,
+  complexity,
+  actual_hours_by_role,
+  notes
+)
+select
+  '00000000-0000-0000-0000-000000000001',
+  p.id,
+  module_name,
+  module_description,
+  complexity,
+  actual_hours_by_role,
+  notes
+from projects p
+cross join (
+  values
+  (
+    'Subscription food delivery',
+    'Subscription e checkout',
+    'Stripe Billing, carrello e gestione abbonamenti ricorrenti.',
+    'medium',
+    '{"Full-Stack / Backend Developer|Senior": 34, "Frontend Developer|Mid": 22, "QA / Tester Engineer|Mid": 10}'::jsonb,
+    null
+  ),
+  (
+    'Subscription food delivery',
+    'Pannello operativo',
+    'Gestione catalogo, ordini e operazioni interne.',
+    'medium',
+    '{"UX/UI Designer|Senior": 10, "Full-Stack / Backend Developer|Senior": 26, "Frontend Developer|Mid": 28}'::jsonb,
+    null
+  ),
+  (
+    'Marketplace B2B',
+    'Onboarding venditori',
+    'Flusso di registrazione, verifica e configurazione profilo venditore.',
+    'medium',
+    '{"UX/UI Designer|Senior": 12, "Full-Stack / Backend Developer|Senior": 28, "Frontend Developer|Mid": 24}'::jsonb,
+    null
+  ),
+  (
+    'Marketplace B2B',
+    'Pagamenti Stripe Connect',
+    'Configurazione account connessi, payout e gestione KYC.',
+    'high',
+    '{"Software Architect|Specialist": 8, "Full-Stack / Backend Developer|Senior": 36, "QA / Tester Engineer|Mid": 12}'::jsonb,
+    'Le regole KYC hanno richiesto discovery aggiuntiva.'
+  )
+) as modules(
+  project_name,
+  module_name,
+  module_description,
+  complexity,
+  actual_hours_by_role,
+  notes
+)
+where p.project_name = modules.project_name
+  and not exists (
+    select 1
+    from public.historical_project_modules existing
+    where existing.historical_project_id = p.id
+      and existing.module_name = modules.module_name
+  );

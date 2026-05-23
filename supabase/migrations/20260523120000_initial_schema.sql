@@ -1,4 +1,3 @@
-create extension if not exists vector;
 create extension if not exists pg_trgm;
 create extension if not exists unaccent;
 create extension if not exists pgcrypto;
@@ -126,27 +125,6 @@ create table public.historical_project_modules (
   created_at timestamptz not null default now()
 );
 
-create table public.historical_project_chunks (
-  id uuid primary key default gen_random_uuid(),
-  organization_id uuid not null references public.organizations(id),
-  historical_project_id uuid not null references public.historical_projects(id) on delete cascade,
-  content text not null,
-  content_tsv tsvector generated always as (
-    to_tsvector('simple', coalesce(content, ''))
-  ) stored,
-  embedding vector(1536),
-  metadata jsonb not null default '{}'::jsonb,
-  created_at timestamptz not null default now()
-);
-
-create index historical_project_chunks_embedding_idx
-on public.historical_project_chunks
-using hnsw (embedding vector_cosine_ops);
-
-create index historical_project_chunks_tsv_idx
-on public.historical_project_chunks
-using gin (content_tsv);
-
 create table public.quote_runs (
   id uuid primary key default gen_random_uuid(),
   organization_id uuid not null references public.organizations(id),
@@ -272,47 +250,6 @@ create table public.ai_call_logs (
   created_at timestamptz not null default now()
 );
 
-create or replace function public.match_historical_project_chunks(
-  query_embedding vector(1536),
-  query_text text,
-  match_count int,
-  org_id uuid
-)
-returns table (
-  id uuid,
-  historical_project_id uuid,
-  content text,
-  similarity float,
-  text_rank float,
-  combined_score float,
-  metadata jsonb
-)
-language sql stable
-as $$
-  with semantic_matches as (
-    select
-      c.id,
-      c.historical_project_id,
-      c.content,
-      1 - (c.embedding <=> query_embedding) as similarity,
-      ts_rank(c.content_tsv, plainto_tsquery('simple', query_text)) as text_rank,
-      c.metadata
-    from public.historical_project_chunks c
-    where c.organization_id = org_id
-  )
-  select
-    id,
-    historical_project_id,
-    content,
-    similarity,
-    text_rank,
-    (0.70 * similarity + 0.30 * text_rank) as combined_score,
-    metadata
-  from semantic_matches
-  order by combined_score desc
-  limit match_count;
-$$;
-
 create or replace function public.current_organization_id()
 returns uuid
 language sql stable
@@ -360,7 +297,6 @@ alter table public.client_requests enable row level security;
 alter table public.request_assets enable row level security;
 alter table public.historical_projects enable row level security;
 alter table public.historical_project_modules enable row level security;
-alter table public.historical_project_chunks enable row level security;
 alter table public.quote_runs enable row level security;
 alter table public.clarification_questions enable row level security;
 alter table public.quote_scenarios enable row level security;
@@ -460,15 +396,6 @@ using (public.can_read_org_row(organization_id));
 
 create policy "Write own org history modules"
 on public.historical_project_modules for all
-using (public.can_write_org_row(organization_id))
-with check (public.can_write_org_row(organization_id));
-
-create policy "Read own org history chunks"
-on public.historical_project_chunks for select
-using (public.can_read_org_row(organization_id));
-
-create policy "Write own org history chunks"
-on public.historical_project_chunks for all
 using (public.can_write_org_row(organization_id))
 with check (public.can_write_org_row(organization_id));
 

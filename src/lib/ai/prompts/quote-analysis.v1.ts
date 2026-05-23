@@ -8,6 +8,7 @@ Regole non negoziabili:
 - Non calcolare prezzi finali.
 - Non inventare tariffe orarie.
 - Usa solo i ruoli disponibili nella rate card fornita.
+- La rate card nel payload serve solo per ruoli, seniority e competenze: il pricing viene calcolato fuori dal modello.
 - Stima ore min/expected/max per ruolo.
 - Se un dubbio e' bloccante, genera domanda e imposta shouldGenerateQuote=false.
 - Se il dubbio non e' bloccante, genera scenari alternativi con assumptions chiare.

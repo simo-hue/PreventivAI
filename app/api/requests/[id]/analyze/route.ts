@@ -8,6 +8,7 @@ import {
 } from "@/src/lib/ai/quote-agent";
 import { DEFAULT_PM_PERCENTAGE, officialRateCards } from "@/src/lib/demo/rate-card";
 import { priceScenarios } from "@/src/lib/quotes/pricing-engine";
+import { requireUser } from "@/src/lib/auth/require-user";
 import { getSimilarHistoricalProjects } from "@/src/server/repositories/history-repository";
 import { createQuoteRun } from "@/src/server/repositories/quote-repository";
 
@@ -31,7 +32,11 @@ export async function POST(
   }
 
   try {
-    const similarHistoricalProjects = await getSimilarHistoricalProjects();
+    const user = await requireUser();
+    const similarHistoricalProjects = await getSimilarHistoricalProjects({
+      organizationId: user.organizationId,
+      requestText: parsed.data.requestText,
+    });
     const context = createPromptContext({
       requestText: parsed.data.requestText,
       rateCards: officialRateCards,

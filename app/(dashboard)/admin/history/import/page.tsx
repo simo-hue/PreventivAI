@@ -13,7 +13,7 @@ export default function HistoryImportPage() {
       <Alert title="Formato supportato" variant="info">
         Usa JSON con project_name, description, modules e actual_hours_by_role
         come descritto in specifiche.md. Il prossimo passo e' collegare questa
-        pagina a Supabase Storage e alla funzione di chunking.
+        pagina a Supabase Storage e alle tabelle dello storico lavori.
       </Alert>
     </div>
   );

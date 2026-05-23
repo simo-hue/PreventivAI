@@ -20,15 +20,19 @@ export type PromptContext = {
   rateCard: Array<{
     roleName: string;
     seniority: string;
-    hourlyRateEur: number;
     competenceScope: string;
   }>;
   similarHistoricalProjects: Array<{
     projectName: string;
+    clientIndustry?: string;
     projectType?: string;
     description: string;
+    initialRequest?: string;
+    deliveredScope?: string;
+    tags?: string[];
     modules: Array<{
       moduleName: string;
+      description?: string;
       complexity?: string;
       actualHoursByRole: Record<string, number>;
       notes?: string;
@@ -94,7 +98,6 @@ export function createPromptContext(args: {
     rateCard: args.rateCards.map((rateCard) => ({
       roleName: rateCard.roleName,
       seniority: rateCard.seniority,
-      hourlyRateEur: rateCard.hourlyRateEur,
       competenceScope: rateCard.competenceScope,
     })),
     similarHistoricalProjects: args.similarHistoricalProjects,

@@ -163,7 +163,7 @@ Stack consigliato per il progetto:
 - **Supabase Auth** per autenticazione interna;
 - **Supabase Storage** per audio, documenti e PDF;
 - **Supabase Row Level Security** per protezione dati;
-- **pgvector** per ricerca semantica su storico progetti;
+- **storico lavori Supabase** passato come contesto compatto al modello;
 - **OpenRouter API** per chiamata LLM;
 - **ElevenLabs Speech-to-Text** per trascrizione audio;
 - **Zod** per validazione input e output AI;
@@ -188,8 +188,7 @@ Web App Next.js
    v
 Pipeline AI
    |
-   |-- embedding richiesta
-   |-- recupero progetti storici simili da Supabase
+   |-- recupero storico lavori filtrato da Supabase
    |-- recupero tariffario ufficiale
    |-- chiamata OpenRouter con prompt strutturato
    |-- validazione output JSON con Zod
@@ -333,15 +332,7 @@ Annotare:
 - anon public key;
 - service role key.
 
-### 2. Abilitare estensione vector
-
-Nel SQL editor Supabase eseguire:
-
-```sql
-create extension if not exists vector;
-```
-
-### 3. Tabelle minime
+### 2. Tabelle minime
 
 Il database deve contenere almeno queste tabelle:
 
@@ -349,7 +340,8 @@ Il database deve contenere almeno queste tabelle:
 rate_cards
 employees
 employee_rate_cards
-project_histories
+historical_projects
+historical_project_modules
 estimate_requests
 estimates
 estimate_scenarios
@@ -362,7 +354,7 @@ estimate_exports
 ai_audit_logs
 ```
 
-### 4. Rate card ufficiale
+### 3. Rate card ufficiale
 
 La tabella `rate_cards` deve essere popolata con il tariffario ufficiale. Queste tariffe sono la base obbligatoria per il calcolo economico.
 
@@ -385,17 +377,21 @@ insert into rate_cards (
   ('DevOps Engineer', 'Senior', 80, 'EUR', 'Deploy su AWS/Azure, CI/CD pipelines, ottimizzazione server.', true);
 ```
 
-### 5. Storico progetti
+### 4. Storico progetti
 
-La tabella `project_histories` deve contenere i lavori precedenti dell’azienda.
+Le tabelle `historical_projects` e `historical_project_modules` devono contenere
+i lavori precedenti dell’azienda.
 
 Campi consigliati:
 
 ```text
 id
 project_name
-client_sector
+client_industry
+project_type
 description
+initial_request
+delivered_scope
 modules
 technologies
 actual_hours
@@ -404,14 +400,14 @@ team_composition
 complexity
 risks
 lessons_learned
-embedding
 created_at
 updated_at
 ```
 
-Questa tabella viene usata per recuperare progetti simili e aiutare l’LLM a stimare ore coerenti.
+Queste tabelle vengono usate per recuperare progetti simili con filtri testuali
+semplici e aiutare l’LLM a stimare ore coerenti.
 
-### 6. Row Level Security
+### 5. Row Level Security
 
 Abilitare RLS su tutte le tabelle applicative.
 
@@ -1009,4 +1005,3 @@ Controllare:
 ## Licenza e utilizzo
 
 PreventivAI è un tool interno aziendale. L’uso è riservato a personale autorizzato.
-
