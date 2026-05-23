@@ -1,3 +1,0 @@
-- [2026-05-23 13:12:51 CEST]: Configurare `.env.local` per testare integrazioni reali. Copiare `.env.example` e inserire valori per Supabase, `OPENROUTER_API_KEY` e `ELEVENLABS_API_KEY` se vuoi uscire dal fallback demo.
-- [2026-05-23 13:12:51 CEST]: Se vuoi provare Supabase locale, eseguire `pnpm db:start` e `pnpm db:reset` per applicare migration e seed.
-- [2026-05-23 13:12:51 CEST]: Completare il test manuale browser richiesto dall'utente su `http://localhost:3000/requests`.
