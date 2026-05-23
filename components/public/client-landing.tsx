@@ -1,29 +1,61 @@
 "use client";
 
 import { useState } from "react";
-import { Sparkles } from "lucide-react";
+import { UserCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SignupModal } from "./signup-modal";
+import { LoginModal } from "./login-modal";
+import Image from "next/image";
 
 export function ClientLanding() {
   const [companyName, setCompanyName] = useState("");
   const [projectDescription, setProjectDescription] = useState("");
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isSignupModalOpen, setIsSignupModalOpen] = useState(false);
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (companyName.trim() && projectDescription.trim().length >= 10) {
-      setIsModalOpen(true);
+      setIsSignupModalOpen(true);
     }
   };
 
   return (
-    <main className="min-h-screen bg-slate-50 text-slate-900">
-      <div className="mx-auto max-w-4xl px-4 py-20 sm:px-6 lg:px-8">
-        <div className="text-center">
-          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-[var(--primary)] text-white shadow-lg">
-            <Sparkles className="h-8 w-8" />
+    <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col">
+      {/* Header */}
+      <header className="w-full bg-white border-b border-slate-200">
+        <nav className="mx-auto flex max-w-7xl items-center justify-between p-4 sm:px-6 lg:px-8" aria-label="Global">
+          <div className="flex lg:flex-1">
+            <a href="/home" className="-m-1.5 p-1.5">
+              <span className="sr-only">Italians quote it better</span>
+              <div className="relative h-12 w-48 sm:h-14 sm:w-56">
+                <Image
+                  src="/logo_originale.png"
+                  alt="Italians quote it better Logo"
+                  fill
+                  className="object-contain object-left"
+                  priority
+                />
+              </div>
+            </a>
           </div>
+          <div className="flex flex-1 justify-end">
+            <Button 
+              variant="secondary" 
+              onClick={() => setIsLoginModalOpen(true)}
+              className="gap-2"
+            >
+              <UserCircle className="h-4 w-4" />
+              Area Utente
+            </Button>
+          </div>
+        </nav>
+      </header>
+
+      {/* Main Content */}
+      <main className="flex-1 w-full mx-auto max-w-4xl px-4 py-16 sm:px-6 lg:px-8">
+        <div className="text-center">
+
           <h1 className="mt-8 text-4xl font-extrabold tracking-tight sm:text-5xl">
             Dai vita al tuo progetto.
           </h1>
@@ -32,7 +64,7 @@ export function ClientLanding() {
           </p>
         </div>
 
-        <div className="mx-auto mt-16 max-w-2xl rounded-2xl border border-slate-200 bg-white p-8 shadow-xl">
+        <div className="mx-auto mt-12 max-w-2xl rounded-2xl border border-slate-200 bg-white p-8 shadow-xl">
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label htmlFor="companyName" className="block text-sm font-semibold text-slate-900">
@@ -76,14 +108,19 @@ export function ClientLanding() {
             </Button>
           </form>
         </div>
-      </div>
+      </main>
 
       <SignupModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        isOpen={isSignupModalOpen}
+        onClose={() => setIsSignupModalOpen(false)}
         companyName={companyName}
         projectDescription={projectDescription}
       />
-    </main>
+
+      <LoginModal
+        isOpen={isLoginModalOpen}
+        onClose={() => setIsLoginModalOpen(false)}
+      />
+    </div>
   );
 }
