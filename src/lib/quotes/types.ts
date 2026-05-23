@@ -1,0 +1,129 @@
+export type Seniority =
+  | "Junior"
+  | "Mid"
+  | "Senior"
+  | "Specialist"
+  | string;
+
+export type RateCard = {
+  id: string;
+  roleName: string;
+  seniority: Seniority;
+  hourlyRateEur: number;
+  competenceScope: string;
+};
+
+export type RoleEffort = {
+  roleName: string;
+  seniority: Seniority;
+  estimatedHoursMin: number;
+  estimatedHoursExpected: number;
+  estimatedHoursMax: number;
+  rationale: string;
+};
+
+export type QuoteTask = {
+  title: string;
+  description?: string;
+  userStory?: string;
+  acceptanceCriteria: string[];
+  efforts: RoleEffort[];
+};
+
+export type QuoteModule = {
+  name: string;
+  description: string;
+  complexity: "low" | "medium" | "high";
+  isOptional: boolean;
+  isIncludedByDefault: boolean;
+  dependencyNotes?: string;
+  riskNotes?: string;
+  tasks: QuoteTask[];
+};
+
+export type QuoteRisk = {
+  label: string;
+  severity: "low" | "medium" | "high";
+  mitigation: string;
+};
+
+export type QuoteScenarioFromAi = {
+  name: string;
+  slug: string;
+  scenarioType: "base" | "alternative" | "premium" | "lean";
+  description: string;
+  assumptions: string[];
+  exclusions: string[];
+  risks: QuoteRisk[];
+  confidence: number;
+  estimatedWeeksMin: number;
+  estimatedWeeksExpected: number;
+  estimatedWeeksMax: number;
+  modules: QuoteModule[];
+};
+
+export type PricedEffort = RoleEffort & {
+  roleRateCardId: string;
+  hourlyRateEur: number;
+  costEur: number;
+};
+
+export type PricedTask = Omit<QuoteTask, "efforts"> & {
+  efforts: PricedEffort[];
+  subtotalEur: number;
+};
+
+export type PricedModule = Omit<QuoteModule, "tasks"> & {
+  id: string;
+  isIncluded: boolean;
+  tasks: PricedTask[];
+  subtotalEur: number;
+};
+
+export type ScenarioTotals = {
+  subtotalEur: number;
+  nonPmHours: number;
+  pmHours: number;
+  pmCostEur: number;
+  riskBufferEur: number;
+  totalEur: number;
+};
+
+export type PricedScenario = Omit<QuoteScenarioFromAi, "modules"> & {
+  id: string;
+  modules: PricedModule[];
+  totals: ScenarioTotals;
+  roleBreakdown: PricedRoleBreakdown[];
+};
+
+export type PricedRoleBreakdown = {
+  roleRateCardId: string;
+  roleName: string;
+  seniority: string;
+  hours: number;
+  hourlyRateEur: number;
+  costEur: number;
+};
+
+export type ClarificationQuestion = {
+  question: string;
+  reason: string;
+  impact: string;
+  priority: "blocking" | "important" | "nice_to_have";
+  answer?: string;
+};
+
+export type AnalysisOutput = {
+  summary: string;
+  detectedBudgetEur: number | null;
+  detectedDeadline: string | null;
+  detectedTimelineText: string | null;
+  blockingQuestions: ClarificationQuestion[];
+  importantQuestions: ClarificationQuestion[];
+  shouldGenerateQuote: boolean;
+  scenarios: QuoteScenarioFromAi[];
+};
+
+export type PricedAnalysisOutput = Omit<AnalysisOutput, "scenarios"> & {
+  scenarios: PricedScenario[];
+};
