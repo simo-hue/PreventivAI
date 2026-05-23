@@ -7,7 +7,7 @@ export default function RateCardPage() {
   return (
     <div className="space-y-5">
       <div>
-        <h1 className="text-2xl font-bold tracking-normal">Rate card ufficiale</h1>
+        <h1 className="text-2xl font-bold tracking-normal">Tariffario ufficiale</h1>
         <p className="mt-1 max-w-3xl text-sm leading-6 text-[var(--muted)]">
           Il pricing usa queste tariffe come input. In produzione vengono lette
           da Supabase e salvate come snapshot negli effort del preventivo.
@@ -36,7 +36,7 @@ export default function RateCardPage() {
                   </td>
                   <td className="py-3 text-[var(--muted)]">{rate.competenceScope}</td>
                   <td className="py-3">
-                    <Badge variant="success">active</Badge>
+                    <Badge variant="success">Attivo</Badge>
                   </td>
                 </tr>
               ))}

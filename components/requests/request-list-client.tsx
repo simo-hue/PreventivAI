@@ -9,12 +9,12 @@ import { formatCurrency } from "@/src/lib/utils/format";
 import { deleteRequestAction } from "@/app/(dashboard)/requests/actions";
 
 const statusLabel: Record<string, string> = {
-  draft: "Draft",
-  analyzing: "Analyzing",
-  needs_clarification: "Needs clarification",
-  quoted: "Quoted",
-  delivered: "Delivered",
-  error: "Error",
+  draft: "Bozza",
+  analyzing: "In analisi",
+  needs_clarification: "Richiede chiarimenti",
+  quoted: "Preventivato",
+  delivered: "Consegnato",
+  error: "Errore",
 };
 
 import type { StoredRequest } from "@/src/lib/demo/storage";

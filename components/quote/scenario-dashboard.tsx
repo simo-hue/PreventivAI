@@ -43,7 +43,7 @@ export function ScenarioDashboard({ initialData: request }: { initialData: Store
                       : "neutral"
               }
             >
-              {request.status === "quoted" ? "Quoted" : request.status === "delivered" ? "Delivered" : "Needs clarification"}
+              {request.status === "quoted" ? "Preventivato" : request.status === "delivered" ? "Consegnato" : "Richiede chiarimenti"}
             </Badge>
           </div>
           <p className="mt-2 max-w-4xl text-sm leading-6 text-[var(--muted)]">
@@ -144,7 +144,7 @@ export function ScenarioDashboard({ initialData: request }: { initialData: Store
                     <div className="flex flex-wrap items-center gap-2">
                       <h2 className="text-lg font-bold">{scenario.name}</h2>
                       <Badge variant={scenario.scenarioType === "lean" ? "success" : scenario.scenarioType === "premium" ? "warning" : "info"}>
-                        {scenario.scenarioType}
+                        {scenario.scenarioType === "lean" ? "Essenziale" : scenario.scenarioType === "premium" ? "Premium" : "Bilanciato"}
                       </Badge>
                     </div>
                     <p className="mt-2 text-sm leading-6 text-[var(--muted)]">

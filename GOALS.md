@@ -9,10 +9,6 @@
 
 [ ] Voglio effettuare una modifica alla pagina "/admin/rate-card". La modifica consiste nel fatto che io voglio poter aver la possibilità modificare ogni singola cella del tariffario una volta cliccato sul pulsante, che deve essere aggiunto, "Modifica". Per la colonna "stato" devo poter selezionare tra "attivo" e "inattivo".
 
-
-[ ] Anche quando clicco il pulsante "rispondi e ricalcola" con la risposta ad una domanda voglio che come per la fase di generazione dei preventivi ci sia un pop up che mi tiene aggiornato sullo stato dell'aggiornamento ( prendi quello come esempio e personalizza le voci )
-
-
 [ ] Controllare coerenza tra budget disponibile e budget proposto da preventivo
 
 [ ] 

@@ -219,7 +219,9 @@ export function ScenarioDetailClient({
           </Link>
           <div className="mt-2 flex flex-wrap items-center gap-2">
             <h1 className="text-2xl font-bold tracking-normal">{display.name}</h1>
-            <Badge variant="info">{display.scenarioType}</Badge>
+            <Badge variant="info">
+              {display.scenarioType === "lean" ? "Essenziale" : display.scenarioType === "premium" ? "Premium" : "Bilanciato"}
+            </Badge>
           </div>
           <p className="mt-2 max-w-4xl text-sm leading-6 text-[var(--muted)]">
             {display.description}
@@ -248,7 +250,7 @@ export function ScenarioDetailClient({
 
       <div className="grid gap-4 md:grid-cols-4">
         <Metric label="Totale" value={formatCurrency(display.totals.totalEur, pricingSettings?.currency)} />
-        <Metric label="Subtotal" value={formatCurrency(display.totals.subtotalEur, pricingSettings?.currency)} />
+        <Metric label="Subtotale" value={formatCurrency(display.totals.subtotalEur, pricingSettings?.currency)} />
         <Metric label="PM" value={`${display.totals.pmHours}h / ${formatCurrency(display.totals.pmCostEur, pricingSettings?.currency)}`} />
         <Metric label="Confidenza" value={formatPercent(display.confidence)} />
       </div>
@@ -263,7 +265,7 @@ export function ScenarioDetailClient({
                   <div className="flex flex-wrap items-center gap-2">
                     <h2 className="font-semibold">{module.name}</h2>
                     <Badge variant={module.isOptional ? "warning" : "success"}>
-                      {module.isOptional ? "Optional" : "Core"}
+                      {module.isOptional ? "Opzionale" : "Base"}
                     </Badge>
                     <Badge variant="neutral">{module.complexity}</Badge>
                   </div>
@@ -371,8 +373,8 @@ export function ScenarioDetailClient({
       </Card>
 
       <div className="grid gap-4 lg:grid-cols-2">
-        <ListCard title="Assumptions" items={display.assumptions} />
-        <ListCard title="Exclusions" items={display.exclusions} />
+        <ListCard title="Ipotesi / Assunzioni" items={display.assumptions} />
+        <ListCard title="Esclusioni" items={display.exclusions} />
       </div>
     </div>
   );
