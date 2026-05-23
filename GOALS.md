@@ -73,3 +73,10 @@ A: bacheca pubblica                                                             
 Risposte cliente:
 Q: I rider necessitano di un'applicazione nativa separata o è sufficiente una vista dedicata nell'app principale?
 A: sono disposto ad aumentare il budget fino a 50000€ | null            | text        | quoted | null              | null            | null                 | it       | 2026-05-23 14:37:37.513918+00 | 2026-05-23 14:38:48.286+00    |""".
+
+
+---
+
+è stato risolto con successo, quando però clicco sul pulsante "Rispondi e ricalcola" ricevo questo da terminale : [QuoteRepo] Errore aggiornamento client_requests: invalid input syntax for type date: "3 mesi"
+ POST /api/requests/5473f9e7-47d4-4973-a3f3-4412b805035e/analyze 200 in 24.4s (next.js: 6ms, application-code: 24.4s)
+ GET /requests/5473f9e7-47d4-4973-a3f3-4412b805035e 200 in 434ms (next.js: 4ms, application-code: 430ms)
