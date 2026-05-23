@@ -1,5 +1,6 @@
 import { QuotePreviewClient } from "@/components/quote/quote-preview-client";
 import { getScenarioById } from "@/src/server/repositories/quote-repository";
+import { getClientRequestById } from "@/src/server/repositories/request-repository";
 
 export default async function QuotePreviewPage({
   params,
@@ -8,5 +9,17 @@ export default async function QuotePreviewPage({
 }) {
   const { scenarioId } = await params;
   const scenario = await getScenarioById(scenarioId);
-  return <QuotePreviewClient scenarioId={scenarioId} initialScenario={scenario} />;
+  
+  let request = null;
+  if (scenario?.clientRequestId) {
+    request = await getClientRequestById(scenario.clientRequestId);
+  }
+
+  return (
+    <QuotePreviewClient 
+      scenarioId={scenarioId} 
+      initialScenario={scenario} 
+      initialRequest={request as unknown as import("@/src/lib/demo/storage").StoredRequest} 
+    />
+  );
 }

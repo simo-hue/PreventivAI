@@ -90,6 +90,28 @@ export async function POST(
       return NextResponse.json({ error: "Not found or unauthorized" }, { status: 404 });
     }
 
+    // Ensure the sender has a profile (customers signing up might not have one)
+    if (user.id !== "demo-user") {
+      const { data: profile } = await admin
+        .from("profiles")
+        .select("id")
+        .eq("id", user.id)
+        .maybeSingle();
+
+      if (!profile) {
+        // Fetch user metadata to get the full name
+        const { data: userData } = await admin.auth.admin.getUserById(user.id);
+        const fullName = userData?.user?.user_metadata?.full_name || "Cliente";
+
+        await admin.from("profiles").insert({
+          id: user.id,
+          organization_id: user.organizationId,
+          full_name: fullName,
+          role: "viewer",
+        });
+      }
+    }
+
     const { data: message, error } = await admin
       .from("chat_messages")
       .insert({

@@ -50,11 +50,13 @@ export async function getClientRequestById(id: string) {
 
   const { data, error } = await admin
     .from("client_requests")
-    .select("*")
+    .select("*, quote_runs(id, llm_raw_response)")
     .eq("id", id)
     .maybeSingle();
 
   if (error || !data) return null;
+
+  const quoteRun = data.quote_runs?.[data.quote_runs.length - 1];
 
   return {
     id: data.id,
@@ -63,6 +65,7 @@ export async function getClientRequestById(id: string) {
     sourceType: data.source_type,
     status: data.status,
     createdAt: data.created_at,
+    analysis: quoteRun?.llm_raw_response ?? undefined,
   };
 }
 

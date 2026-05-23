@@ -236,9 +236,22 @@
   - *Tech Notes*: Modificato `components/quote/scenario-dashboard.tsx` eliminando la funzione `handleRecalculate`, lo stato `isRecalculating` e il bottone HTML corrispondente. La logica di ri-trigger automatico risiede già all'interno di `chat-box.tsx`.
 
 - [2026-05-23T22:50:00+02:00]: Aggiunta Toggle per Nascondere Ore e Tariffe
-  - *Details*: Aggiunta la possibilità di decidere se mostrare o nascondere le colonne delle ore stimate e delle tariffe orarie al cliente. La scelta viene salvata e impatta sia la vista preview per il cliente, sia il documento PDF finale esportato.
+  - *Details*: Aggiunta la possibilità di decidere se mostrare o nascondere le colonne delle ore stimate e delle tariffe orarie al cliente in modo separato e indipendente l'uno dall'altro. La scelta viene salvata e impatta sia la vista preview per il cliente, sia il documento PDF finale esportato.
   - *Tech Notes*: 
-    - Aggiunta colonna `display_options` JSONB alla tabella `quote_scenarios` (file di migrazione generato: `20260523205634_add_scenario_display_options.sql`).
+    - Aggiunta colonna `display_options` JSONB alla tabella `quote_scenarios` (file di migrazione aggiornato `20260523205634_add_scenario_display_options.sql`).
     - Aggiornati i tipi TypeScript in `PricedScenario`.
     - Aggiunto lo switch UI in `ScenarioDetailClient.tsx` (all'interno del blocco `isEditing`), e implementato l'aggiornamento sul db in `app/api/quote-scenarios/[id]/route.ts`.
-    - Modificato `QuotePreviewClient.tsx` e la Server Action di generazione PDF (`renderQuotePdf.ts`) per condizionare il rendering dei dettagli se `showHoursAndRates === false`.
+    - Modificato `QuotePreviewClient.tsx` e la Server Action di generazione PDF (`renderQuotePdf.ts`) per condizionare il rendering dei dettagli in modo indipendente per `showHours` e `showHourlyRate`.
+
+- [2026-05-23T23:08:00+02:00]: Fix pagina Preview vuota (Preventivo non trovato)
+  - *Details*: Risolto un bug critico per cui la pagina di Preview di un preventivo salvato mostrava l'errore "Preventivo non trovato. Lo scenario non è disponibile nello storage locale". Il problema era causato dalla migrazione a Supabase, in cui i dati non risiedono più in `localStorage`.
+  - *Tech Notes*: 
+    - Modificato `src/server/repositories/request-repository.ts` estendendo la query di `getClientRequestById` per includere `quote_runs(id, llm_raw_response)` ed estrarre `analysis.summary`.
+    - Modificato `app/quotes/[scenarioId]/preview/page.tsx` per prelevare dal server anche i dati di `request` tramite l'ID contenuto nel preventivo (`scenario.clientRequestId`).
+    - Aggiornato `QuotePreviewClient.tsx` per accettare e utilizzare la prop `initialRequest` dal server, azzerando la dipendenza totale da `localStorage`.
+
+- [2026-05-23T23:14:00+02:00]: Chat Input Multiline & Customer Chat Fix
+  - *Details*: Migliorata la chat tra utente e organizzazione: l'input è stato convertito in una textarea auto-espandibile per gestire lunghi testi professionalmente. Risolto anche un bug critico per cui l'invio dei messaggi da parte di un cliente falliva per la mancanza di un record nella tabella `profiles`.
+  - *Tech Notes*:
+    - In `chat-box.tsx`, sostituito `<input>` con `<textarea>` che si ridimensiona dinamicamente calcolando lo `scrollHeight`, con gestione differenziata di Invio (per l'invio) e Shift+Invio (per l'a capo).
+    - In `app/api/requests/[id]/chat/route.ts`, aggiunta la creazione on-the-fly di un profilo (nella tabella `profiles`) per i nuovi clienti (leggendo nome utente da `auth.users`), superando così l'errore di violazione del vincolo di chiave esterna su `sender_id`.

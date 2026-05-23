@@ -12,22 +12,32 @@ import {
 import type { PricedScenario } from "@/src/lib/quotes/types";
 import { formatCurrency, formatNumber, formatPercent } from "@/src/lib/utils/format";
 
-export function QuotePreviewClient({ scenarioId, initialScenario }: { scenarioId: string; initialScenario?: PricedScenario | null }) {
-  const [request, setRequest] = useState<StoredRequest | null>(null);
+export function QuotePreviewClient({ 
+  scenarioId, 
+  initialScenario,
+  initialRequest,
+}: { 
+  scenarioId: string; 
+  initialScenario?: PricedScenario | null;
+  initialRequest?: StoredRequest | null;
+}) {
+  const [request, setRequest] = useState<StoredRequest | null>(initialRequest ?? null);
   const [scenario, setScenario] = useState<PricedScenario | null>(initialScenario ?? null);
 
   useEffect(() => {
-    if (initialScenario) {
-      // Cerca la richiesta in localStorage per il titolo/summary, se disponibile
+    if (initialScenario && initialRequest) {
+      // Entrambi provengono dal server, non usiamo il localStorage
+      return;
+    } else if (initialScenario && !initialRequest) {
+      // Fallback solo per la request se manca
       const found = findStoredScenario(scenarioId);
       setRequest(found?.request ?? null);
-      // Il scenario viene dalla fonte di verità del server — non sovrascrivere
     } else {
       const found = findStoredScenario(scenarioId);
       setRequest(found?.request ?? null);
       setScenario(found?.scenario ?? null);
     }
-  }, [scenarioId, initialScenario]);
+  }, [scenarioId, initialScenario, initialRequest]);
 
   async function exportPdf() {
     if (!request || !scenario) {

@@ -29,6 +29,7 @@ export function ChatBox({
   const [inputValue, setInputValue] = useState("");
   const [sending, setSending] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const fetchMessages = async () => {
     try {
@@ -56,6 +57,13 @@ export function ChatBox({
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [messages]);
+
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = "auto";
+      textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 120)}px`;
+    }
+  }, [inputValue]);
 
   const handleSend = async () => {
     if (!inputValue.trim()) return;
@@ -85,6 +93,8 @@ export function ChatBox({
       console.error(e);
     } finally {
       setSending(false);
+      // Ensure focus goes back to the textarea after sending
+      setTimeout(() => textareaRef.current?.focus(), 0);
     }
   };
 
@@ -125,26 +135,33 @@ export function ChatBox({
 
       {/* Input */}
       <div className="p-4 border-t border-slate-200 bg-white mt-auto">
-        <div className="flex gap-2">
-          <input 
-            type="text" 
+        <div className="flex gap-2 items-end">
+          <textarea 
+            ref={textareaRef}
             placeholder="Scrivi un messaggio..." 
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             onKeyDown={(e) => {
-              if (e.key === "Enter") handleSend();
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                handleSend();
+              }
             }}
             disabled={sending}
-            className="flex-1 rounded-full border border-slate-300 px-4 py-2 text-sm focus:outline-none focus:border-[var(--primary)] disabled:bg-slate-50 disabled:text-slate-400"
+            rows={1}
+            className="flex-1 resize-none rounded-2xl border border-slate-300 px-4 py-3 text-sm focus:outline-none focus:border-[var(--primary)] disabled:bg-slate-50 disabled:text-slate-400 overflow-y-auto min-h-[44px] max-h-[120px] shadow-sm transition-colors"
           />
           <Button 
             onClick={handleSend} 
             disabled={!inputValue.trim() || sending} 
-            className="rounded-full px-4"
+            className="rounded-full px-4 h-11 shrink-0 shadow-sm"
           >
             <Send className="h-4 w-4 sm:mr-2" />
             <span className="hidden sm:inline">Invia</span>
           </Button>
+        </div>
+        <div className="text-xs text-slate-400 text-center mt-2 hidden sm:block">
+          Premi Invio per inviare, Shift + Invio per andare a capo
         </div>
       </div>
     </div>
