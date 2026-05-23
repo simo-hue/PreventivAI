@@ -7,7 +7,7 @@ export default async function HistoryPage() {
 
   const importAction = (
     <ButtonLink href="/admin/history/import" variant="secondary">
-      Import JSON
+      Importa JSON
     </ButtonLink>
   );
 
