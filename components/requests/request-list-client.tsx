@@ -1,10 +1,12 @@
 "use client";
 
-import { ArrowRight, FileText, Plus } from "lucide-react";
+import { useState, useTransition } from "react";
+import { ArrowRight, FileText, Plus, Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { ButtonLink } from "@/components/ui/button";
+import { Button, ButtonLink } from "@/components/ui/button";
 import { Card, CardBody } from "@/components/ui/card";
 import { formatCurrency } from "@/src/lib/utils/format";
+import { deleteRequestAction } from "@/app/(dashboard)/requests/actions";
 
 const statusLabel: Record<string, string> = {
   draft: "Draft",
@@ -31,7 +33,21 @@ export function RequestListClient({
   customAction?: React.ReactNode;
 }) {
   const requests = initialRequests;
+  const [isPending, startTransition] = useTransition();
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
+  const handleDelete = (id: string) => {
+    if (window.confirm("Sei sicuro di voler eliminare questa richiesta? L'azione non può essere annullata.")) {
+      setDeletingId(id);
+      startTransition(async () => {
+        try {
+          await deleteRequestAction(id);
+        } finally {
+          setDeletingId(null);
+        }
+      });
+    }
+  };
   return (
     <div className="space-y-4">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -89,10 +105,21 @@ export function RequestListClient({
                       </p>
                     </div>
                   ) : null}
-                  <ButtonLink href={`/requests/${request.id}`} variant="secondary">
-                    Apri
-                    <ArrowRight className="size-4" aria-hidden="true" />
-                  </ButtonLink>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="ghost"
+                      className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                      onClick={() => handleDelete(request.id)}
+                      disabled={isPending && deletingId === request.id}
+                      title="Elimina richiesta"
+                    >
+                      <Trash2 className="size-4" aria-hidden="true" />
+                    </Button>
+                    <ButtonLink href={`/requests/${request.id}`} variant="secondary">
+                      Apri
+                      <ArrowRight className="size-4" aria-hidden="true" />
+                    </ButtonLink>
+                  </div>
                 </div>
               </CardBody>
             </Card>

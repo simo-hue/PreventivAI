@@ -110,3 +110,7 @@
 - [2026-05-23 18:01:00 CEST]: Fix Invalid effort bounds error on manual quote editing
   - *Details*: Risolto un bug che causava un crash invisibile del `recalculateScenario` (visibile nella console e come avviso "Avviso prezzi") quando si modificavano manualmente le ore di effort di un task dal pannello di dettaglio.
   - *Tech Notes*: Modificato `updateEffortHours` all'interno di `components/quote/scenario-detail-client.tsx`. Quando viene modificato `estimatedHoursExpected` dalla UI, il sistema ora auto-aggiusta `estimatedHoursMin` e `estimatedHoursMax` per evitare che la validazione `min <= expected <= max` di `assertEffortBounds` (`pricing-engine.ts`) fallisca.
+
+- [2026-05-23 18:05:00 CEST]: Aggiunta eliminazione richiesta preventiva
+  - *Details*: Inserito il tasto per eliminare un preventivo direttamente dalla lista "Requests", implementando una logica per cancellarlo dal database in modo sicuro previa conferma utente.
+  - *Tech Notes*: Aggiunto bottone in `RequestListClient` (`components/requests/request-list-client.tsx`) usando `lucide-react` e `useTransition`. Creata Server Action `deleteRequestAction` in `app/(dashboard)/requests/actions.ts` che esegue `revalidatePath`. Creata la funzione `deleteClientRequest` in `src/server/repositories/request-repository.ts` per l'eliminazione fisica tramite Supabase Admin.

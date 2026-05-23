@@ -102,3 +102,20 @@ export async function getAllClientRequests(options?: {
     };
   });
 }
+
+export async function deleteClientRequest(id: string) {
+  const admin = createSupabaseAdminClient();
+  if (!admin) throw new Error("Supabase non configurato");
+
+  // TODO: Verificare che l'utente loggato possa cancellare questa risorsa se necessario.
+  // Al momento lo eliminiamo con i privilegi di admin.
+
+  const { error } = await admin.from("client_requests").delete().eq("id", id);
+
+  if (error) {
+    console.error("[RequestRepo] delete error:", error);
+    throw new Error("Errore durante l'eliminazione della richiesta.");
+  }
+
+  return true;
+}
