@@ -255,6 +255,48 @@ export function ScenarioDetailClient({
         <Metric label="Confidenza" value={formatPercent(display.confidence)} />
       </div>
 
+      {isEditing && (
+        <Card>
+          <CardHeader title="Impostazioni" description="Opzioni visibili al cliente." />
+          <CardBody className="flex flex-wrap gap-6">
+            <label className="flex cursor-pointer items-center gap-2 text-sm font-semibold">
+              <input
+                type="checkbox"
+                className="size-4"
+                checked={display.displayOptions?.showHours ?? true}
+                onChange={(e) => {
+                  if (!scenario) return;
+                  const nextScenario = { ...scenario };
+                  nextScenario.displayOptions = {
+                    ...(nextScenario.displayOptions || {}),
+                    showHours: e.target.checked,
+                  };
+                  setScenario(nextScenario);
+                }}
+              />
+              Mostra dettaglio ore stimate
+            </label>
+            <label className="flex cursor-pointer items-center gap-2 text-sm font-semibold">
+              <input
+                type="checkbox"
+                className="size-4"
+                checked={display.displayOptions?.showHourlyRate ?? true}
+                onChange={(e) => {
+                  if (!scenario) return;
+                  const nextScenario = { ...scenario };
+                  nextScenario.displayOptions = {
+                    ...(nextScenario.displayOptions || {}),
+                    showHourlyRate: e.target.checked,
+                  };
+                  setScenario(nextScenario);
+                }}
+              />
+              Mostra tariffa oraria
+            </label>
+          </CardBody>
+        </Card>
+      )}
+
       <Card>
         <CardHeader title="Moduli" description="I moduli opzionali aggiornano il totale in tempo reale." />
         <CardBody className="space-y-4">

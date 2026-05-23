@@ -46,6 +46,7 @@ export async function PUT(
       pm_cost_eur: scenario.totals.pmCostEur,
       risk_buffer_eur: scenario.totals.riskBufferEur,
       total_eur: scenario.totals.totalEur,
+      display_options: scenario.displayOptions,
     }).eq("id", id);
 
     // Otteniamo l'ID dell'organizzazione

@@ -139,8 +139,8 @@ export function QuotePreviewClient({ scenarioId, initialScenario }: { scenarioId
               <thead className="border-b border-slate-300 text-xs uppercase text-slate-500">
                 <tr>
                   <th className="py-3">Ruolo</th>
-                  <th className="py-3">Ore</th>
-                  <th className="py-3">Tariffa</th>
+                  {scenario.displayOptions?.showHours !== false && <th className="py-3">Ore</th>}
+                  {scenario.displayOptions?.showHourlyRate !== false && <th className="py-3">Tariffa</th>}
                   <th className="py-3 text-right">Costo</th>
                 </tr>
               </thead>
@@ -150,8 +150,8 @@ export function QuotePreviewClient({ scenarioId, initialScenario }: { scenarioId
                     <td className="py-3 font-semibold">
                       {row.roleName} <span className="font-normal text-slate-500">{row.seniority}</span>
                     </td>
-                    <td className="py-3">{formatNumber(row.hours)}h</td>
-                    <td className="py-3">{formatCurrency(row.hourlyRateEur)}/h</td>
+                    {scenario.displayOptions?.showHours !== false && <td className="py-3">{formatNumber(row.hours)}h</td>}
+                    {scenario.displayOptions?.showHourlyRate !== false && <td className="py-3">{formatCurrency(row.hourlyRateEur)}/h</td>}
                     <td className="py-3 text-right font-semibold">
                       {formatCurrency(row.costEur)}
                     </td>
@@ -159,8 +159,8 @@ export function QuotePreviewClient({ scenarioId, initialScenario }: { scenarioId
                 ))}
                 <tr className="border-b border-slate-100">
                   <td className="py-3 font-semibold">Product Manager / Agile Coach</td>
-                  <td className="py-3">{scenario.totals.pmHours}h</td>
-                  <td className="py-3">Quota 10%</td>
+                  {scenario.displayOptions?.showHours !== false && <td className="py-3">{scenario.totals.pmHours}h</td>}
+                  {scenario.displayOptions?.showHourlyRate !== false && <td className="py-3">Quota 10%</td>}
                   <td className="py-3 text-right font-semibold">
                     {formatCurrency(scenario.totals.pmCostEur)}
                   </td>

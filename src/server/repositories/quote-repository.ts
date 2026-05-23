@@ -196,6 +196,7 @@ export async function createQuoteRun(args: {
         pm_cost_eur: scenario.totals.pmCostEur,
         risk_buffer_eur: scenario.totals.riskBufferEur,
         total_eur: scenario.totals.totalEur,
+        display_options: scenario.displayOptions ?? { showHours: true, showHourlyRate: true },
       });
 
       for (const [modIdx, mod] of scenario.modules.entries()) {
@@ -292,7 +293,7 @@ export async function getQuoteRunForRequest(clientRequestId: string) {
     .select(`
       id, name, slug, description, scenario_type, assumptions, exclusions, risks,
       confidence, estimated_weeks_min, estimated_weeks_expected, estimated_weeks_max,
-      subtotal_eur, pm_cost_eur, risk_buffer_eur, total_eur,
+      subtotal_eur, pm_cost_eur, risk_buffer_eur, total_eur, display_options,
       quote_modules(
         id, name, description, complexity, is_optional, is_included, dependency_notes, risk_notes, subtotal_eur, order_index,
         quote_tasks(
@@ -322,6 +323,7 @@ export async function getQuoteRunForRequest(clientRequestId: string) {
       estimatedWeeksMin: s.estimated_weeks_min,
       estimatedWeeksExpected: s.estimated_weeks_expected,
       estimatedWeeksMax: s.estimated_weeks_max,
+      displayOptions: s.display_options,
       totals: {
         subtotalEur: s.subtotal_eur,
         pmCostEur: s.pm_cost_eur,
@@ -407,7 +409,7 @@ export async function getScenarioById(scenarioId: string): Promise<any | null> {
     .select(`
       id, name, slug, description, scenario_type, assumptions, exclusions, risks,
       confidence, estimated_weeks_min, estimated_weeks_expected, estimated_weeks_max,
-      subtotal_eur, pm_cost_eur, risk_buffer_eur, total_eur,
+      subtotal_eur, pm_cost_eur, risk_buffer_eur, total_eur, display_options,
       client_request_id,
       quote_modules(
         id, name, description, complexity, is_optional, is_included, dependency_notes, risk_notes, subtotal_eur, order_index,
@@ -504,6 +506,7 @@ export async function getScenarioById(scenarioId: string): Promise<any | null> {
     estimatedWeeksMin: s.estimated_weeks_min,
     estimatedWeeksExpected: s.estimated_weeks_expected,
     estimatedWeeksMax: s.estimated_weeks_max,
+    displayOptions: s.display_options,
     totals: {
       subtotalEur: s.subtotal_eur,
       pmCostEur: s.pm_cost_eur,

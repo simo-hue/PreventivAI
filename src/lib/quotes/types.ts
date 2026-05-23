@@ -60,6 +60,10 @@ export type QuoteScenarioFromAi = {
   estimatedWeeksExpected: number;
   estimatedWeeksMax: number;
   modules: QuoteModule[];
+  displayOptions?: {
+    showHours?: boolean;
+    showHourlyRate?: boolean;
+  };
 };
 
 export type PricedEffort = RoleEffort & {
@@ -96,6 +100,10 @@ export type PricedScenario = Omit<QuoteScenarioFromAi, "modules"> & {
   modules: PricedModule[];
   totals: ScenarioTotals;
   roleBreakdown: PricedRoleBreakdown[];
+  displayOptions?: {
+    showHours?: boolean;
+    showHourlyRate?: boolean;
+  };
 };
 
 export type PricedRoleBreakdown = {

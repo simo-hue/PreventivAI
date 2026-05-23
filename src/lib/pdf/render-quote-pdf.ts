@@ -74,17 +74,28 @@ export async function renderQuotePdf(payload: PdfPayload) {
   y -= 8;
   drawText("Breakdown economico", { size: 14, bold: true });
   for (const role of payload.scenario.roleBreakdown) {
-    drawText(
-      `${role.roleName} ${role.seniority}: ${role.hours}h x ${formatCurrency(
-        role.hourlyRateEur,
-      )}/h = ${formatCurrency(role.costEur)}`,
-    );
+    const showHours = payload.scenario.displayOptions?.showHours !== false;
+    const showRate = payload.scenario.displayOptions?.showHourlyRate !== false;
+    
+    if (showHours && showRate) {
+      drawText(
+        `${role.roleName} ${role.seniority}: ${role.hours}h x ${formatCurrency(role.hourlyRateEur)}/h = ${formatCurrency(role.costEur)}`
+      );
+    } else if (showHours && !showRate) {
+      drawText(`${role.roleName} ${role.seniority}: ${role.hours}h = ${formatCurrency(role.costEur)}`);
+    } else if (!showHours && showRate) {
+      drawText(`${role.roleName} ${role.seniority}: ${formatCurrency(role.hourlyRateEur)}/h = ${formatCurrency(role.costEur)}`);
+    } else {
+      drawText(`${role.roleName} ${role.seniority}: ${formatCurrency(role.costEur)}`);
+    }
   }
-  drawText(
-    `PM/Agile Coach: ${payload.scenario.totals.pmHours}h = ${formatCurrency(
-      payload.scenario.totals.pmCostEur,
-    )}`,
-  );
+
+  const showHoursPm = payload.scenario.displayOptions?.showHours !== false;
+  if (showHoursPm) {
+    drawText(`PM/Agile Coach: ${payload.scenario.totals.pmHours}h = ${formatCurrency(payload.scenario.totals.pmCostEur)}`);
+  } else {
+    drawText(`PM/Agile Coach: ${formatCurrency(payload.scenario.totals.pmCostEur)}`);
+  }
 
   y -= 8;
   drawText("Assumptions ed esclusioni", { size: 14, bold: true });

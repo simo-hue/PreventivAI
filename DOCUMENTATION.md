@@ -234,3 +234,11 @@
   - *Details*: L'interfaccia dell'amministratore (dashboard della richiesta) non espone più il pulsante manuale "Ricalcola Preventivo". Il ricalcolo è ora interamente delegato e innescato dalla risposta del cliente all'interno della chat, semplificando le operazioni lato admin.
   - *Tech Notes*: Modificato `components/quote/scenario-dashboard.tsx` eliminando la funzione `handleRecalculate`, lo stato `isRecalculating` e il bottone HTML corrispondente. La logica di ri-trigger automatico risiede già all'interno di `chat-box.tsx`.
   - *Tech Notes*: Modificato `components/quote/scenario-dashboard.tsx` eliminando la funzione `handleRecalculate`, lo stato `isRecalculating` e il bottone HTML corrispondente. La logica di ri-trigger automatico risiede già all'interno di `chat-box.tsx`.
+
+- [2026-05-23T22:50:00+02:00]: Aggiunta Toggle per Nascondere Ore e Tariffe
+  - *Details*: Aggiunta la possibilità di decidere se mostrare o nascondere le colonne delle ore stimate e delle tariffe orarie al cliente. La scelta viene salvata e impatta sia la vista preview per il cliente, sia il documento PDF finale esportato.
+  - *Tech Notes*: 
+    - Aggiunta colonna `display_options` JSONB alla tabella `quote_scenarios` (file di migrazione generato: `20260523205634_add_scenario_display_options.sql`).
+    - Aggiornati i tipi TypeScript in `PricedScenario`.
+    - Aggiunto lo switch UI in `ScenarioDetailClient.tsx` (all'interno del blocco `isEditing`), e implementato l'aggiornamento sul db in `app/api/quote-scenarios/[id]/route.ts`.
+    - Modificato `QuotePreviewClient.tsx` e la Server Action di generazione PDF (`renderQuotePdf.ts`) per condizionare il rendering dei dettagli se `showHoursAndRates === false`.
