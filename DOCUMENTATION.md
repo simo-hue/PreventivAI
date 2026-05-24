@@ -603,3 +603,7 @@
 - [2026-05-24 12:26:00 CEST]: Sincronizzazione Stato UI al Redirect
   - *Details*: Modificata la logica del redirect post-risposta per forzare lo stato 'analyzing' prima di ricaricare la pagina delle richieste.
   - *Tech Notes*: Aggiunta una chiamata await sincrona a /api/requests/[id]/status in components/quote/scenario-dashboard.tsx per impostare lo stato ad 'analyzing' prima del router.push() e router.refresh(), eliminando la race-condition con l'endpoint asincrono di /analyze e assicurando che la tabella mostri immediatamente lo stato aggiornato.
+
+- [2026-05-24 12:30:00 CEST]: Nascondi 'Invia all'utente' per Richieste Manuali
+  - *Details*: Nascosto il pulsante 'Invia all'utente' nella sezione delle domande importanti se la richiesta è stata generata manualmente dall'admin.
+  - *Tech Notes*: Esteso il tipo `StoredRequest` in `storage.ts` per includere `isManualCreation` (già presente sul DB Supabase come `is_manual_creation` e mappato in `request-repository.ts`). Passata la prop `hideSendToUserButton={request.isManualCreation}` al componente `ImportantQuestionsSection` per renderizzare condizionalmente la action della card.

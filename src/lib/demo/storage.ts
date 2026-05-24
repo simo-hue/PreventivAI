@@ -19,6 +19,7 @@ export type StoredRequest = {
   isApproved?: boolean;
   quoteRunId?: string;
   promptVersion?: string;
+  isManualCreation?: boolean;
 };
 
 export function getStoredRequests(): StoredRequest[] {

@@ -125,7 +125,8 @@ export function ScenarioDashboard({ initialData: request }: { initialData: Store
       {analysis?.importantQuestions.length && !hasApproved ? (
         <ImportantQuestionsSection 
           questions={analysis.importantQuestions} 
-          requestId={request.id} 
+          requestId={request.id}
+          hideSendToUserButton={request.isManualCreation}
         />
       ) : null}
 
@@ -221,7 +222,7 @@ function MiniStat({ label, value }: { label: string; value: string }) {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function ImportantQuestionsSection({ questions, requestId }: { questions: any[]; requestId: string }) {
+function ImportantQuestionsSection({ questions, requestId, hideSendToUserButton }: { questions: any[]; requestId: string; hideSendToUserButton?: boolean }) {
   const router = useRouter();
   const [selected, setSelected] = useState<string[]>([]);
   const [isSending, setIsSending] = useState(false);
@@ -297,14 +298,16 @@ function ImportantQuestionsSection({ questions, requestId }: { questions: any[];
           title="Domande importanti" 
           description="Seleziona le domande da inviare al cliente via chat oppure rispondi direttamente."
           action={
-            <div className="flex gap-2">
-              <Button 
-                onClick={handleSend} 
-                disabled={selected.length === 0 || isSending}
-              >
-                {isSending ? "Invio..." : "Invia all'utente"}
-              </Button>
-            </div>
+            !hideSendToUserButton ? (
+              <div className="flex gap-2">
+                <Button 
+                  onClick={handleSend} 
+                  disabled={selected.length === 0 || isSending}
+                >
+                  {isSending ? "Invio..." : "Invia all'utente"}
+                </Button>
+              </div>
+            ) : null
           }
         />
         <CardBody className="grid gap-3 lg:grid-cols-2">
