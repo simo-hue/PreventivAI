@@ -500,3 +500,11 @@
   - *Tech Notes*:
     - Integrati i Container Queries nativi di Tailwind v4 (`@container`, `@sm`, `@md`, ecc.) nel componente `QuotePreviewClient` e in `app/customer/[id]/requests/[requestId]/page.tsx`, sostituendo le media query basate sulla viewport (es. `sm:`, `lg:`).
     - Rimossa la restrizione rigida `min-w-[680px]` nella tabella di breakdown economico (`QuotePreviewClient`), permettendo al browser di calcolare gli ingombri ideali ed evitando un antiestetico scroll orizzontale in finestre medie.
+
+- [2026-05-24 08:17:00 CEST]: Customer Request Page - Layout Refactoring
+  - *Details*: Ridisegnato il layout della pagina di dettaglio del progetto lato customer per allinearlo alla pulizia visiva della dashboard admin. Eliminata la visualizzazione a schede affiancate (card) in favore di un layout lineare.
+  - *Tech Notes*: Modificato `app/customer/[id]/requests/[requestId]/page.tsx` rimuovendo il CSS grid (`@xl:grid-cols-2`) e la card contenente titolo e descrizione. Ora il titolo, i metadati e il corpo della richiesta sono renderizzati come testo nativo formattato, separati visivamente dal pannello dei preventivi tramite un `<hr>`. Questo garantisce che i "Preventivi Ricevuti" rimangano sempre posizionati inferiormente rispetto alla descrizione, su schermi di qualsiasi dimensione.
+
+- [2026-05-24 08:18:00 CEST]: Chat Admin Avatar Update
+  - *Details*: Sostituite le iniziali di default ("SH" o "TU") con il logo ufficiale dell'amministratore all'interno della chat.
+  - *Tech Notes*: Modificato `components/chat/chat-box.tsx` in modo che, qualora il mittente sia l'amministratore (verificato tramite l'ID hardcoded), il rendering dell'avatar utilizzi l'immagine `logo_chat_admin.png` (presente in `public/`) inserita in un container arrotondato con background scuro (`bg-slate-900`), garantendo contrasto col logo bianco e l'adattamento tramite `object-contain`. Questa logica copre i messaggi già inviati, l'indicatore di scrittura e lo streaming in corso.

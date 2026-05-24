@@ -141,8 +141,14 @@ export function ChatBox({
             return (
               <div key={msg.id} className={`flex w-full ${isMe ? "justify-end" : "justify-start"}`}>
                 <div className={`flex items-start gap-3 max-w-[85%] ${isMe ? "flex-row-reverse" : "flex-row"}`}>
-                  <div className={`h-8 w-8 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0 ${isMe ? "bg-indigo-600" : "bg-slate-600"}`}>
-                    {isMe ? "TU" : msg.profiles?.full_name?.substring(0, 2).toUpperCase() || "SH"}
+                  <div className={`h-8 w-8 rounded-full flex items-center justify-center shrink-0 overflow-hidden text-xs font-bold ${msg.sender_id === "5d65094f-d066-423c-a7ce-ef18a0f64368" ? "bg-slate-900" : isMe ? "bg-indigo-600 text-white" : "bg-slate-600 text-white"}`}>
+                    {msg.sender_id === "5d65094f-d066-423c-a7ce-ef18a0f64368" ? (
+                      <img src="/logo_chat_admin.png" alt="Admin" className="h-7 w-7 object-contain" />
+                    ) : isMe ? (
+                      "TU"
+                    ) : (
+                      msg.profiles?.full_name?.substring(0, 2).toUpperCase() || "CL"
+                    )}
                   </div>
                   <div className={`border rounded-2xl p-3 shadow-sm text-sm whitespace-pre-wrap ${isMe
                     ? "bg-indigo-600 text-white border-indigo-500 rounded-tr-sm"
@@ -227,8 +233,8 @@ export function ChatBox({
         {isStreamLoading && object?.aiResponse && (
           <div className={`flex w-full ${isAdminView ? "justify-end" : "justify-start"}`}>
             <div className={`flex items-start gap-3 max-w-[85%] ${isAdminView ? "flex-row-reverse" : "flex-row"}`}>
-              <div className={`h-8 w-8 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0 ${isAdminView ? "bg-indigo-600" : "bg-slate-600"}`}>
-                {isAdminView ? "TU" : "SH"}
+              <div className="h-8 w-8 rounded-full flex items-center justify-center shrink-0 bg-slate-900 overflow-hidden">
+                <img src="/logo_chat_admin.png" alt="Admin" className="h-7 w-7 object-contain" />
               </div>
               <div className={`border rounded-2xl p-3 shadow-sm text-sm whitespace-pre-wrap ${isAdminView
                 ? "bg-indigo-600 text-white border-indigo-500 rounded-tr-sm"
@@ -252,8 +258,8 @@ export function ChatBox({
         {showTypingIndicator && (
           <div className={`flex w-full ${isAdminView ? "justify-end" : "justify-start"}`}>
             <div className={`flex items-start gap-3 ${isAdminView ? "flex-row-reverse" : "flex-row"}`}>
-              <div className={`h-8 w-8 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0 ${isAdminView ? "bg-indigo-600" : "bg-slate-600"}`}>
-                {isAdminView ? "TU" : "SH"}
+              <div className="h-8 w-8 rounded-full flex items-center justify-center shrink-0 bg-slate-900 overflow-hidden">
+                <img src="/logo_chat_admin.png" alt="Admin" className="h-7 w-7 object-contain" />
               </div>
               <div className={`border rounded-2xl p-4 shadow-sm flex items-center gap-1.5 h-[46px] ${isAdminView
                 ? "bg-indigo-600 text-white border-indigo-500 rounded-tr-sm"

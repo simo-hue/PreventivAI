@@ -69,40 +69,34 @@ export default async function CustomerProjectDetailPage({
         Torna ai progetti
       </Link>
       <div className="w-full max-w-[1400px] mx-auto">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
-          <h1 className="text-3xl font-bold tracking-tight text-slate-900">Il tuo Progetto</h1>
-          <Badge variant="info" className="capitalize shrink-0">{request.status}</Badge>
-        </div>
-        
-        <div className="grid grid-cols-1 @xl:grid-cols-2 gap-8">
-          {/* Project Details Panel */}
-          <div className="rounded-2xl border border-slate-200 bg-white p-6 sm:p-8 shadow-sm h-fit">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-indigo-50 text-indigo-600">
-                <FileText className="h-6 w-6" />
-              </div>
-              <div>
-                <h2 className="text-xl font-semibold text-slate-900 line-clamp-2">{request.title}</h2>
-                <p className="text-sm text-slate-500 mt-1">Inviato il {new Date(request.createdAt).toLocaleDateString("it-IT")}</p>
-              </div>
-            </div>
-            <div className="prose prose-slate max-w-none text-slate-700 mt-6 bg-slate-50 rounded-xl p-5 border border-slate-100">
-              <p className="whitespace-pre-wrap leading-relaxed">{request.rawText}</p>
-            </div>
+        {/* Header and Description */}
+        <div className="mb-12">
+          <div className="flex flex-wrap items-center gap-3 mb-4">
+            <h1 className="text-3xl font-bold tracking-tight text-slate-900">{request.title}</h1>
+            <Badge variant="info" className="capitalize shrink-0">{request.status}</Badge>
           </div>
+          <p className="max-w-4xl text-slate-700 leading-relaxed whitespace-pre-wrap">
+            {request.normalizedText || request.rawText}
+          </p>
+          <div className="mt-4 text-sm text-slate-500">
+            Inviato il {new Date(request.createdAt).toLocaleDateString("it-IT")}
+          </div>
+        </div>
 
-          {/* Quotes Panel */}
-          <div className="flex flex-col">
-            <h3 className="text-xl font-bold text-slate-900 mb-4 px-1">Preventivi Ricevuti</h3>
-            <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-10 sm:p-14 text-center flex-1 flex flex-col items-center justify-center min-h-[300px]">
-              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-slate-50 mb-6 border border-slate-100">
-                <FileText className="h-8 w-8 text-slate-300" />
-              </div>
-              <p className="text-slate-500 mb-6 max-w-sm leading-relaxed">
-                La software house sta analizzando la tua richiesta. I preventivi appariranno qui non appena saranno pronti.
-              </p>
-              <Button variant="secondary" disabled className="min-w-[200px]">Nessun preventivo disponibile</Button>
+        {/* Separator */}
+        <hr className="border-slate-200 mb-12" />
+
+        {/* Quotes Panel */}
+        <div className="flex flex-col">
+          <h3 className="text-2xl font-bold text-slate-900 mb-6 px-1">Preventivi Ricevuti</h3>
+          <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-10 sm:p-14 text-center flex flex-col items-center justify-center min-h-[300px]">
+            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-slate-50 mb-6 border border-slate-100">
+              <FileText className="h-8 w-8 text-slate-300" />
             </div>
+            <p className="text-slate-500 mb-6 max-w-sm leading-relaxed">
+              La software house sta analizzando la tua richiesta. I preventivi appariranno qui non appena saranno pronti.
+            </p>
+            <Button variant="secondary" disabled className="min-w-[200px]">Nessun preventivo disponibile</Button>
           </div>
         </div>
       </div>
