@@ -256,7 +256,18 @@ export function RequestForm() {
       }
 
       const payload = (await response.json()) as { transcript: string };
-      setAudioTranscript(payload.transcript);
+      const transcript = payload.transcript;
+      setAudioTranscript(transcript);
+
+      // Insert the transcription into the "Testo cliente" textarea.
+      // If the textarea already contains text, append with a visual separator.
+      setRequestText((prev) => {
+        const trimmed = prev.trim();
+        if (trimmed.length === 0) {
+          return transcript;
+        }
+        return `${trimmed}\n\n--- Trascrizione audio ---\n${transcript}`;
+      });
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "Errore inatteso.");
     } finally {
@@ -330,7 +341,7 @@ export function RequestForm() {
             {isTranscribing ? "Trascrizione in corso" : "Carica audio"}
             <input
               type="file"
-              accept=".m4a,.mp3,.wav,audio/mp3,audio/mpeg,audio/wav,audio/x-wav,audio/mp4,audio/m4a"
+              accept=".mp3,.m4a,.wav,audio/mpeg,audio/mp3,audio/mp4,audio/m4a,audio/x-m4a,audio/x-aac,audio/aac,audio/wav,audio/x-wav,audio/wave"
               className="sr-only"
               disabled={isTranscribing}
               onChange={(event) => handleAudioUpload(event.target.files?.[0])}
