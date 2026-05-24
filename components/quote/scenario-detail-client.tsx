@@ -193,7 +193,7 @@ export function ScenarioDetailClient({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          content: `Ti ho inviato il preventivo **${display.name}**. Puoi visualizzarlo o scaricarlo in PDF cliccando sui pulsanti qui sotto.`,
+          content: "",
           metadata: {
             type: "quote_share",
             scenarioId: display.id,
