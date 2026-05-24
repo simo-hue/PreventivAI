@@ -54,7 +54,7 @@ export async function GET(
 }
 
 const PostMessageSchema = z.object({
-  content: z.string().min(1),
+  content: z.string(),
   metadata: z.any().optional(),
 });
 

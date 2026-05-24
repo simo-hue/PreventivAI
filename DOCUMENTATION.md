@@ -531,3 +531,7 @@
 - [2026-05-24T08:53:00+02:00]: Disattivazione invio preventivo per richieste manuali
   - *Details*: Nascosto il pulsante "Invia a cliente" nella pagina di dettaglio del preventivo se la richiesta è stata creata manualmente dall'admin e non è associata ad alcun cliente.
   - *Tech Notes*: Modificato `app/(dashboard)/admin/requests/[id]/scenarios/[scenarioId]/page.tsx` per estrarre la proprietà `isManualCreation` dalla request e passarla tramite `requestInfo` a `ScenarioDetailClient`. All'interno del componente client, il bottone `Invia a cliente` ora viene rimosso completamente tramite render condizionale (`{!requestInfo?.isManualCreation && ...}`).
+
+- [2026-05-24T08:59:00+02:00]: Fix 400 Bad Request su Invio Preventivo via Chat
+  - *Details*: Risolto l'errore 400 Bad Request che impediva all'amministratore di inviare un preventivo condiviso nella chat del cliente.
+  - *Tech Notes*: Modificato `app/api/requests/[id]/chat/route.ts` eliminando il vincolo `.min(1)` dallo schema Zod (`PostMessageSchema`) per il campo `content`. I messaggi di tipo "quote_share" generati in `components/quote/scenario-detail-client.tsx` inviano infatti una stringa vuota come contenuto, appoggiandosi ai soli `metadata` per il render; la rimozione del vincolo consente l'accettazione del payload senza validazione restrittiva sul testuale.
