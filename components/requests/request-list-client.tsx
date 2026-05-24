@@ -94,7 +94,7 @@ export function RequestListClient({
         {requests.map((request) => {
           const bestScenario = request.analysis?.scenarios[0];
           const isProcessing = request.status === "draft" || request.status === "analyzing";
-          const isApproved = request.analysis?.scenarios?.some((s: any) => s.isApproved);
+          const isApproved = request.isApproved || request.analysis?.scenarios?.some((s: any) => s.isApproved);
           return (
             <Card 
               key={request.id}
@@ -107,16 +107,18 @@ export function RequestListClient({
                     <h2 className="font-semibold">{request.title}</h2>
                     <Badge
                       variant={
-                        request.status === "delivered"
+                        isApproved
                           ? "success"
-                          : request.status === "quoted"
+                          : request.status === "delivered"
                             ? "success"
-                            : request.status === "needs_clarification"
-                              ? "warning"
-                              : "neutral"
+                            : request.status === "quoted"
+                              ? "success"
+                              : request.status === "needs_clarification"
+                                ? "warning"
+                                : "neutral"
                       }
                     >
-                      {statusLabel[request.status]}
+                      {isApproved ? "Confermato" : statusLabel[request.status]}
                     </Badge>
                   </div>
                   <p className="mt-2 line-clamp-2 max-w-3xl text-sm leading-6 text-[var(--muted)]">

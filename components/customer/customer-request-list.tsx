@@ -142,8 +142,9 @@ export function CustomerRequestList({
         <div className="grid gap-4">
           {requests.map((request) => {
             const isProcessing = request.status === "draft" || request.status === "analyzing";
+            const isApproved = request.isApproved || request.analysis?.scenarios?.some((s: any) => s.isApproved);
             return (
-              <Card key={request.id}>
+              <Card key={request.id} className={isApproved ? "bg-emerald-50/50 border-emerald-500 shadow-md ring-1 ring-emerald-500/20" : ""}>
                 <CardBody className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between p-6">
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-3">
@@ -155,6 +156,7 @@ export function CustomerRequestList({
                         <div className="flex items-center gap-3 mt-1">
                           <Badge
                             variant={
+                              isApproved ? "success" :
                               request.status === "delivered" || request.status === "quoted"
                                 ? "success"
                                 : request.status === "needs_clarification"
@@ -162,7 +164,7 @@ export function CustomerRequestList({
                                   : "info"
                             }
                           >
-                            {statusLabel[request.status] || request.status}
+                            {isApproved ? "Confermato" : (statusLabel[request.status] || request.status)}
                           </Badge>
                           <span className="text-xs text-slate-500">
                             {new Date(request.createdAt).toLocaleDateString("it-IT")}

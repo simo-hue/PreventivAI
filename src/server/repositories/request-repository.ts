@@ -53,13 +53,33 @@ export async function getClientRequestById(id: string) {
 
   const { data, error } = await admin
     .from("client_requests")
-    .select("*, quote_runs(id, llm_raw_response)")
+    .select("*, quote_runs(id, llm_raw_response, quote_scenarios(id, is_approved))")
     .eq("id", id)
     .maybeSingle();
 
   if (error || !data) return null;
 
   const quoteRun = data.quote_runs?.[data.quote_runs.length - 1];
+
+  let analysis = quoteRun?.llm_raw_response ?? undefined;
+  
+  // Controlla robustamente se C'E' ALMENO UNO scenario approvato in TUTTI i quote runs
+  const isApproved = data.quote_runs?.some((qr: any) => 
+    qr.quote_scenarios?.some((qs: any) => qs.is_approved)
+  ) || false;
+
+  if (analysis && quoteRun?.quote_scenarios) {
+    analysis = {
+      ...analysis,
+      scenarios: analysis.scenarios?.map((s: any) => {
+        const dbScenario = quoteRun.quote_scenarios.find((qs: any) => qs.id === s.id);
+        return {
+          ...s,
+          isApproved: dbScenario ? dbScenario.is_approved : s.isApproved
+        };
+      })
+    };
+  }
 
   return {
     id: data.id,
@@ -70,7 +90,8 @@ export async function getClientRequestById(id: string) {
     createdAt: data.created_at,
     isManualCreation: data.is_manual_creation,
     userId: data.created_by,
-    analysis: quoteRun?.llm_raw_response ?? undefined,
+    analysis,
+    isApproved,
   };
 }
 
@@ -83,7 +104,7 @@ export async function getAllClientRequests(options?: {
 
   let query = admin
     .from("client_requests")
-    .select("*, quote_runs(id, llm_raw_response)")
+    .select("*, quote_runs(id, llm_raw_response, quote_scenarios(id, is_approved))")
     .order("created_at", { ascending: false });
 
   if (options?.status) {
@@ -100,6 +121,28 @@ export async function getAllClientRequests(options?: {
   return data.map((row: any) => {
     // Ordiniamo le quote runs per ottenere l'ultima generata
     const quoteRun = row.quote_runs?.[row.quote_runs.length - 1];
+    
+    // Inject isApproved from quote_scenarios if available
+    let analysis = quoteRun?.llm_raw_response ?? undefined;
+    
+    // Controlla robustamente se C'E' ALMENO UNO scenario approvato in TUTTI i quote runs
+    const isApproved = row.quote_runs?.some((qr: any) => 
+      qr.quote_scenarios?.some((qs: any) => qs.is_approved)
+    ) || false;
+
+    if (analysis && quoteRun?.quote_scenarios) {
+      analysis = {
+        ...analysis,
+        scenarios: analysis.scenarios?.map((s: any) => {
+          const dbScenario = quoteRun.quote_scenarios.find((qs: any) => qs.id === s.id);
+          return {
+            ...s,
+            isApproved: dbScenario ? dbScenario.is_approved : s.isApproved
+          };
+        })
+      };
+    }
+
     return {
       id: row.id,
       title: row.title,
@@ -109,7 +152,8 @@ export async function getAllClientRequests(options?: {
       createdAt: row.created_at,
       updatedAt: row.updated_at,
       isManualCreation: row.is_manual_creation,
-      analysis: quoteRun?.llm_raw_response ?? undefined,
+      analysis,
+      isApproved,
     };
   });
 }
@@ -137,7 +181,7 @@ export async function getAllClientRequestsByUserId(userId: string) {
 
   const { data, error } = await admin
     .from("client_requests")
-    .select("*, quote_runs(id, llm_raw_response)")
+    .select("*, quote_runs(id, llm_raw_response, quote_scenarios(id, is_approved))")
     .eq("created_by", userId)
     .order("created_at", { ascending: false });
 
@@ -146,6 +190,28 @@ export async function getAllClientRequestsByUserId(userId: string) {
   return data.map((row: any) => {
     // Ordiniamo le quote runs per ottenere l'ultima generata
     const quoteRun = row.quote_runs?.[row.quote_runs.length - 1];
+
+    // Inject isApproved from quote_scenarios if available
+    let analysis = quoteRun?.llm_raw_response ?? undefined;
+    
+    // Controlla robustamente se C'E' ALMENO UNO scenario approvato in TUTTI i quote runs
+    const isApproved = row.quote_runs?.some((qr: any) => 
+      qr.quote_scenarios?.some((qs: any) => qs.is_approved)
+    ) || false;
+
+    if (analysis && quoteRun?.quote_scenarios) {
+      analysis = {
+        ...analysis,
+        scenarios: analysis.scenarios?.map((s: any) => {
+          const dbScenario = quoteRun.quote_scenarios.find((qs: any) => qs.id === s.id);
+          return {
+            ...s,
+            isApproved: dbScenario ? dbScenario.is_approved : s.isApproved
+          };
+        })
+      };
+    }
+
     return {
       id: row.id,
       title: row.title,
@@ -155,7 +221,8 @@ export async function getAllClientRequestsByUserId(userId: string) {
       createdAt: row.created_at,
       updatedAt: row.updated_at,
       isManualCreation: row.is_manual_creation,
-      analysis: quoteRun?.llm_raw_response ?? undefined,
+      analysis,
+      isApproved,
     };
   });
 }
