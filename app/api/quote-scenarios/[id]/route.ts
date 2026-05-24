@@ -120,13 +120,16 @@ export async function PUT(
 
     if (modulesToInsert.length > 0) {
       const { error } = await admin.from("quote_modules").insert(modulesToInsert);
-      if (error) console.error("[ScenarioPUT] Errore insert moduli:", error.message);
+      if (error) throw new Error(`[ScenarioPUT] Errore insert moduli: ${error.message}`);
     }
     if (tasksToInsert.length > 0) {
       const { error } = await admin.from("quote_tasks").insert(tasksToInsert);
-      if (error) console.error("[ScenarioPUT] Errore insert task:", error.message);
+      if (error) throw new Error(`[ScenarioPUT] Errore insert task: ${error.message}`);
     }
-    if (effortsToInsert.length > 0) await admin.from("quote_task_efforts").insert(effortsToInsert);
+    if (effortsToInsert.length > 0) {
+      const { error } = await admin.from("quote_task_efforts").insert(effortsToInsert);
+      if (error) throw new Error(`[ScenarioPUT] Errore insert efforts: ${error.message}`);
+    }
 
     return NextResponse.json({ saved: true });
 

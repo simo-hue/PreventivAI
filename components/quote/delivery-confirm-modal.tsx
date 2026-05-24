@@ -4,8 +4,6 @@ import { useEffect, useRef, useState } from "react";
 import { AlertTriangle, Clock, Loader2, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { PricedScenario } from "@/src/lib/quotes/types";
-import { DEFAULT_PM_PERCENTAGE, officialRateCards } from "@/src/lib/demo/rate-card";
-import { recalculateScenario } from "@/src/lib/quotes/pricing-engine";
 
 export function DeliveryConfirmModal({
   isOpen,
@@ -126,36 +124,23 @@ export function DeliveryConfirmModal({
 
     setIsSaving(true);
     try {
-      // 1. Recalculate
-      const overrides = Object.fromEntries(
-        editedScenario.modules.map((m) => [m.id!, m.isIncluded])
-      );
-
-      const recalculated = recalculateScenario(
-        editedScenario,
-        officialRateCards,
-        pricingSettings?.pmPercentage ?? DEFAULT_PM_PERCENTAGE,
-        overrides,
-        pricingSettings?.riskBufferPercentage ?? 0,
-      );
-
-      // 2. Save
-      const response = await fetch(`/api/quote-scenarios/${recalculated.id}`, {
+      // Passiamo direttamente l'editedScenario che contiene già le ore modificate nel suo state
+      // (evitiamo recalculateScenario che sovrascrive i roleRateCardId con gli ID fake locali).
+      const response = await fetch(`/api/quote-scenarios/${editedScenario.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ scenario: recalculated }),
+        body: JSON.stringify({ scenario: editedScenario }),
       });
 
       if (!response.ok) {
-        alert("Errore durante il salvataggio del preventivo.");
-        setIsSaving(false);
-        return;
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Errore durante il salvataggio");
       }
 
-      // 3. Confirm delivery
       onConfirm();
-    } catch (e) {
-      alert("Errore di rete durante il salvataggio.");
+    } catch (e: any) {
+      console.error(e);
+      alert(`Errore: ${e.message}`);
       setIsSaving(false);
     }
   };
