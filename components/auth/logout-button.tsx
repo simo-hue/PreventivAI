@@ -10,7 +10,7 @@ export function LogoutButton({
   variant = "ghost" 
 }: { 
   className?: string;
-  variant?: "ghost" | "default" | "secondary" | "outline" | "danger";
+  variant?: "ghost" | "primary" | "secondary" | "danger";
 }) {
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);

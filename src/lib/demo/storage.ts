@@ -20,7 +20,7 @@ export type StoredRequest = {
   promptVersion?: string;
 };
 
-export function getStoredRequests() {
+export function getStoredRequests(): StoredRequest[] {
   return [];
 }
 

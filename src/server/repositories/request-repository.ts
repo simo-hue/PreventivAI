@@ -9,6 +9,7 @@ export async function createClientRequest(args: {
   rawText: string;
   sourceType: "text" | "audio" | "document" | "mixed";
   customerId?: string;
+  isManualCreation?: boolean;
 }) {
   const admin = createSupabaseAdminClient();
   if (!admin) throw new Error("Supabase non configurato");
@@ -25,6 +26,7 @@ export async function createClientRequest(args: {
       raw_text: args.rawText,
       source_type: args.sourceType,
       status: "draft",
+      is_manual_creation: args.isManualCreation ?? false,
     })
     .select()
     .single();
@@ -41,6 +43,7 @@ export async function createClientRequest(args: {
     sourceType: data.source_type,
     status: data.status,
     createdAt: data.created_at,
+    isManualCreation: data.is_manual_creation,
   };
 }
 
@@ -65,6 +68,7 @@ export async function getClientRequestById(id: string) {
     sourceType: data.source_type,
     status: data.status,
     createdAt: data.created_at,
+    isManualCreation: data.is_manual_creation,
     analysis: quoteRun?.llm_raw_response ?? undefined,
   };
 }
@@ -103,6 +107,7 @@ export async function getAllClientRequests(options?: {
       status: row.status,
       createdAt: row.created_at,
       updatedAt: row.updated_at,
+      isManualCreation: row.is_manual_creation,
       analysis: quoteRun?.llm_raw_response ?? undefined,
     };
   });
@@ -148,6 +153,7 @@ export async function getAllClientRequestsByUserId(userId: string) {
       status: row.status,
       createdAt: row.created_at,
       updatedAt: row.updated_at,
+      isManualCreation: row.is_manual_creation,
       analysis: quoteRun?.llm_raw_response ?? undefined,
     };
   });
@@ -173,5 +179,7 @@ export async function getClientRequestByIdAndUserId(requestId: string, userId: s
     sourceType: data.source_type,
     status: data.status,
     createdAt: data.created_at,
+    isManualCreation: data.is_manual_creation,
+    normalizedText: data.normalized_text,
   };
 }

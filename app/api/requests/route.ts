@@ -7,6 +7,7 @@ const CreateRequestSchema = z.object({
   rawText: z.string().min(20),
   sourceType: z.enum(["text", "audio", "document", "mixed"]).default("text"),
   customerId: z.string().optional(),
+  isManualCreation: z.boolean().optional().default(false),
 });
 
 export async function POST(request: Request) {

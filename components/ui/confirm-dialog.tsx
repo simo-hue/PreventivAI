@@ -83,7 +83,7 @@ export function ConfirmDialog({
     },
   };
 
-  const colors = variantColors[variant];
+  const colors = variantColors[variant] as any;
   const Icon = colors.icon || AlertTriangle;
 
   return (

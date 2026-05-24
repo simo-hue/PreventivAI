@@ -170,8 +170,7 @@ export function ChatBox({
                             Apri preview
                           </Link>
                           <Button 
-                            variant={isMe ? "default" : "outline"} 
-                            size="sm"
+                            variant={isMe ? "primary" : "secondary"} 
                             className={`flex-1 h-[30px] text-xs font-semibold ${isMe ? 'bg-indigo-700 hover:bg-indigo-800 text-white border-none' : ''}`}
                             onClick={async () => {
                               try {

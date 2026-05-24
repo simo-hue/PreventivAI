@@ -454,3 +454,13 @@
 - [2026-05-24T07:32:00+02:00]: Fix Supabase Cookies Error in Server Components
   - *Details*: Fixed an unhandled rejection error (`Cookies can only be modified in a Server Action or Route Handler`) that crashed the Next.js development server during page loads.
   - *Tech Notes*: Added a `try-catch` block around `cookieStore.set` inside the `setAll` method of `createSupabaseServerClient` in `src/lib/supabase/server.ts`, following Supabase SSR guidelines, so that attempts to set cookies from Server Components fail silently instead of throwing errors.
+
+- [2026-05-24 07:44:00 CEST]: Hide Chat for Manually Created Requests
+  - *Details*: Nascosta la chat e allargata a pieno schermo la vista dei dettagli/preventivi per le richieste create manualmente dall'amministratore (tramite il form "Nuova richiesta"). Questo evita di mostrare la chat quando la comunicazione con il cliente viene gestita altrove.
+  - *Tech Notes*:
+    - Aggiunta colonna `is_manual_creation` (boolean, default false) alla tabella `client_requests` tramite nuova migration Supabase (`20260524030000_add_is_manual_creation_to_client_requests.sql`).
+    - Aggiornato `createClientRequest` e gli altri metodi in `src/server/repositories/request-repository.ts` per inserire e ritornare il flag `isManualCreation`.
+    - Aggiornato lo schema Zod in `app/api/requests/route.ts` per accettare il nuovo campo.
+    - `components/requests/request-form.tsx` (usato dall'admin) ora invia `isManualCreation: true` nel payload.
+    - Aggiornata la pagina `app/(dashboard)/admin/requests/[id]/page.tsx` che legge il flag e condiziona il layout: se la richiesta è manuale renderizza `<ScenarioDashboard>` in un div full screen, altrimenti renderizza il normale `<ResizableLayout>` con chat.
+    - Corretti alcuni problemi di type-checking (`normalizedText` mancante, invalid button props) emersi in fase di build.

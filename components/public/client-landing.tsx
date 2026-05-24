@@ -66,7 +66,7 @@ export function ClientLanding() {
             Siamo una software house all'avanguardia. Progettiamo e sviluppiamo soluzioni web, app e intelligenza artificiale per far crescere il tuo business.
           </p>
           <div className="flex justify-center gap-4">
-            <Button 
+            <Button
               className="rounded-full px-8 h-14 text-lg shadow-lg hover:shadow-xl transition-all bg-blue-600 text-white hover:bg-blue-700"
               onClick={() => {
                 document.getElementById('preventivo-form')?.scrollIntoView({ behavior: 'smooth' });
@@ -153,7 +153,7 @@ export function ClientLanding() {
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
                 <label htmlFor="companyName" className="block text-sm font-semibold text-slate-900">
-                  Nome Azienda / Progetto
+                  Nome Progetto
                 </label>
                 <input
                   id="companyName"
@@ -161,7 +161,7 @@ export function ClientLanding() {
                   required
                   value={companyName}
                   onChange={(e) => setCompanyName(e.target.value)}
-                  placeholder="Es. La tua azienda S.r.l."
+                  placeholder="Es. landing page Italians QUOTE It Better S.r.l."
                   className="mt-2 block w-full rounded-xl border border-slate-300 px-4 py-3 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all bg-slate-50 focus:bg-white"
                 />
               </div>

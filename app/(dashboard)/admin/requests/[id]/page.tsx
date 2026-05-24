@@ -36,10 +36,16 @@ export default async function RequestDetailPage({
 
   return (
     <div className="h-[calc(100vh-100px)] min-h-[600px] w-full pt-6 px-6">
-      <ResizableLayout 
-        leftContent={<ScenarioDashboard initialData={mappedRequest} />}
-        rightContent={<ChatBox requestId={id} currentUserId="5d65094f-d066-423c-a7ce-ef18a0f64368" isAdminView={true} />}
-      />
+      {clientReq.isManualCreation ? (
+        <div className="w-full h-full pb-6">
+          <ScenarioDashboard initialData={mappedRequest} />
+        </div>
+      ) : (
+        <ResizableLayout 
+          leftContent={<ScenarioDashboard initialData={mappedRequest} />}
+          rightContent={<ChatBox requestId={id} currentUserId="5d65094f-d066-423c-a7ce-ef18a0f64368" isAdminView={true} />}
+        />
+      )}
     </div>
   );
 }

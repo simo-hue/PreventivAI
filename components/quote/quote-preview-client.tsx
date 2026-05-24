@@ -231,8 +231,7 @@ export function QuotePreviewClient({
               Il team verrà notificato e potrà sbloccare il progetto procedendo con la consegna formale.
             </p>
             <Button 
-              className="mt-6 bg-emerald-600 text-white hover:bg-emerald-700 w-full sm:w-auto"
-              size="lg"
+              className="mt-6 bg-emerald-600 text-white hover:bg-emerald-700 w-full sm:w-auto px-8"
               onClick={handleApprove}
               disabled={isApproving}
             >

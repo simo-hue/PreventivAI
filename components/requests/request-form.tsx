@@ -193,6 +193,7 @@ export function RequestForm() {
           title,
           rawText: textToAnalyze,
           sourceType: audioTranscript ? "mixed" : "text",
+          isManualCreation: true,
         }),
       });
 
