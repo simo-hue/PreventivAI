@@ -330,25 +330,24 @@ export function RequestForm() {
             {isTranscribing ? "Trascrizione in corso" : "Carica audio"}
             <input
               type="file"
-              accept="audio/mp3,audio/mpeg,audio/wav,audio/x-wav,audio/mp4,audio/m4a"
+              accept=".m4a,.mp3,.wav,audio/mp3,audio/mpeg,audio/wav,audio/x-wav,audio/mp4,audio/m4a"
               className="sr-only"
               disabled={isTranscribing}
               onChange={(event) => handleAudioUpload(event.target.files?.[0])}
             />
           </label>
 
-          <div>
-            <label className="text-sm font-semibold" htmlFor="audio-transcript">
-              Transcript editabile
-            </label>
-            <textarea
-              id="audio-transcript"
-              value={audioTranscript}
-              onChange={(event) => setAudioTranscript(event.target.value)}
-              placeholder="La trascrizione apparira' qui."
-              className="mt-2 min-h-44 w-full rounded-md border border-[var(--border)] px-3 py-3 text-sm leading-6"
-            />
-          </div>
+          {audioTranscript ? (
+            <div className="rounded-md border border-emerald-200 bg-emerald-50 p-3 text-sm text-[var(--success)] dark:border-emerald-900 dark:bg-emerald-950/20">
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="size-4" />
+                <span className="font-medium">Audio trascritto con successo!</span>
+              </div>
+              <p className="mt-1 text-xs opacity-90">
+                La trascrizione verrà automaticamente inclusa nell'analisi.
+              </p>
+            </div>
+          ) : null}
         </aside>
       </div>
 

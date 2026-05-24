@@ -15,9 +15,10 @@ Error: [ScenarioPUT] Errore insert efforts: invalid input syntax for type uuid: 
 
 
 
+
+
   quando segno come completato un progetto da admin voglio che venga fatto il redirect alla pagina  
 
 ---
 
   
-Quando dalla pagina "/admin/requests" clicco su il pulsante "nuova richiesta" problema con il carico del file audio, non ci deve essere transcript visibile ed editabile

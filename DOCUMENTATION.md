@@ -567,3 +567,7 @@
 - [2026-05-24 11:14:00 CEST]: UX Tweaks e Forzatura Lingua Italiana AI
   - *Details*: Applicate 3 migliorie basate sul feedback utente: rimossa la sezione statica "Prossimi Step" dal preventivo, nascosta l'animazione di digitazione nella chat quando l'AI elabora il preventivo in background, e imposta una direttiva forte di sistema all'AI per evitare che l'output ritorni in lingua inglese dopo svariate iterazioni.
   - *Tech Notes*: Eliminato il markup relativo alla sezione "Prossimi step" in `quote-preview-client.tsx`. Modificata la condizione `showTypingIndicator` in `chat-box.tsx` in modo da visualizzarla solo quando l'AI sta effettivamente generando un messaggio per la chat (`isStreamLoading && !object?.aiResponse`), rimuovendo la dipendenza dallo stato `analyzing` globale. Aggiunto l'imperativo in maiuscolo sull'obbligo dell'uso della lingua italiana nei system prompt `quote-analysis.v1.ts` e `validate-reply.ts`.
+
+- [2026-05-24 11:32:00 CEST]: Hide Editable Transcript & .m4a Support
+  - *Details*: Nascosto il transcript editabile visibile all'utente durante il caricamento audio nella form di Nuova Richiesta. Migliorato il supporto del formato .m4a.
+  - *Tech Notes*: Rimosso la textarea del transcript in components/requests/request-form.tsx e sostituita con un alert di conferma in verde al termine del caricamento e della trascrizione. Aggiunte esplicitamente estensioni .m4a, .mp3 e .wav nella prop accept dell'input audio.
