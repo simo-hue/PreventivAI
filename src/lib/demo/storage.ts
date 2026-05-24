@@ -16,6 +16,7 @@ export type StoredRequest = {
   createdAt: string;
   updatedAt: string;
   analysis?: PricedAnalysisOutput;
+  isApproved?: boolean;
   quoteRunId?: string;
   promptVersion?: string;
 };

@@ -59,6 +59,7 @@ export function ScenarioDashboard({ initialData: request }: { initialData: Store
           isPending={isDelivering}
           requestId={request.id}
           scenarioId={approvedScenario.id}
+          scenario={approvedScenario as any}
         />
       )}
       <div className="flex flex-col gap-3">
