@@ -1,6 +1,7 @@
 "use client";
 
 import { AlertTriangle, ArrowRight, CheckCircle2 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { Alert } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button, ButtonLink } from "@/components/ui/button";
@@ -12,6 +13,7 @@ import { DeliveryConfirmModal } from "./delivery-confirm-modal";
 import { useState } from "react";
 
 export function ScenarioDashboard({ initialData: request }: { initialData: StoredRequest }) {
+  const router = useRouter();
   const scenarios = request?.analysis?.scenarios ?? [];
   const sortedScenarios = [...scenarios].sort(
     (a, b) => a.totals.totalEur - b.totals.totalEur,
@@ -42,7 +44,10 @@ export function ScenarioDashboard({ initialData: request }: { initialData: Store
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status: "delivered" }),
       });
-      if (res.ok) window.location.reload();
+      if (res.ok) {
+        router.push("/admin/history");
+        router.refresh();
+      }
     } catch {
       alert("Errore di connessione");
       setIsDelivering(false);

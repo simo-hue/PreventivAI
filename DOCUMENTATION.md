@@ -571,3 +571,7 @@
 - [2026-05-24 11:32:00 CEST]: Hide Editable Transcript & .m4a Support
   - *Details*: Nascosto il transcript editabile visibile all'utente durante il caricamento audio nella form di Nuova Richiesta. Migliorato il supporto del formato .m4a.
   - *Tech Notes*: Rimosso la textarea del transcript in components/requests/request-form.tsx e sostituita con un alert di conferma in verde al termine del caricamento e della trascrizione. Aggiunte esplicitamente estensioni .m4a, .mp3 e .wav nella prop accept dell'input audio.
+
+- [2026-05-24 11:34:00 CEST]: Delivered Redirect
+  - *Details*: Modificato il comportamento al completamento di un progetto (stato "Consegnato"). L'admin viene ora reindirizzato automaticamente alla pagina /admin/history invece di eseguire un ricaricamento della pagina corrente.
+  - *Tech Notes*: Modificato components/quote/scenario-dashboard.tsx introducendo useRouter() per eseguire un `router.push("/admin/history")` seguito da `router.refresh()` all'interno della funzione `handleConfirmDelivery`.

@@ -13,12 +13,6 @@ Error: [ScenarioPUT] Errore insert efforts: invalid input syntax for type uuid: 
   133 |
   134 |     return NextResponse.json({ saved: true });
 
-
-
-
-
-  quando segno come completato un progetto da admin voglio che venga fatto il redirect alla pagina  
-
 ---
 
   
