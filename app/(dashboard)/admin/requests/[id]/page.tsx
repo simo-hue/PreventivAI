@@ -44,6 +44,7 @@ export default async function RequestDetailPage({
     analysis: quoteRun?.llm_raw_response ?? undefined,
     quoteRunId: quoteRun?.id,
     promptVersion: quoteRun?.prompt_version,
+    isManualCreation: clientReq.isManualCreation,
   };
 
   return (

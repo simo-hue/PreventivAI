@@ -607,3 +607,7 @@
 - [2026-05-24 12:30:00 CEST]: Nascondi 'Invia all'utente' per Richieste Manuali
   - *Details*: Nascosto il pulsante 'Invia all'utente' nella sezione delle domande importanti se la richiesta è stata generata manualmente dall'admin.
   - *Tech Notes*: Esteso il tipo `StoredRequest` in `storage.ts` per includere `isManualCreation` (già presente sul DB Supabase come `is_manual_creation` e mappato in `request-repository.ts`). Passata la prop `hideSendToUserButton={request.isManualCreation}` al componente `ImportantQuestionsSection` per renderizzare condizionalmente la action della card.
+
+- [2026-05-24 12:33:00 CEST]: Fix mappaggio isManualCreation
+  - *Details*: Risolto un bug per cui il pulsante 'Invia all'utente' continuava ad apparire per le richieste create manualmente dall'admin.
+  - *Tech Notes*: Aggiunto `isManualCreation: clientReq.isManualCreation` nell'oggetto `mappedRequest` in `app/(dashboard)/admin/requests/[id]/page.tsx`. Il campo, sebbene estratto correttamente dal DB e tipizzato, veniva perso durante la mappatura passata a `ScenarioDashboard`.
