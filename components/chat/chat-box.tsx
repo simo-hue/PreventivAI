@@ -133,10 +133,10 @@ export function ChatBox({
       <div ref={scrollRef} className="flex-1 p-4 overflow-y-auto bg-slate-50/50 flex flex-col gap-4">
         {loading ? (
           <div className="text-center text-sm text-slate-500 my-auto">Caricamento chat...</div>
-        ) : messages.length === 0 ? (
+        ) : messages.filter(m => !m.metadata?.isHidden).length === 0 ? (
           <div className="text-center text-sm text-slate-500 my-auto">Nessun messaggio. Scrivi qualcosa per iniziare!</div>
         ) : (
-          messages.map((msg) => {
+          messages.filter(m => !m.metadata?.isHidden).map((msg) => {
             const isMe = isAdminView
               ? (msg.sender_id === currentUserId || msg.sender_id === "5d65094f-d066-423c-a7ce-ef18a0f64368")
               : (msg.sender_id === currentUserId);

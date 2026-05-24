@@ -222,8 +222,13 @@ function MiniStat({ label, value }: { label: string; value: string }) {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function ImportantQuestionsSection({ questions, requestId }: { questions: any[]; requestId: string }) {
+  const router = useRouter();
   const [selected, setSelected] = useState<string[]>([]);
   const [isSending, setIsSending] = useState(false);
+  
+  const [answeringQuestion, setAnsweringQuestion] = useState<string | null>(null);
+  const [answerText, setAnswerText] = useState("");
+  const [isAnswering, setIsAnswering] = useState(false);
 
   const toggle = (q: string) => {
     setSelected(prev => prev.includes(q) ? prev.filter(x => x !== q) : [...prev, q]);
@@ -251,38 +256,116 @@ function ImportantQuestionsSection({ questions, requestId }: { questions: any[];
     }
   }
 
+  const handleAnswerSubmit = async () => {
+    if (!answeringQuestion || !answerText.trim()) return;
+    setIsAnswering(true);
+    try {
+      await fetch(`/api/requests/${requestId}/chat`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+          content: `Nota: Alla domanda "${answeringQuestion}", il cliente ha fornito questa informazione: ${answerText}`,
+          metadata: { isHidden: true }
+        }),
+      });
+
+      await fetch(`/api/requests/${requestId}/analyze`, { method: "POST" });
+      
+      setAnsweringQuestion(null);
+      setAnswerText("");
+      router.refresh();
+    } catch (e) {
+      console.error(e);
+      alert("Errore durante l'aggiornamento del preventivo.");
+    } finally {
+      setIsAnswering(false);
+    }
+  }
+
   return (
-    <Card>
-      <CardHeader 
-        title="Domande importanti" 
-        description="Seleziona le domande da inviare al cliente via chat."
-        action={
-          <div className="flex gap-2">
-            <Button 
-              onClick={handleSend} 
-              disabled={selected.length === 0 || isSending}
-            >
-              {isSending ? "Invio..." : "Invia all'utente"}
-            </Button>
-          </div>
-        }
-      />
-      <CardBody className="grid gap-3 lg:grid-cols-2">
-        {questions.map(q => (
-          <label key={q.question} className="flex items-start gap-3 rounded-md border border-[var(--border)] bg-white p-4 cursor-pointer hover:bg-[var(--surface-strong)] transition-colors">
-            <input 
-              type="checkbox" 
-              className="mt-1 h-4 w-4 rounded border-slate-300 text-[var(--primary)] focus:ring-[var(--primary)]"
-              checked={selected.includes(q.question)}
-              onChange={() => toggle(q.question)}
-            />
-            <div className="w-full">
-              <p className="text-sm font-semibold">{q.question}</p>
-              <p className="mt-1 text-xs text-[var(--muted)]">{q.impact}</p>
+    <>
+      <Card>
+        <CardHeader 
+          title="Domande importanti" 
+          description="Seleziona le domande da inviare al cliente via chat oppure rispondi direttamente."
+          action={
+            <div className="flex gap-2">
+              <Button 
+                onClick={handleSend} 
+                disabled={selected.length === 0 || isSending}
+              >
+                {isSending ? "Invio..." : "Invia all'utente"}
+              </Button>
             </div>
-          </label>
-        ))}
-      </CardBody>
-    </Card>
+          }
+        />
+        <CardBody className="grid gap-3 lg:grid-cols-2">
+          {questions.map(q => (
+            <div key={q.question} className="flex flex-col rounded-md border border-[var(--border)] bg-white p-4 hover:bg-[var(--surface-strong)] transition-colors">
+              <div className="flex items-start gap-3">
+                <label className="flex items-start gap-3 cursor-pointer flex-1">
+                  <input 
+                    type="checkbox" 
+                    className="mt-1 h-4 w-4 rounded border-slate-300 text-[var(--primary)] focus:ring-[var(--primary)]"
+                    checked={selected.includes(q.question)}
+                    onChange={() => toggle(q.question)}
+                  />
+                  <div className="w-full">
+                    <p className="text-sm font-semibold">{q.question}</p>
+                    <p className="mt-1 text-xs text-[var(--muted)]">{q.impact}</p>
+                  </div>
+                </label>
+                <Button 
+                  variant="secondary" 
+                  className="shrink-0 text-xs py-1 px-3 h-8"
+                  onClick={() => setAnsweringQuestion(q.question)}
+                >
+                  Rispondi
+                </Button>
+              </div>
+            </div>
+          ))}
+        </CardBody>
+      </Card>
+
+      {answeringQuestion && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm animate-in fade-in">
+          <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-xl animate-in zoom-in-95">
+            <h3 className="text-lg font-bold text-slate-900">Rispondi alla domanda</h3>
+            <p className="mt-2 text-sm font-medium text-slate-700 bg-slate-50 p-3 rounded-md border border-slate-100">{answeringQuestion}</p>
+            
+            <textarea
+              className="mt-4 w-full rounded-xl border border-slate-300 p-4 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 min-h-[160px] resize-y shadow-sm transition-colors"
+              placeholder="Inserisci qui le informazioni ricevute..."
+              value={answerText}
+              onChange={(e) => setAnswerText(e.target.value)}
+              disabled={isAnswering}
+              autoFocus
+            />
+            
+            <div className="mt-6 flex justify-end gap-3">
+              <Button 
+                variant="secondary" 
+                onClick={() => {
+                  setAnsweringQuestion(null);
+                  setAnswerText("");
+                }}
+                disabled={isAnswering}
+                className="w-24"
+              >
+                Annulla
+              </Button>
+              <Button 
+                onClick={handleAnswerSubmit}
+                disabled={!answerText.trim() || isAnswering}
+                className="w-32 bg-indigo-600 hover:bg-indigo-700 text-white"
+              >
+                {isAnswering ? "Aggiornamento..." : "Aggiorna"}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }

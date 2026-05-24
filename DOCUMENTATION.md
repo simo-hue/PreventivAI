@@ -591,3 +591,7 @@
 - [2026-05-24 11:46:00 CEST]: Rimozione completa riferimenti mock da UI
   - *Details*: Completata la rimozione del file mock `officialRateCards` dal componente client `scenario-detail-client.tsx` per garantire che tutti i prezzi calcolati nella UI provengano solo ed esclusivamente dal database di produzione (Supabase).
   - *Tech Notes*: Aggiunta chiamata a `/api/admin/rate-cards` on mount per fetchare i rate_card reali da Supabase. `recalculateScenario` adesso processa la UI utilizzando solo i dati prelevati dal db, evitando in toto gli ID fittizi.
+
+- [2026-05-24 12:19:00 CEST]: Admin Direct Reply to Important Questions
+  - *Details*: Aggiunta la possibilità per l'admin di rispondere direttamente alle 'Domande importanti' generando un aggiornamento silente del preventivo, senza che il messaggio risulti visibile nella chat.
+  - *Tech Notes*: Aggiunto un modal custom in `components/quote/scenario-dashboard.tsx` per inserire la risposta alla domanda. Al submit, viene effettuata una chiamata POST a `/api/requests/[id]/chat` con un messaggio contenente `metadata: { isHidden: true }`, seguita immediatamente da una chiamata a `/api/requests/[id]/analyze` per scatenare la rigenerazione. In `components/chat/chat-box.tsx` i messaggi con tale metadata vengono filtrati in modo da non essere renderizzati nell'interfaccia della chat.
