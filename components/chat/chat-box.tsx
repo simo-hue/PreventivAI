@@ -26,11 +26,13 @@ interface ChatMessage {
 export function ChatBox({
   requestId,
   currentUserId,
-  isAdminView = false
+  isAdminView = false,
+  chatTitle = "Chat con il Team"
 }: {
   requestId: string;
   currentUserId: string;
   isAdminView?: boolean;
+  chatTitle?: string;
 }) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [loading, setLoading] = useState(true);
@@ -124,7 +126,7 @@ export function ChatBox({
       {/* Header */}
       <div className="flex items-center gap-2 p-4 border-b border-slate-200 bg-slate-50">
         <MessageSquare className="h-5 w-5 text-[var(--primary)]" />
-        <h2 className="text-lg font-bold text-slate-900">Chat con il Team</h2>
+        <h2 className="text-lg font-bold text-slate-900">{chatTitle}</h2>
       </div>
 
       {/* Messages */}

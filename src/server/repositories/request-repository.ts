@@ -69,6 +69,7 @@ export async function getClientRequestById(id: string) {
     status: data.status,
     createdAt: data.created_at,
     isManualCreation: data.is_manual_creation,
+    userId: data.created_by,
     analysis: quoteRun?.llm_raw_response ?? undefined,
   };
 }

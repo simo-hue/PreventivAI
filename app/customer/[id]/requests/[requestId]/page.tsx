@@ -38,8 +38,8 @@ export default async function CustomerProjectDetailPage({
   const leftContent = previewQuoteId ? (
     <section className="relative h-full flex flex-col bg-slate-50">
       <div className="p-4 border-b border-slate-200 bg-white flex items-center justify-between z-10 shadow-sm relative">
-        <Link 
-          href="?" 
+        <Link
+          href="?"
           className="flex items-center text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
@@ -47,21 +47,21 @@ export default async function CustomerProjectDetailPage({
         </Link>
       </div>
       <div className="flex-1 overflow-y-auto">
-        <QuotePreviewClient 
-           scenarioId={previewQuoteId} 
-           initialScenario={previewScenario} 
-           initialRequest={{
-             id: request.id,
-             title: request.title,
-             status: request.status,
-             analysis: { summary: request.normalizedText || request.rawText }
-           } as any} 
+        <QuotePreviewClient
+          scenarioId={previewQuoteId}
+          initialScenario={previewScenario}
+          initialRequest={{
+            id: request.id,
+            title: request.title,
+            status: request.status,
+            analysis: { summary: request.normalizedText || request.rawText }
+          } as any}
         />
       </div>
     </section>
   ) : (
     <section className="bg-slate-50/50 p-6 sm:p-10 relative h-full overflow-y-auto @container">
-      <Link 
+      <Link
         href={`/customer/${id}`}
         className="inline-flex items-center text-sm font-medium text-[var(--muted)] hover:text-[var(--primary)] transition-colors mb-8"
       >
@@ -105,13 +105,13 @@ export default async function CustomerProjectDetailPage({
 
   const rightContent = (
     <section className="bg-slate-50 p-6 flex flex-col h-full">
-      <ChatBox requestId={requestId} currentUserId={id} />
+      <ChatBox requestId={requestId} currentUserId={id} chatTitle="Chat Con il Team Quote It Better" />
     </section>
   );
 
   return (
     <main className="h-[calc(100vh-64px)] min-h-[600px] w-full">
-      <ResizableLayout 
+      <ResizableLayout
         leftContent={leftContent}
         rightContent={rightContent}
       />

@@ -508,3 +508,7 @@
 - [2026-05-24 08:18:00 CEST]: Chat Admin Avatar Update
   - *Details*: Sostituite le iniziali di default ("SH" o "TU") con il logo ufficiale dell'amministratore all'interno della chat.
   - *Tech Notes*: Modificato `components/chat/chat-box.tsx` in modo che, qualora il mittente sia l'amministratore (verificato tramite l'ID hardcoded), il rendering dell'avatar utilizzi l'immagine `logo_chat_admin.png` (presente in `public/`) inserita in un container arrotondato con background scuro (`bg-slate-900`), garantendo contrasto col logo bianco e l'adattamento tramite `object-contain`. Questa logica copre i messaggi già inviati, l'indicatore di scrittura e lo streaming in corso.
+
+- [2026-05-24 08:22:00 CEST]: Dynamic Chat Titles
+  - *Details*: Aggiornato l'header della chat per mostrare titoli personalizzati in base a chi sta visualizzando l'interfaccia.
+  - *Tech Notes*: Aggiunta la prop `chatTitle` al componente `ChatBox`. Sulla dashboard lato customer viene passato esplicitamente `chatTitle="Chat con info@italiansquoteitbetter.com"`. Nella dashboard admin, invece, il titolo viene costruito dinamicamente interrogando la tabella `profiles` tramite il `userId` (inserito per l'occasione all'interno dell'oggetto restituito da `getClientRequestById`) per ricavare la mail e generare il titolo `Chat con [email]`.

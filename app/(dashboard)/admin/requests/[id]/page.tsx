@@ -3,6 +3,7 @@ import { getClientRequestById } from "@/src/server/repositories/request-reposito
 import { getQuoteRunForRequest } from "@/src/server/repositories/quote-repository";
 import { redirect } from "next/navigation";
 import { ChatBox } from "@/components/chat/chat-box";
+import { createSupabaseAdminClient } from "@/src/lib/supabase/admin";
 
 import { ResizableLayout } from "@/components/layout/resizable-layout";
 
@@ -19,6 +20,17 @@ export default async function RequestDetailPage({
   }
 
   const quoteRun = await getQuoteRunForRequest(id);
+
+  let chatTitle = "Chat con il Cliente";
+  if (clientReq.userId) {
+    const admin = createSupabaseAdminClient();
+    if (admin) {
+      const { data: profile } = await admin.from('profiles').select('email').eq('id', clientReq.userId).maybeSingle();
+      if (profile?.email) {
+        chatTitle = `Chat con ${profile.email}`;
+      }
+    }
+  }
 
   // Mappiamo nel formato atteso dalla UI (StoredRequest)
   const mappedRequest = {
@@ -43,7 +55,7 @@ export default async function RequestDetailPage({
       ) : (
         <ResizableLayout 
           leftContent={<ScenarioDashboard initialData={mappedRequest} />}
-          rightContent={<ChatBox requestId={id} currentUserId="5d65094f-d066-423c-a7ce-ef18a0f64368" isAdminView={true} />}
+          rightContent={<ChatBox requestId={id} currentUserId="5d65094f-d066-423c-a7ce-ef18a0f64368" isAdminView={true} chatTitle={chatTitle} />}
         />
       )}
     </div>

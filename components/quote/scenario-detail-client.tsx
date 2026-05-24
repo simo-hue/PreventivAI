@@ -53,7 +53,7 @@ export function ScenarioDetailClient({
     fetch("/api/admin/settings")
       .then((r) => r.ok ? r.json() : null)
       .then((data) => { if (data) setPricingSettings(data); })
-      .catch(() => {});
+      .catch(() => { });
   }, []);
 
   // Se non arrivano dal server, tenta di ricaricare dal DB via API
@@ -76,7 +76,7 @@ export function ScenarioDetailClient({
           );
         }
       })
-      .catch(() => {});
+      .catch(() => { });
   }, [scenarioId, initialScenario]);
 
   const { recalculated, recalcError } = useMemo(() => {
@@ -192,14 +192,14 @@ export function ScenarioDetailClient({
       const response = await fetch(`/api/requests/${requestId}/chat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
-           content: `Ti ho inviato il preventivo **${display.name}**. Puoi visualizzarlo o scaricarlo in PDF cliccando sui pulsanti qui sotto.`,
-           metadata: {
-              type: "quote_share",
-              scenarioId: display.id,
-              scenarioName: display.name,
-              requestTitle: requestInfo?.title || display.name
-           }
+        body: JSON.stringify({
+          content: `Ti ho inviato il preventivo **${display.name}**. Puoi visualizzarlo o scaricarlo in PDF cliccando sui pulsanti qui sotto.`,
+          metadata: {
+            type: "quote_share",
+            scenarioId: display.id,
+            scenarioName: display.name,
+            requestTitle: requestInfo?.title || display.name
+          }
         }),
       });
       if (response.ok) {
