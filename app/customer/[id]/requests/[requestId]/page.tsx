@@ -60,42 +60,49 @@ export default async function CustomerProjectDetailPage({
       </div>
     </section>
   ) : (
-    <section className="bg-white p-6 sm:p-10 relative h-full overflow-y-auto">
+    <section className="bg-slate-50/50 p-6 sm:p-10 relative h-full overflow-y-auto">
       <Link 
         href={`/customer/${id}`}
-        className="absolute top-6 left-6 sm:top-10 sm:left-10 flex items-center text-sm font-medium text-[var(--muted)] hover:text-[var(--primary)] transition-colors"
+        className="inline-flex items-center text-sm font-medium text-[var(--muted)] hover:text-[var(--primary)] transition-colors mb-8"
       >
         <ArrowLeft className="mr-2 h-4 w-4" />
         Torna ai progetti
       </Link>
-      <div className="max-w-3xl mx-auto pt-10">
-        <div className="flex items-center justify-between mb-8">
+      <div className="w-full max-w-[1400px] mx-auto">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
           <h1 className="text-3xl font-bold tracking-tight text-slate-900">Il tuo Progetto</h1>
-          <Badge variant="info" className="capitalize">{request.status}</Badge>
+          <Badge variant="info" className="capitalize shrink-0">{request.status}</Badge>
         </div>
         
-        <div className="rounded-2xl border border-slate-200 bg-slate-50 p-6 shadow-sm mb-10">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-indigo-100 text-indigo-600">
-              <FileText className="h-5 w-5" />
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
+          {/* Project Details Panel */}
+          <div className="rounded-2xl border border-slate-200 bg-white p-6 sm:p-8 shadow-sm h-fit">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-indigo-50 text-indigo-600">
+                <FileText className="h-6 w-6" />
+              </div>
+              <div>
+                <h2 className="text-xl font-semibold text-slate-900 line-clamp-2">{request.title}</h2>
+                <p className="text-sm text-slate-500 mt-1">Inviato il {new Date(request.createdAt).toLocaleDateString("it-IT")}</p>
+              </div>
             </div>
-            <div>
-              <h2 className="text-xl font-semibold text-slate-900">{request.title}</h2>
-              <p className="text-sm text-slate-500">Inviato il {new Date(request.createdAt).toLocaleDateString("it-IT")}</p>
+            <div className="prose prose-slate max-w-none text-slate-700 mt-6 bg-slate-50 rounded-xl p-5 border border-slate-100">
+              <p className="whitespace-pre-wrap leading-relaxed">{request.rawText}</p>
             </div>
           </div>
-          <div className="prose prose-slate max-w-none text-slate-700">
-            <p className="whitespace-pre-wrap">{request.rawText}</p>
-          </div>
-        </div>
 
-        <div>
-          <h3 className="text-xl font-bold text-slate-900 mb-4">Preventivi Ricevuti</h3>
-          <div className="rounded-xl border border-dashed border-slate-300 bg-white p-10 text-center">
-            <p className="text-slate-500 mb-4">
-              La software house sta analizzando la tua richiesta. I preventivi appariranno qui non appena saranno pronti.
-            </p>
-            <Button variant="secondary" disabled>Nessun preventivo disponibile</Button>
+          {/* Quotes Panel */}
+          <div className="flex flex-col">
+            <h3 className="text-xl font-bold text-slate-900 mb-4 px-1">Preventivi Ricevuti</h3>
+            <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-10 sm:p-14 text-center flex-1 flex flex-col items-center justify-center min-h-[300px]">
+              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-slate-50 mb-6 border border-slate-100">
+                <FileText className="h-8 w-8 text-slate-300" />
+              </div>
+              <p className="text-slate-500 mb-6 max-w-sm leading-relaxed">
+                La software house sta analizzando la tua richiesta. I preventivi appariranno qui non appena saranno pronti.
+              </p>
+              <Button variant="secondary" disabled className="min-w-[200px]">Nessun preventivo disponibile</Button>
+            </div>
           </div>
         </div>
       </div>

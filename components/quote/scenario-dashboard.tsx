@@ -126,7 +126,7 @@ export function ScenarioDashboard({ initialData: request }: { initialData: Store
       ) : null}
 
       {scenariosToDisplay.length ? (
-        <div className="grid gap-4 xl:grid-cols-3">
+        <div className={`grid gap-4 ${scenariosToDisplay.length === 1 ? "xl:grid-cols-1" : scenariosToDisplay.length === 2 ? "xl:grid-cols-2" : "xl:grid-cols-3"}`}>
           {scenariosToDisplay.map((scenario) => {
             const risks = evaluateScenarioRisk({
               scenario,

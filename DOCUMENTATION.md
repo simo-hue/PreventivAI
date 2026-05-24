@@ -464,3 +464,14 @@
     - `components/requests/request-form.tsx` (usato dall'admin) ora invia `isManualCreation: true` nel payload.
     - Aggiornata la pagina `app/(dashboard)/admin/requests/[id]/page.tsx` che legge il flag e condiziona il layout: se la richiesta è manuale renderizza `<ScenarioDashboard>` in un div full screen, altrimenti renderizza il normale `<ResizableLayout>` con chat.
     - Corretti alcuni problemi di type-checking (`normalizedText` mancante, invalid button props) emersi in fase di build.
+
+- [2026-05-24 07:55:00 CEST]: Customer Request Page - Responsive Layout Upgrade
+  - *Details*: Aggiornato il layout della pagina della singola richiesta per il customer (`/customer/[id]/requests/[requestId]`) rendendolo responsive e moderno. La pagina ora sfrutta tutta la larghezza dei display desktop (max-width 1400px), offrendo una User Experience ottimizzata e uno stile più pulito.
+  - *Tech Notes*:
+    - Sostituito il container con `max-w-3xl` e disposizione a blocchi in colonna con un `max-w-[1400px] mx-auto` e griglia CSS adattiva (`grid-cols-1 xl:grid-cols-2`).
+    - Migliorati i contrasti dei panel e lo scaling delle icone utilizzando Tailwind (aggiunto un "Preventivi Ricevuti" panel affiancato al dettaglio testuale della richiesta per schermi larghi).
+    - Risolto un piccolo errore di sintassi introdotto nel Refactoring dei children JSX.
+
+- [2026-05-24 07:55:00 CEST]: Scenario Cards Responsive Layout
+  - *Details*: Modificata la griglia dei preventivi nella vista ScenarioDashboard in modo da rendere il layout dinamico e distribuire sempre le card occupando tutta la larghezza disponibile. Ora, se c'è un solo preventivo, questo si allargherà al 100%, mentre se ce ne sono 2 si divideranno lo spazio al 50%.
+  - *Tech Notes*: Modificata l'espressione in `components/quote/scenario-dashboard.tsx` sostituendo la classe fissa `xl:grid-cols-3` con un template string dinamico `scenariosToDisplay.length === 1 ? "xl:grid-cols-1" : scenariosToDisplay.length === 2 ? "xl:grid-cols-2" : "xl:grid-cols-3"`.
