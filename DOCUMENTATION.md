@@ -434,3 +434,23 @@
 - [2026-05-24 02:22:00 CEST]: Fix Quote Approval State Sync
   - *Details*: Risolto il problema per cui l'accettazione del preventivo da parte del customer non aggiornava in tempo reale il badge "Confermato" e gli altri stati della UI (sia lato customer che admin).
   - *Tech Notes*: Modificata l'API route `/api/quote-scenarios/[id]/approve` aggiungendo `revalidatePath("/", "layout")` per invalidare tutta la cache Server Side in Next.js App Router (RSC cache). In questo modo la Admin dashboard riflette istantaneamente il cambiamento caricando dal DB lo stato `is_approved`. Aggiornato anche `QuotePreviewClient` aggiungendo `router.refresh()` in modo che il browser del customer ricarichi le modifiche al DOM (Route Cache client-side) in automatico al momento dell'approvazione.
+
+- [2026-05-24 02:23:00 CEST]: Admin Dashboard - Approved Card Styling
+  - *Details*: Aggiunto uno stile visivo che cambia il colore dell'intera card dello scenario quando questo viene approvato dal cliente.
+  - *Tech Notes*: Modificato `Card` in `components/quote/scenario-dashboard.tsx` con classi tailwind condizionali (`bg-emerald-50/50 border-emerald-500 shadow-md ring-1 ring-emerald-500/20`) se `scenario.isApproved` è vero.
+
+- [2026-05-24 02:25:00 CEST]: Admin Dashboard - Hide Rejected Quotes
+  - *Details*: Modificata la UI della dashboard admin in modo che, una volta che il cliente approva uno scenario (preventivo), tutti gli altri scenari non approvati vengano nascosti ("scartati" visivamente), lasciando visibile unicamente la versione confermata.
+  - *Tech Notes*: Implementata la costante `scenariosToDisplay` in `components/quote/scenario-dashboard.tsx` che intercetta la presenza di un preventivo accettato (`approvedScenario`) e filtra l'array sostituendo la lista completa con il singolo scenario confermato.
+
+- [2026-05-24 02:26:00 CEST]: Admin Dashboard - Highlight Accepted Requests
+  - *Details*: Fatto in modo che anche nella pagina riepilogativa `/admin/requests` l'intera card diventi verde se il cliente ha accettato uno dei preventivi associati.
+  - *Tech Notes*: Sincronizzato lo stato `isApproved = true` all'interno del JSON `llm_raw_response` nella tabella `quote_runs` in fase di approvazione (`app/api/quote-scenarios/[id]/approve/route.ts`). In questo modo i componenti della lista che non fanno la join profonda (come `RequestListClient`) possono verificare istantaneamente se esiste un preventivo accettato controllando il flag JSON nativo ed evidenziare correttamente la Card usando Tailwind (`bg-emerald-50/50 border-emerald-500 shadow-md ring-1 ring-emerald-500/20`).
+
+- [2026-05-24T07:30:10+02:00]: Hide Important Questions on Approval
+  - *Details*: Nascosta la sezione "Domande importanti" nella dashboard dello scenario una volta che un preventivo è stato confermato.
+  - *Tech Notes*: Aggiunta la condizione `!hasApproved` nel rendering di `ImportantQuestionsSection` all'interno di `components/quote/scenario-dashboard.tsx`.
+
+- [2026-05-24T07:32:00+02:00]: Fix Supabase Cookies Error in Server Components
+  - *Details*: Fixed an unhandled rejection error (`Cookies can only be modified in a Server Action or Route Handler`) that crashed the Next.js development server during page loads.
+  - *Tech Notes*: Added a `try-catch` block around `cookieStore.set` inside the `setAll` method of `createSupabaseServerClient` in `src/lib/supabase/server.ts`, following Supabase SSR guidelines, so that attempts to set cookies from Server Components fail silently instead of throwing errors.

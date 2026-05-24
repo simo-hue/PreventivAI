@@ -28,6 +28,34 @@ export async function POST(
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
+    // Sincronizza lo stato isApproved nel JSON llm_raw_response per le liste (che non fanno la join completa)
+    const { data: scenario } = await admin
+      .from("quote_scenarios")
+      .select("quote_run_id")
+      .eq("id", id)
+      .single();
+
+    if (scenario?.quote_run_id) {
+      const { data: qr } = await admin
+        .from("quote_runs")
+        .select("llm_raw_response")
+        .eq("id", scenario.quote_run_id)
+        .single();
+        
+      if (qr?.llm_raw_response) {
+        const scenarios = qr.llm_raw_response.scenarios || [];
+        const updatedScenarios = scenarios.map((s: any) => 
+          s.id === id ? { ...s, isApproved: true } : s
+        );
+        await admin
+          .from("quote_runs")
+          .update({ 
+            llm_raw_response: { ...qr.llm_raw_response, scenarios: updatedScenarios } 
+          })
+          .eq("id", scenario.quote_run_id);
+      }
+    }
+
     revalidatePath("/", "layout");
 
     return NextResponse.json({ success: true });

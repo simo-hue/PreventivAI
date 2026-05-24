@@ -29,6 +29,7 @@ export function ScenarioDashboard({ initialData: request }: { initialData: Store
   const analysis = request.analysis;
   const approvedScenario = sortedScenarios.find((s) => s.isApproved);
   const hasApproved = !!approvedScenario;
+  const scenariosToDisplay = approvedScenario ? [approvedScenario] : sortedScenarios;
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDelivering, setIsDelivering] = useState(false);
 
@@ -117,23 +118,26 @@ export function ScenarioDashboard({ initialData: request }: { initialData: Store
 
 
 
-      {analysis?.importantQuestions.length ? (
+      {analysis?.importantQuestions.length && !hasApproved ? (
         <ImportantQuestionsSection 
           questions={analysis.importantQuestions} 
           requestId={request.id} 
         />
       ) : null}
 
-      {sortedScenarios.length ? (
+      {scenariosToDisplay.length ? (
         <div className="grid gap-4 xl:grid-cols-3">
-          {sortedScenarios.map((scenario) => {
+          {scenariosToDisplay.map((scenario) => {
             const risks = evaluateScenarioRisk({
               scenario,
               budgetEur: analysis?.detectedBudgetEur ?? null,
               requestedTimelineText: analysis?.detectedTimelineText ?? null,
             });
             return (
-              <Card key={scenario.id}>
+              <Card 
+                key={scenario.id} 
+                className={scenario.isApproved ? "bg-emerald-50/50 border-emerald-500 shadow-md ring-1 ring-emerald-500/20" : ""}
+              >
                 <CardBody className="flex h-full flex-col gap-4">
                   <div>
                     <div className="flex flex-wrap items-center gap-2">

@@ -94,8 +94,12 @@ export function RequestListClient({
         {requests.map((request) => {
           const bestScenario = request.analysis?.scenarios[0];
           const isProcessing = request.status === "draft" || request.status === "analyzing";
+          const isApproved = request.analysis?.scenarios?.some((s: any) => s.isApproved);
           return (
-            <Card key={request.id}>
+            <Card 
+              key={request.id}
+              className={isApproved ? "bg-emerald-50/50 border-emerald-500 shadow-md ring-1 ring-emerald-500/20" : ""}
+            >
               <CardBody className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
