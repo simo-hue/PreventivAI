@@ -358,6 +358,13 @@
     - Il fallback a `window.print()` nel client veniva innescato perché la rotta API restituiva un errore 500. Questo errore era causato dal workaround `eval('require')` inserito in precedenza per bypassare Turbopack, il quale non è supportato nel runtime isolato di Next.js.
     - Ripristinato il normale import ES6 di `pdf-lib`. Il tempo di compilazione lungo si verificherà solo alla prima esecuzione in locale, ma garantisce la stabilità assoluta del servizio e il download immediato.
 
+- [2026-05-24T09:15:00+02:00]: Fix UI Breakdown Ore Lato Cliente e Totali Modulo
+  - *Details*: Aggiunto il dettaglio dei task, dei ruoli, e il **totale delle ore aggregate per modulo**, visibili in tutte le sezioni del preventivo (PDF, anteprima cliente, vista software house).
+  - *Tech Notes*:
+    - In `quote-preview-client.tsx`, la sezione "Scope incluso" mostrava solo il nome del modulo e il subtotale. È stato integrato l'elenco dei singoli task e dei ruoli associati.
+    - Calcolato dinamicamente e aggiunto il "totale ore del modulo" (es: `120h`) a fianco del subtotale economico di ciascuna sezione/modulo, visibile se l'opzione `showHours` è attiva.
+    - Il totale ore aggregate del modulo è stato aggiunto anche nel layout del PDF (accanto al nome della sezione) e nella dashboard di edit della software house per massima trasparenza.
+
 - [2026-05-24T00:58:00+02:00]: Fix Build Type Error and ReferenceError Resolution
   - *Details*: Risolto un errore di compilazione TypeScript che causava il blocco della build e conseguenti problemi di hot-reloading (incluso un falso positivo su `createSupabaseServerClient is not defined`).
   - *Tech Notes*: Rimosso l'attributo `size="lg"` dal componente `<Button>` all'interno di `components/public/client-landing.tsx`, poiché la prop non è supportata dal componente custom. Build e type-checking (`pnpm build`) eseguiti con successo senza errori.
@@ -535,3 +542,6 @@
 - [2026-05-24T08:59:00+02:00]: Fix 400 Bad Request su Invio Preventivo via Chat
   - *Details*: Risolto l'errore 400 Bad Request che impediva all'amministratore di inviare un preventivo condiviso nella chat del cliente.
   - *Tech Notes*: Modificato `app/api/requests/[id]/chat/route.ts` eliminando il vincolo `.min(1)` dallo schema Zod (`PostMessageSchema`) per il campo `content`. I messaggi di tipo "quote_share" generati in `components/quote/scenario-detail-client.tsx` inviano infatti una stringa vuota come contenuto, appoggiandosi ai soli `metadata` per il render; la rimozione del vincolo consente l'accettazione del payload senza validazione restrittiva sul testuale.
+- [2026-05-24 09:43:38]: Bugfix - Zeroed data in PDF and web app
+  *Details*: Resolved a critical issue where the quote preview UI and PDF generation crashed or reset to zero due to unsafe `.reduce` operations when iterating over `module.tasks` and `task.efforts` to calculate total hours. Implemented optional chaining (`?.`) and zero-fallbacks (`|| 0`) in `scenario-detail-client.tsx`, `quote-preview-client.tsx` and `render-quote-pdf.ts`.
+  *Tech Notes*: `reduce` functions now safely cast `estimatedHoursExpected` to Number and provide safe fallback values for missing arrays.

@@ -360,9 +360,12 @@ export function ScenarioDetailClient({
                   </p>
                 </div>
                 <div className="flex shrink-0 items-center gap-4">
-                  <p className="text-right font-bold">
-                    {formatCurrency(module.subtotalEur, pricingSettings?.currency)}
-                  </p>
+                  <div className="text-right font-bold flex flex-col items-end">
+                    <span>{formatCurrency(module.subtotalEur, pricingSettings?.currency)}</span>
+                    <span className="text-xs text-slate-500 font-normal mt-1">
+                      {formatNumber(module.tasks?.reduce((sum, t) => sum + (t.efforts?.reduce((es, e) => es + (Number(e.estimatedHoursExpected) || 0), 0) || 0), 0) || 0)}h stimate
+                    </span>
+                  </div>
                   {module.isOptional ? (
                     <label className="flex cursor-pointer items-center gap-2 text-sm font-semibold">
                       <input

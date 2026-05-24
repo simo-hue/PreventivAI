@@ -157,7 +157,14 @@ export function QuotePreviewClient({
                         {module.description}
                       </p>
                     </div>
-                    <p className="font-bold">{formatCurrency(module.subtotalEur)}</p>
+                    <p className="font-bold text-lg text-right">
+                      {scenario.displayOptions?.showHours !== false && (
+                         <span className="text-slate-400 font-normal mr-3 text-base">
+                           {formatNumber(module.tasks?.reduce((sum, t) => sum + (t.efforts?.reduce((es, e) => es + (Number(e.estimatedHoursExpected) || 0), 0) || 0), 0) || 0)}h
+                         </span>
+                      )}
+                      {formatCurrency(module.subtotalEur)}
+                    </p>
                   </div>
                 </div>
               ))}

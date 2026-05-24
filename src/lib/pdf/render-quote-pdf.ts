@@ -229,7 +229,9 @@ export async function renderQuotePdf(payload: PdfPayload) {
     
     // Subtotale modulo
     checkPageBreak(20);
-    drawText(`Totale ${mod.name}:`, pageWidth - margin - 70, fontRegular, 9, TEXT_MUTED, 'right');
+    const modHours = mod.tasks?.reduce((sum, t) => sum + (t.efforts?.reduce((es, e) => es + (Number(e.estimatedHoursExpected) || 0), 0) || 0), 0) || 0;
+    const modSubtotalLabel = showHours ? `Totale ${mod.name} (${formatNumber(modHours)}h):` : `Totale ${mod.name}:`;
+    drawText(modSubtotalLabel, pageWidth - margin - 70, fontRegular, 9, TEXT_MUTED, 'right');
     drawText(`${formatCurrency(mod.subtotalEur)}`, pageWidth - margin, fontBold, 10, TEXT_DARK, 'right');
     currentY -= 15;
   }
