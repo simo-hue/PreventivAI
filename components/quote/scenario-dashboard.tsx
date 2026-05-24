@@ -61,7 +61,7 @@ export function ScenarioDashboard({ initialData: request }: { initialData: Store
           scenarioId={approvedScenario.id}
         />
       )}
-      <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+      <div className="flex flex-col gap-3">
         <div>
           <div className="flex flex-wrap items-center gap-2">
             <h1 className="text-2xl font-bold tracking-normal">{request.title}</h1>
@@ -83,19 +83,17 @@ export function ScenarioDashboard({ initialData: request }: { initialData: Store
             {analysis?.summary ?? request.rawText}
           </p>
         </div>
-        <div className="flex flex-wrap gap-2">
-          {request.status === "quoted" && hasApproved && (
-            <Button
-              variant="primary"
-              onClick={() => setIsModalOpen(true)}
-            >
-              Segna come Consegnato
-            </Button>
-          )}
-        </div>
       </div>
 
-
+      {request.status === "quoted" && hasApproved && (
+        <Button
+          variant="primary"
+          className="w-full"
+          onClick={() => setIsModalOpen(true)}
+        >
+          Segna come Consegnato
+        </Button>
+      )}
 
       <div className="grid gap-4 md:grid-cols-3">
         <Metric
