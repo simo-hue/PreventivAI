@@ -20,6 +20,7 @@ export default async function QuotePreviewPage({
       scenarioId={scenarioId} 
       initialScenario={scenario} 
       initialRequest={request as unknown as import("@/src/lib/demo/storage").StoredRequest} 
+      backUrl={request ? `/admin/requests/${request.id}/scenarios/${scenarioId}` : undefined}
     />
   );
 }

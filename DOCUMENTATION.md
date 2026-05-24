@@ -479,3 +479,10 @@
 - [2026-05-24 08:00:00 CEST]: Scenario Detail Client - Header Redesign
   - *Details*: Ristrutturato l'header della pagina di dettaglio del preventivo lato admin (`/admin/requests/[id]/scenarios/[scenarioId]`). Invece della disposizione "sparpagliata" (testo a sinistra, bottoni a destra), ora gli elementi sono impilati logicamente e centrati (Titolo -> Descrizione -> Barra dei pulsanti centrata), come richiesto.
   - *Tech Notes*: Modificato il componente `ScenarioDetailClient` rimpiazzando `flex-row lg:justify-between` con un `flex-col gap-6` e un container `justify-center` apposito per i pulsanti.
+
+- [2026-05-24 08:02:00 CEST]: Quote Preview Back Button
+  - *Details*: Aggiunto un pulsante "Torna al preventivo" all'interno della barra superiore di navigazione della pagina di preview del preventivo (vista dall'admin). Questo permette all'amministratore di tornare agevolmente alla dashboard di dettaglio dello scenario senza dover ricorrere alle frecce di navigazione del browser.
+  - *Tech Notes*:
+    - Aggiunta la prop `backUrl` a `QuotePreviewClient`.
+    - Modificata `app/quotes/[scenarioId]/preview/page.tsx` per calcolare e passare un URL di ritorno (`/admin/requests/${request.id}/scenarios/${scenarioId}`) basandosi sulla presenza della request collegata.
+    - Il link sostituisce il testo statico "Italians quote it better - Preview" solo lato admin, mantenendo invariata l'esperienza per il cliente nel link pubblico.

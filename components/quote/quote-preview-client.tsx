@@ -2,10 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Download, Printer, CheckCircle2, Loader2 } from "lucide-react";
+import { Download, Printer, CheckCircle2, Loader2, ArrowLeft } from "lucide-react";
+import Link from "next/link";
 import { Alert } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Button, ButtonLink } from "@/components/ui/button";
 import type { StoredRequest } from "@/src/lib/demo/storage";
 import type { PricedScenario } from "@/src/lib/quotes/types";
 import { formatCurrency, formatNumber, formatPercent } from "@/src/lib/utils/format";
@@ -14,10 +15,12 @@ export function QuotePreviewClient({
   scenarioId, 
   initialScenario,
   initialRequest,
+  backUrl,
 }: { 
   scenarioId: string; 
   initialScenario?: PricedScenario | null;
   initialRequest?: StoredRequest | null;
+  backUrl?: string;
 }) {
   const request = initialRequest;
   const scenario = initialScenario;
@@ -87,7 +90,14 @@ export function QuotePreviewClient({
     <main className="bg-white">
       <div className="no-print sticky top-0 z-20 border-b border-[var(--border)] bg-white/95 px-4 py-3 backdrop-blur">
         <div className="mx-auto flex max-w-5xl items-center justify-between gap-3">
-          <p className="text-sm font-semibold text-[var(--primary)]">Italians quote it better - Preview</p>
+          {backUrl ? (
+            <ButtonLink href={backUrl} variant="ghost" className="-ml-2 px-2 text-slate-600 hover:text-slate-900">
+              <ArrowLeft className="mr-2 size-4" />
+              Torna al preventivo
+            </ButtonLink>
+          ) : (
+            <p className="text-sm font-semibold text-[var(--primary)]">Italians quote it better - Preview</p>
+          )}
           <div className="flex gap-2">
             <Button variant="secondary" onClick={() => window.print()}>
               <Printer className="size-4" aria-hidden="true" />
