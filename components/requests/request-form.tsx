@@ -259,15 +259,8 @@ export function RequestForm() {
       const transcript = payload.transcript;
       setAudioTranscript(transcript);
 
-      // Insert the transcription into the "Testo cliente" textarea.
-      // If the textarea already contains text, append with a visual separator.
-      setRequestText((prev) => {
-        const trimmed = prev.trim();
-        if (trimmed.length === 0) {
-          return transcript;
-        }
-        return `${trimmed}\n\n--- Trascrizione audio ---\n${transcript}`;
-      });
+      // Overwrite the "Testo cliente" textarea with the transcription.
+      setRequestText(transcript);
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "Errore inatteso.");
     } finally {
