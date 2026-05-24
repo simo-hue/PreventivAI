@@ -575,3 +575,11 @@
 - [2026-05-24 11:34:00 CEST]: Delivered Redirect
   - *Details*: Modificato il comportamento al completamento di un progetto (stato "Consegnato"). L'admin viene ora reindirizzato automaticamente alla pagina /admin/history invece di eseguire un ricaricamento della pagina corrente.
   - *Tech Notes*: Modificato components/quote/scenario-dashboard.tsx introducendo useRouter() per eseguire un `router.push("/admin/history")` seguito da `router.refresh()` all'interno della funzione `handleConfirmDelivery`.
+
+- [2026-05-24 11:36:00 CEST]: Fix Next.js Image warnings and Turbopack cache
+  - *Details*: Risolti gli avvisi per le performance dell'immagine LCP in home e la corruzione del database di Turbopack che rallentava i tempi di caricamento.
+  - *Tech Notes*: Aggiunte property  e  ai componenti  in  per  e . Svuotata cache di  corrotta.
+
+- [2026-05-24 11:36:00 CEST]: Fix Next.js Image warnings and Turbopack cache
+  - *Details*: Risolti gli avvisi per le performance dell'immagine LCP in home e la corruzione del database di Turbopack che rallentava i tempi di caricamento.
+  - *Tech Notes*: Aggiunte property `priority` e `sizes` ai componenti `Image` in `components/public/client-landing.tsx` per `/team.png` e `/logo.png`. Svuotata cache di `.next` corrotta.

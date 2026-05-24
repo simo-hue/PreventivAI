@@ -33,6 +33,7 @@ export function ClientLanding() {
                   src="/logo.png"
                   alt="Logo Software House"
                   fill
+                  sizes="(max-width: 640px) 192px, 224px"
                   className="object-contain object-left"
                   priority
                 />
@@ -85,6 +86,8 @@ export function ClientLanding() {
               src="/team.png"
               alt="Il team della nostra software house"
               fill
+              priority
+              sizes="(max-width: 1152px) 100vw, 1152px"
               className="object-cover object-top transition-transform duration-700 group-hover:scale-105"
             />
             <div className="absolute inset-0 ring-1 ring-inset ring-black/10 rounded-[2rem]"></div>
