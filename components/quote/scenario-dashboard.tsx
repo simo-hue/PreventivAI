@@ -228,6 +228,7 @@ function ImportantQuestionsSection({ questions, requestId, hideSendToUserButton 
   const [isSending, setIsSending] = useState(false);
   
   const [answeringQuestion, setAnsweringQuestion] = useState<string | null>(null);
+  const [isGeneralUpdateOpen, setIsGeneralUpdateOpen] = useState(false);
   const [answerText, setAnswerText] = useState("");
   const [isAnswering, setIsAnswering] = useState(false);
 
@@ -257,15 +258,14 @@ function ImportantQuestionsSection({ questions, requestId, hideSendToUserButton 
     }
   }
 
-  const handleAnswerSubmit = async () => {
-    if (!answeringQuestion || !answerText.trim()) return;
+  const submitUpdate = async (contentStr: string) => {
     setIsAnswering(true);
     try {
       await fetch(`/api/requests/${requestId}/chat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 
-          content: `Nota: Alla domanda "${answeringQuestion}", il cliente ha fornito questa informazione: ${answerText}`,
+          content: contentStr,
           metadata: { isHidden: true }
         }),
       });
@@ -281,6 +281,7 @@ function ImportantQuestionsSection({ questions, requestId, hideSendToUserButton 
       fetch(`/api/requests/${requestId}/analyze`, { method: "POST" }).catch(console.error);
       
       setAnsweringQuestion(null);
+      setIsGeneralUpdateOpen(false);
       setAnswerText("");
       router.push("/admin/requests");
       router.refresh();
@@ -289,6 +290,16 @@ function ImportantQuestionsSection({ questions, requestId, hideSendToUserButton 
       alert("Errore durante l'aggiornamento del preventivo.");
       setIsAnswering(false);
     }
+  };
+
+  const handleAnswerSubmit = async () => {
+    if (!answeringQuestion || !answerText.trim()) return;
+    await submitUpdate(`Nota: Alla domanda "${answeringQuestion}", il cliente ha fornito questa informazione: ${answerText}`);
+  }
+
+  const handleGeneralUpdateSubmit = async () => {
+    if (!answerText.trim()) return;
+    await submitUpdate(`Nota di aggiornamento: ${answerText}`);
   }
 
   return (
@@ -307,7 +318,13 @@ function ImportantQuestionsSection({ questions, requestId, hideSendToUserButton 
                   {isSending ? "Invio..." : "Invia all'utente"}
                 </Button>
               </div>
-            ) : null
+            ) : (
+              <div className="flex gap-2">
+                <Button onClick={() => setIsGeneralUpdateOpen(true)}>
+                  Aggiorna preventivo
+                </Button>
+              </div>
+            )
           }
         />
         <CardBody className="grid gap-3 lg:grid-cols-2">
@@ -370,6 +387,45 @@ function ImportantQuestionsSection({ questions, requestId, hideSendToUserButton 
               </Button>
               <Button 
                 onClick={handleAnswerSubmit}
+                disabled={!answerText.trim() || isAnswering}
+                className="w-32 bg-indigo-600 hover:bg-indigo-700 text-white"
+              >
+                {isAnswering ? "Aggiornamento..." : "Aggiorna"}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {isGeneralUpdateOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm animate-in fade-in">
+          <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-xl animate-in zoom-in-95">
+            <h3 className="text-lg font-bold text-slate-900">Aggiorna Preventivo</h3>
+            <p className="mt-2 text-sm text-slate-600">Inserisci i nuovi dettagli o le modifiche per aggiornare la richiesta.</p>
+            
+            <textarea
+              className="mt-4 w-full rounded-xl border border-slate-300 p-4 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 min-h-[160px] resize-y shadow-sm transition-colors"
+              placeholder="Es. Il cliente richiede anche l'integrazione con un CRM esterno..."
+              value={answerText}
+              onChange={(e) => setAnswerText(e.target.value)}
+              disabled={isAnswering}
+              autoFocus
+            />
+            
+            <div className="mt-6 flex justify-end gap-3">
+              <Button 
+                variant="secondary" 
+                onClick={() => {
+                  setIsGeneralUpdateOpen(false);
+                  setAnswerText("");
+                }}
+                disabled={isAnswering}
+                className="w-24"
+              >
+                Annulla
+              </Button>
+              <Button 
+                onClick={handleGeneralUpdateSubmit}
                 disabled={!answerText.trim() || isAnswering}
                 className="w-32 bg-indigo-600 hover:bg-indigo-700 text-white"
               >
