@@ -516,3 +516,15 @@
 - [2026-05-24 08:31:00 CEST]: Modal "Conferma Consegna" UI Restyling
   - *Details*: Migliorato l'impatto visivo e risolti i problemi di contrasto presenti nel modale di conferma consegna del preventivo.
   - *Tech Notes*: Rimosse le classi `dark:*` sfuggite all'interno di `components/quote/delivery-confirm-modal.tsx` che, in assenza di un setup di tema rigoroso o per via di sovrapposizioni globali, causavano su sfondi chiari l'applicazione di colori testuali errati (come il giallo illeggibile). Sostituita l'icona "ArrowRight" del tasto principale con un più rassicurante "CheckCircle2", ingrandite e spaziate meglio le icone di alert, aumentata la leggibilità della box warning usando la combinazione `bg-amber-50 / text-amber-900` e stilizzati i pulsanti in modo più distinto e moderno.
+
+- [2026-05-24 08:36:00 CEST]: Blocco Prezzo sui Preventivi Confermati
+  - *Details*: Assicurato che la modifica delle stime ore su un preventivo già confermato dal cliente aggiorni solo i parametri di costo interno (ore totali, costo ore team) ma preservi immutato il prezzo di vendita totale e i subtotali dei moduli.
+  - *Tech Notes*: Modificata la funzione `recalculateScenario` in `src/lib/quotes/pricing-engine.ts`. Se un preventivo è approvato (`scenario.isApproved`), il motore di pricing sovrascrive `totals` e `module.subtotalEur` del preventivo ricalcolato utilizzando i valori originariamente approvati, congelando la quotazione presentata al cliente e modificando internamente solo i valori di costo reali. Grazie all'uso strutturale del campo JSONB `llm_raw_response`, la persistenza è automatica e schema-less senza necessitare di script SQL di migrazione DB.
+
+- [2026-05-24T08:45:00+02:00]: Fix z-index e posizionamento modali di conferma
+  - *Details*: Risolto un bug visivo per cui il modale di conferma logout (o altri dialoghi di conferma) risultava non centrato e coperto da un overlay scuro troncato all'header, a causa di vincoli nel contesto di stacking (z-index) dell'header.
+  - *Tech Notes*: Modificato `components/ui/confirm-dialog.tsx` per utilizzare `createPortal` di `react-dom` in modo da renderizzare il dialog direttamente all'interno di `document.body`, bypassando l'overflow e la position dei contenitori padri. Impostato `z-[100]` per assicurare che il dialog e il suo overlay coprano l'intero schermo.
+
+- [2026-05-24T08:47:00+02:00]: Fix accidental logout on modal open
+  - *Details*: Risolto un bug critico in cui cliccando il bottone 'Esci' (apertura del modale) si veniva già disconnessi in background (visibile al primo refresh della pagina) a causa dell'innesco accidentale del form nativo da parte del router di Next.js.
+  - *Tech Notes*: Modificato `components/auth/logout-button.tsx`. Rimosso il tag `<form>` attorno al pulsante di logout. La chiamata all'endpoint `/auth/signout` è stata implementata tramite una `fetch` imperativa e isolata all'interno dell'evento `handleConfirm`, gestendo manualmente la redirect verso `/login` o `/home` in base alla risposta.

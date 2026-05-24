@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState } from "react";
 import { LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
@@ -13,30 +13,42 @@ export function LogoutButton({
   variant?: "ghost" | "primary" | "secondary" | "danger";
 }) {
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
-  const formRef = useRef<HTMLFormElement>(null);
+  const [isPending, setIsPending] = useState(false);
 
-  const handleConfirm = () => {
-    formRef.current?.submit();
+  const handleConfirm = async () => {
+    setIsPending(true);
+    try {
+      const res = await fetch("/auth/signout", { method: "POST" });
+      if (res.redirected) {
+        window.location.href = res.url;
+      } else if (res.ok) {
+        window.location.href = "/login";
+      }
+    } catch (e) {
+      console.error(e);
+      window.location.href = "/login";
+    } finally {
+      setIsPending(false);
+    }
   };
 
   return (
     <>
-      <form ref={formRef} action="/auth/signout" method="post" className={className}>
-        <Button 
-          type="button" 
-          variant={variant} 
-          className={variant === "ghost" ? "text-slate-500 hover:text-slate-900" : ""}
-          onClick={() => setIsConfirmOpen(true)}
-        >
-          <LogOut className="mr-2 h-4 w-4" />
-          <span className="hidden sm:inline">Esci</span>
-        </Button>
-      </form>
+      <Button 
+        type="button" 
+        variant={variant} 
+        className={className || (variant === "ghost" ? "text-slate-500 hover:text-slate-900" : "")}
+        onClick={() => setIsConfirmOpen(true)}
+      >
+        <LogOut className="mr-2 h-4 w-4" />
+        <span className="hidden sm:inline">Esci</span>
+      </Button>
 
       <ConfirmDialog
         isOpen={isConfirmOpen}
         onClose={() => setIsConfirmOpen(false)}
         onConfirm={handleConfirm}
+        isPending={isPending}
         title="Esci dall'account"
         description="Sei sicuro di voler uscire? Dovrai effettuare nuovamente l'accesso per visualizzare i tuoi progetti e preventivi."
         confirmText="Sì, esci"

@@ -88,20 +88,20 @@ export function DeliveryConfirmModal({
         </div>
 
         <div className="mt-8 flex flex-col sm:flex-row gap-3">
-          <ButtonLink 
-            href={`/admin/requests/${requestId}/scenarios/${scenarioId}`} 
+          <ButtonLink
+            href={`/admin/requests/${requestId}/scenarios/${scenarioId}`}
             variant="secondary"
             className="w-full sm:w-1/2 flex justify-center bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 hover:text-slate-900 font-semibold"
           >
             Modifica Ore
           </ButtonLink>
-          <Button 
-            onClick={onConfirm} 
+          <Button
+            onClick={onConfirm}
             disabled={isPending}
             className="w-full sm:w-1/2 flex justify-center bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm font-semibold"
           >
             {isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <CheckCircle2 className="mr-2 h-4 w-4" />}
-            {isPending ? "Consegna in corso..." : "Conferma e Consegna"}
+            {isPending ? "Consegna in corso..." : "Consegnato"}
           </Button>
         </div>
       </div>

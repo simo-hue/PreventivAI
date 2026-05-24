@@ -118,7 +118,23 @@ export function recalculateScenario(
     riskBufferPercentage,
   });
 
-  return repriced[0] ?? scenario;
+  const newScenario = repriced[0] ?? scenario;
+
+  if (scenario.isApproved) {
+    // Preserve the original sell prices if the scenario is approved
+    newScenario.totals = { ...scenario.totals };
+    
+    // Preserve module subtotals
+    newScenario.modules = newScenario.modules.map(newMod => {
+      const origMod = scenario.modules.find(m => m.id === newMod.id);
+      if (origMod) {
+        newMod.subtotalEur = origMod.subtotalEur;
+      }
+      return newMod;
+    });
+  }
+
+  return newScenario;
 }
 
 function buildRateCardMap(rateCards: RateCard[]) {

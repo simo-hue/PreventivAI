@@ -376,11 +376,11 @@ export function ScenarioDetailClient({
                 <table className="w-full min-w-[760px] text-left text-sm">
                   <thead className="bg-[var(--surface-strong)] text-xs uppercase text-[var(--muted)]">
                     <tr>
-                      <th className="px-4 py-3">Task</th>
-                      <th className="px-4 py-3">Ruolo</th>
-                      <th className="px-4 py-3">Ore</th>
-                      <th className="px-4 py-3">Tariffa</th>
-                      <th className="px-4 py-3 text-right">Costo</th>
+                      <th className="px-4 py-3 w-[40%]"></th>
+                      <th className="px-4 py-3 w-[20%]"></th>
+                      <th className="px-4 py-3 text-right">Ore</th>
+                      <th className="px-4 py-3 text-right">Tariffa</th>
+                      <th className="px-4 py-3 text-right">Prezzo</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -414,13 +414,13 @@ export function ScenarioDetailClient({
                             {effort.roleName}{" "}
                             <span className="text-[var(--muted)]">{effort.seniority}</span>
                           </td>
-                          <td className="px-4 py-3">
+                          <td className="px-4 py-3 text-right">
                             {isEditing ? (
-                              <div className="flex items-center gap-1">
+                              <div className="flex items-center justify-end gap-1">
                                 <input
                                   type="number"
                                   min="0"
-                                  className="w-16 rounded border border-[var(--border)] px-2 py-1 text-sm"
+                                  className="w-16 rounded border border-[var(--border)] px-2 py-1 text-sm text-left"
                                   value={effort.estimatedHoursExpected}
                                   onChange={(e) =>
                                     updateEffortHours(
@@ -437,7 +437,7 @@ export function ScenarioDetailClient({
                               <span>{formatNumber(effort.estimatedHoursExpected)}h</span>
                             )}
                           </td>
-                          <td className="px-4 py-3">
+                          <td className="px-4 py-3 text-right">
                             {formatCurrency(effort.hourlyRateEur, pricingSettings?.currency)}/h
                           </td>
                           <td className="px-4 py-3 text-right font-semibold">

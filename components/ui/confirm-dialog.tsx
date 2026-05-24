@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { AlertTriangle, Loader2, CheckCircle2, Info } from "lucide-react";
 import { Button } from "./button";
 import { cn } from "@/src/lib/utils/cn";
@@ -30,6 +31,11 @@ export function ConfirmDialog({
 }: ConfirmDialogProps) {
   const overlayRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Close on Escape key press
   useEffect(() => {
@@ -54,7 +60,7 @@ export function ConfirmDialog({
     };
   }, [isOpen]);
 
-  if (!isOpen) return null;
+  if (!isOpen || !mounted) return null;
 
   const handleOverlayClick = (e: React.MouseEvent) => {
     if (e.target === overlayRef.current && !isPending) {
@@ -86,11 +92,11 @@ export function ConfirmDialog({
   const colors = variantColors[variant] as any;
   const Icon = colors.icon || AlertTriangle;
 
-  return (
+  const dialogContent = (
     <div
       ref={overlayRef}
       onClick={handleOverlayClick}
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs transition-opacity duration-300 animate-in fade-in"
+      className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm transition-opacity duration-300 animate-in fade-in"
       role="dialog"
       aria-modal="true"
       aria-labelledby="confirm-dialog-title"
@@ -148,4 +154,6 @@ export function ConfirmDialog({
       </div>
     </div>
   );
+
+  return createPortal(dialogContent, document.body);
 }
