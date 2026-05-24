@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { AlertTriangle, Clock, ArrowRight, Loader2 } from "lucide-react";
+import { AlertTriangle, Clock, ArrowRight, Loader2, CheckCircle2 } from "lucide-react";
 import { Button, ButtonLink } from "@/components/ui/button";
 
 export function DeliveryConfirmModal({
@@ -56,29 +56,29 @@ export function DeliveryConfirmModal({
     <div
       ref={overlayRef}
       onClick={handleOverlayClick}
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs transition-opacity duration-300 animate-in fade-in"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm transition-opacity duration-300 animate-in fade-in"
       role="dialog"
       aria-modal="true"
     >
-      <div className="relative w-full max-w-md overflow-hidden rounded-2xl bg-[var(--surface)] border border-[var(--border)] p-6 shadow-2xl transition-all duration-300 scale-100 animate-in zoom-in-95">
+      <div className="relative w-full max-w-md overflow-hidden rounded-2xl bg-white border border-slate-100 p-8 shadow-2xl transition-all duration-300 scale-100 animate-in zoom-in-95">
         <div className="flex flex-col items-center text-center">
-          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-amber-100 mb-4 ring-4 ring-amber-50 dark:bg-amber-950/30 dark:ring-amber-950/10">
-            <AlertTriangle className="h-6 w-6 text-amber-600 dark:text-amber-400" aria-hidden="true" />
+          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-amber-100 mb-5 ring-8 ring-amber-50">
+            <AlertTriangle className="h-7 w-7 text-amber-600" aria-hidden="true" />
           </div>
-          <h2 className="text-xl font-bold tracking-tight text-[var(--foreground)]">Conferma Consegna Progetto</h2>
-          <p className="mt-2 text-sm leading-relaxed text-[var(--muted)]">
+          <h2 className="text-2xl font-bold tracking-tight text-slate-900">Conferma Consegna</h2>
+          <p className="mt-3 text-sm leading-relaxed text-slate-500">
             Stai per segnare questa richiesta come completata e consegnata, accettando il preventivo approvato dal cliente.
           </p>
         </div>
 
-        <div className="rounded-md bg-amber-50 p-4 my-6 border border-amber-200 dark:bg-amber-950/20 dark:border-amber-900/50">
+        <div className="rounded-xl bg-amber-50 p-4 my-8 border border-amber-200/60 shadow-sm">
           <div className="flex">
-            <div className="flex-shrink-0">
-              <Clock className="h-5 w-5 text-amber-600 dark:text-amber-500" aria-hidden="true" />
+            <div className="flex-shrink-0 mt-0.5">
+              <Clock className="h-5 w-5 text-amber-600" aria-hidden="true" />
             </div>
-            <div className="ml-3">
-              <h3 className="text-sm font-medium text-amber-800 dark:text-amber-400">Verifica le stime</h3>
-              <div className="mt-2 text-sm text-amber-700 dark:text-amber-300/80">
+            <div className="ml-3 text-left">
+              <h3 className="text-sm font-bold text-amber-900">Verifica le stime</h3>
+              <div className="mt-1 text-sm text-amber-800 leading-relaxed">
                 <p>
                   Hai verificato se le ore stimate dall'AI per questo preventivo sono corrette e fattibili per il team?
                 </p>
@@ -87,20 +87,20 @@ export function DeliveryConfirmModal({
           </div>
         </div>
 
-        <div className="mt-6 flex flex-col sm:flex-row gap-3">
+        <div className="mt-8 flex flex-col sm:flex-row gap-3">
           <ButtonLink 
             href={`/admin/requests/${requestId}/scenarios/${scenarioId}`} 
             variant="secondary"
-            className="w-full sm:w-auto flex-1 justify-center"
+            className="w-full sm:w-1/2 flex justify-center bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 hover:text-slate-900 font-semibold"
           >
             Modifica Ore
           </ButtonLink>
           <Button 
             onClick={onConfirm} 
             disabled={isPending}
-            className="w-full sm:w-auto flex-1 justify-center bg-emerald-600 hover:bg-emerald-700 text-white border-transparent focus:ring-emerald-500"
+            className="w-full sm:w-1/2 flex justify-center bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm font-semibold"
           >
-            {isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ArrowRight className="mr-2 h-4 w-4" />}
+            {isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <CheckCircle2 className="mr-2 h-4 w-4" />}
             {isPending ? "Consegna in corso..." : "Conferma e Consegna"}
           </Button>
         </div>
