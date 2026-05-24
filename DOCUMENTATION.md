@@ -475,3 +475,7 @@
 - [2026-05-24 07:55:00 CEST]: Scenario Cards Responsive Layout
   - *Details*: Modificata la griglia dei preventivi nella vista ScenarioDashboard in modo da rendere il layout dinamico e distribuire sempre le card occupando tutta la larghezza disponibile. Ora, se c'è un solo preventivo, questo si allargherà al 100%, mentre se ce ne sono 2 si divideranno lo spazio al 50%.
   - *Tech Notes*: Modificata l'espressione in `components/quote/scenario-dashboard.tsx` sostituendo la classe fissa `xl:grid-cols-3` con un template string dinamico `scenariosToDisplay.length === 1 ? "xl:grid-cols-1" : scenariosToDisplay.length === 2 ? "xl:grid-cols-2" : "xl:grid-cols-3"`.
+
+- [2026-05-24 08:00:00 CEST]: Scenario Detail Client - Header Redesign
+  - *Details*: Ristrutturato l'header della pagina di dettaglio del preventivo lato admin (`/admin/requests/[id]/scenarios/[scenarioId]`). Invece della disposizione "sparpagliata" (testo a sinistra, bottoni a destra), ora gli elementi sono impilati logicamente e centrati (Titolo -> Descrizione -> Barra dei pulsanti centrata), come richiesto.
+  - *Tech Notes*: Modificato il componente `ScenarioDetailClient` rimpiazzando `flex-row lg:justify-between` con un `flex-col gap-6` e un container `justify-center` apposito per i pulsanti.

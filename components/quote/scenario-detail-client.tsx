@@ -244,25 +244,26 @@ export function ScenarioDetailClient({
         </Alert>
       )}
 
-      <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
-        <div>
+      <div className="flex flex-col gap-6">
+        <div className="flex flex-col items-center text-center">
           <Link
             href={`/admin/requests/${requestId}`}
-            className="text-sm font-semibold text-[var(--primary)]"
+            className="mb-4 inline-block text-sm font-semibold text-[var(--primary)]"
           >
             ← Torna alla richiesta
           </Link>
-          <div className="mt-2 flex flex-wrap items-center gap-2">
-            <h1 className="text-2xl font-bold tracking-normal">{display.name}</h1>
-            <Badge variant="info">
+          <div className="flex flex-wrap justify-center items-center gap-3">
+            <h1 className="text-3xl font-bold tracking-normal text-slate-900">{display.name}</h1>
+            <Badge variant="info" className="text-sm">
               {display.scenarioType === "lean" ? "Essenziale" : display.scenarioType === "premium" ? "Premium" : "Bilanciato"}
             </Badge>
           </div>
-          <p className="mt-2 max-w-4xl text-sm leading-6 text-[var(--muted)]">
+          <p className="mt-3 max-w-4xl text-base leading-relaxed text-slate-600">
             {display.description}
           </p>
         </div>
-        <div className="flex flex-wrap gap-2">
+
+        <div className="flex flex-wrap items-center justify-center gap-3 rounded-xl bg-slate-50 border border-slate-200 p-5 shadow-sm">
           {isEditing ? (
             <Button onClick={saveEdits} disabled={isSaving}>
               {isSaving ? "Salvataggio..." : "Salva Modifiche"}
@@ -273,15 +274,15 @@ export function ScenarioDetailClient({
             </Button>
           )}
           <ButtonLink href={`/quotes/${display.id}/preview`} variant="secondary">
-            <ExternalLink className="size-4" aria-hidden="true" />
+            <ExternalLink className="size-4 mr-2" aria-hidden="true" />
             Preview
           </ButtonLink>
           <Button variant="secondary" onClick={exportPdf}>
-            <Download className="size-4" aria-hidden="true" />
+            <Download className="size-4 mr-2" aria-hidden="true" />
             PDF
           </Button>
           <Button onClick={sendToChat} disabled={isSendingToChat || isEditing}>
-            {isSendingToChat ? <Loader2 className="size-4 animate-spin" /> : <Send className="size-4" aria-hidden="true" />}
+            {isSendingToChat ? <Loader2 className="size-4 mr-2 animate-spin" /> : <Send className="size-4 mr-2" aria-hidden="true" />}
             Invia a cliente
           </Button>
         </div>
