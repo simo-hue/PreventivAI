@@ -101,8 +101,10 @@ export function recalculateScenario(
             acceptanceCriteria: task.acceptanceCriteria,
             efforts: task.efforts.map((effort) => ({
               id: effort.id,
+              roleRateCardId: effort.roleRateCardId,
               roleName: effort.roleName,
               seniority: effort.seniority,
+              hourlyRateEur: effort.hourlyRateEur,
               estimatedHoursMin: effort.estimatedHoursMin,
               estimatedHoursExpected: effort.estimatedHoursExpected,
               estimatedHoursMax: effort.estimatedHoursMax,
@@ -166,18 +168,21 @@ function priceTask(
       normalizeRoleKey(effort.roleName, effort.seniority),
     );
 
-    if (!rateCard) {
+    if (!rateCard && effort.hourlyRateEur == null) {
       throw new PricingError(
         `Unmapped role: ${effort.roleName} | ${effort.seniority}.`,
       );
     }
 
+    const hourlyRate = effort.hourlyRateEur ?? rateCard!.hourlyRateEur;
+    const roleRateCardId = effort.roleRateCardId ?? rateCard!.id;
+
     return {
       ...effort,
       id: effort.id,
-      roleRateCardId: rateCard.id,
-      hourlyRateEur: rateCard.hourlyRateEur,
-      costEur: roundMoney(effort.estimatedHoursExpected * rateCard.hourlyRateEur),
+      roleRateCardId,
+      hourlyRateEur: hourlyRate,
+      costEur: roundMoney(effort.estimatedHoursExpected * hourlyRate),
     };
   });
 
