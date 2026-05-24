@@ -7,6 +7,7 @@ import Link from "next/link";
 import ReactMarkdown from "react-markdown";
 import { experimental_useObject } from "@ai-sdk/react";
 import { ValidateReplySchema } from "@/src/lib/ai/schemas";
+import TextareaAutosize from "react-textarea-autosize";
 
 interface Profile {
   full_name: string;
@@ -87,13 +88,6 @@ export function ChatBox({
     }
   }, [messages, showTypingIndicator]);
 
-  useEffect(() => {
-    if (textareaRef.current) {
-      textareaRef.current.style.height = "auto";
-      textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 120)}px`;
-    }
-  }, [inputValue]);
-
   const handleSend = async () => {
     if (!inputValue.trim()) return;
 
@@ -169,8 +163,8 @@ export function ChatBox({
                           <Link href={`?previewQuoteId=${msg.metadata.scenarioId}`} className={`flex-1 flex items-center justify-center py-1.5 px-3 rounded-md text-xs font-semibold transition-colors ${isMe ? 'bg-indigo-500 hover:bg-indigo-400 text-white' : 'bg-white border border-slate-200 hover:bg-slate-50 text-slate-700'}`}>
                             Apri preview
                           </Link>
-                          <Button 
-                            variant={isMe ? "primary" : "secondary"} 
+                          <Button
+                            variant={isMe ? "primary" : "secondary"}
                             className={`flex-1 h-[30px] text-xs font-semibold ${isMe ? 'bg-indigo-700 hover:bg-indigo-800 text-white border-none' : ''}`}
                             onClick={async () => {
                               try {
@@ -277,7 +271,7 @@ export function ChatBox({
       {/* Input */}
       <div className="p-4 border-t border-slate-200 bg-white mt-auto">
         <div className="flex gap-2 items-end">
-          <textarea
+          <TextareaAutosize
             ref={textareaRef}
             placeholder="Scrivi un messaggio..."
             value={inputValue}
@@ -289,8 +283,9 @@ export function ChatBox({
               }
             }}
             disabled={sending}
-            rows={1}
-            className="flex-1 resize-none rounded-2xl border border-slate-300 px-4 py-3 text-sm focus:outline-none focus:border-[var(--primary)] disabled:bg-slate-50 disabled:text-slate-400 overflow-y-auto min-h-[44px] max-h-[120px] shadow-sm transition-colors"
+            minRows={1}
+            maxRows={5}
+            className="flex-1 resize-none rounded-2xl border border-slate-300 px-4 py-3 text-sm focus:outline-none focus:border-[var(--primary)] disabled:bg-slate-50 disabled:text-slate-400 shadow-sm transition-colors"
           />
           <Button
             onClick={handleSend}
@@ -299,9 +294,6 @@ export function ChatBox({
           >
             <Send className="h-4 w-4 sm:mr-2" />
           </Button>
-        </div>
-        <div className="text-xs text-slate-400 text-center mt-2 hidden sm:block">
-          Premi Invio per inviare, Shift + Invio per andare a capo
         </div>
       </div>
     </div>

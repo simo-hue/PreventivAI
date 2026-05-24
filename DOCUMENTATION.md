@@ -486,3 +486,17 @@
     - Aggiunta la prop `backUrl` a `QuotePreviewClient`.
     - Modificata `app/quotes/[scenarioId]/preview/page.tsx` per calcolare e passare un URL di ritorno (`/admin/requests/${request.id}/scenarios/${scenarioId}`) basandosi sulla presenza della request collegata.
     - Il link sostituisce il testo statico "Italians quote it better - Preview" solo lato admin, mantenendo invariata l'esperienza per il cliente nel link pubblico.
+
+- [2026-05-24 08:10:00 CEST]: Chat Input Textarea Auto-Resize Fix
+  - *Details*: Corretto l'allineamento verticale e il comportamento di auto-ridimensionamento della textarea nella chat. Ora il campo di testo appare su una singola riga perfettamente centrata di default, ed espande la sua altezza dinamicamente solo quando il testo inserito supera la prima riga.
+  - *Tech Notes*: Modificata la logica del `useEffect` in `components/chat/chat-box.tsx`. Prima la `scrollHeight` veniva calcolata partendo da `auto` o da un minimo che la faceva bloccare ad altezze maggiori. Impostando temporaneamente `style.height = "0px"` prima del calcolo e assicurando che la `min-h` (46px) combaci con il padding e l'interlinea, il componente si ridimensiona con precisione in base al reale contenuto immesso dall'utente.
+
+- [2026-05-24 08:12:00 CEST]: Chat Input Textarea - Refactored to react-textarea-autosize
+  - *Details*: Risolto definitivamente il problema dell'allineamento verticale errato ("testo in alto") per il campo di chat installando e integrando la libreria ufficiale e robusta `react-textarea-autosize`.
+  - *Tech Notes*: Rimosso tutto il codice e i `useEffect` manuali precedentemente scritti per tentare di calcolare la `scrollHeight` "a mano", che fallivano con alcuni padding. Sostituito il tag `<textarea>` nativo con `<TextareaAutosize>` di `react-textarea-autosize` con `minRows={1}` e rimosso le altezze forzate da Tailwind (`min-h`, `max-h`).
+
+- [2026-05-24 08:14:00 CEST]: Quote Preview - Fully Responsive Split Pane (Container Queries)
+  - *Details*: Ottimizzato il render del preventivo in preview e del dettaglio progetto all'interno del pannello sinistro (ResizableLayout). Ora il layout si riadatta istantaneamente in base alla larghezza del pannello in cui è contenuto, offrendo un'esperienza perfetta anche quando l'utente trascina il separatore.
+  - *Tech Notes*:
+    - Integrati i Container Queries nativi di Tailwind v4 (`@container`, `@sm`, `@md`, ecc.) nel componente `QuotePreviewClient` e in `app/customer/[id]/requests/[requestId]/page.tsx`, sostituendo le media query basate sulla viewport (es. `sm:`, `lg:`).
+    - Rimossa la restrizione rigida `min-w-[680px]` nella tabella di breakdown economico (`QuotePreviewClient`), permettendo al browser di calcolare gli ingombri ideali ed evitando un antiestetico scroll orizzontale in finestre medie.

@@ -60,7 +60,7 @@ export default async function CustomerProjectDetailPage({
       </div>
     </section>
   ) : (
-    <section className="bg-slate-50/50 p-6 sm:p-10 relative h-full overflow-y-auto">
+    <section className="bg-slate-50/50 p-6 sm:p-10 relative h-full overflow-y-auto @container">
       <Link 
         href={`/customer/${id}`}
         className="inline-flex items-center text-sm font-medium text-[var(--muted)] hover:text-[var(--primary)] transition-colors mb-8"
@@ -74,7 +74,7 @@ export default async function CustomerProjectDetailPage({
           <Badge variant="info" className="capitalize shrink-0">{request.status}</Badge>
         </div>
         
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 @xl:grid-cols-2 gap-8">
           {/* Project Details Panel */}
           <div className="rounded-2xl border border-slate-200 bg-white p-6 sm:p-8 shadow-sm h-fit">
             <div className="flex items-center gap-3 mb-6">

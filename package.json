@@ -38,6 +38,7 @@
     "react-hook-form": "latest",
     "react-markdown": "^10.1.0",
     "react-resizable-panels": "^4.11.1",
+    "react-textarea-autosize": "^8.5.9",
     "server-only": "latest",
     "tailwind-merge": "latest",
     "zod": "latest"

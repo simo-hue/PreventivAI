@@ -87,7 +87,7 @@ export function QuotePreviewClient({
   }
 
   return (
-    <main className="bg-white">
+    <main className="bg-white @container">
       <div className="no-print sticky top-0 z-20 border-b border-[var(--border)] bg-white/95 px-4 py-3 backdrop-blur">
         <div className="mx-auto flex max-w-5xl items-center justify-between gap-3">
           {backUrl ? (
@@ -111,7 +111,7 @@ export function QuotePreviewClient({
         </div>
       </div>
 
-      <article className="mx-auto max-w-5xl px-5 py-10 text-slate-900 sm:px-8">
+      <article className="mx-auto max-w-5xl px-5 py-10 text-slate-900 @sm:px-8">
         <section className="min-h-[60vh] border-b border-slate-200 pb-10">
           <div className="flex flex-wrap gap-2">
             <Badge variant="info">{scenario.scenarioType}</Badge>
@@ -123,13 +123,13 @@ export function QuotePreviewClient({
               </Badge>
             )}
           </div>
-          <h1 className="mt-6 max-w-4xl text-4xl font-bold tracking-normal sm:text-5xl">
+          <h1 className="mt-6 max-w-4xl text-4xl font-bold tracking-normal @sm:text-5xl">
             {request.title}
           </h1>
           <p className="mt-4 max-w-3xl text-lg leading-8 text-slate-600">
             {scenario.description}
           </p>
-          <div className="mt-10 grid gap-4 sm:grid-cols-3">
+          <div className="mt-10 grid gap-4 @sm:grid-cols-3">
             <HeroMetric label="Investimento" value={formatCurrency(scenario.totals.totalEur)} />
             <HeroMetric label="Timeline attesa" value={`${scenario.estimatedWeeksExpected} settimane`} />
             <HeroMetric label="Confidenza" value={formatPercent(scenario.confidence)} />
@@ -150,7 +150,7 @@ export function QuotePreviewClient({
               .filter((module) => module.isIncluded)
               .map((module) => (
                 <div key={module.id} className="rounded-lg border border-slate-200 p-5">
-                  <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                  <div className="flex flex-col gap-2 @sm:flex-row @sm:items-start @sm:justify-between">
                     <div>
                       <h3 className="font-bold">{module.name}</h3>
                       <p className="mt-2 text-sm leading-6 text-slate-600">
@@ -167,7 +167,7 @@ export function QuotePreviewClient({
         <section className="avoid-break border-t border-slate-200 py-10">
           <h2 className="text-2xl font-bold">Breakdown economico</h2>
           <div className="mt-6 overflow-x-auto">
-            <table className="w-full min-w-[680px] text-left text-sm">
+            <table className="w-full  text-left text-sm">
               <thead className="border-b border-slate-300 text-xs uppercase text-slate-500">
                 <tr>
                   <th className="py-3">Ruolo</th>
@@ -202,7 +202,7 @@ export function QuotePreviewClient({
           </div>
         </section>
 
-        <section className="grid gap-8 border-t border-slate-200 py-10 lg:grid-cols-2">
+        <section className="grid gap-8 border-t border-slate-200 py-10 @lg:grid-cols-2">
           <PreviewList title="Assumptions" items={scenario.assumptions} />
           <PreviewList title="Exclusions" items={scenario.exclusions} />
         </section>
@@ -226,7 +226,7 @@ export function QuotePreviewClient({
 
         <section className="border-t border-slate-200 py-10">
           <h2 className="text-2xl font-bold">Prossimi step</h2>
-          <ol className="mt-4 grid gap-3 text-sm leading-6 text-slate-700 sm:grid-cols-3">
+          <ol className="mt-4 grid gap-3 text-sm leading-6 text-slate-700 @sm:grid-cols-3">
             <li className="rounded-lg border border-slate-200 p-4">Conferma perimetro e moduli inclusi.</li>
             <li className="rounded-lg border border-slate-200 p-4">Workshop tecnico di dettaglio.</li>
             <li className="rounded-lg border border-slate-200 p-4">Kickoff e pianificazione sprint.</li>
@@ -241,7 +241,7 @@ export function QuotePreviewClient({
               Il team verrà notificato e potrà sbloccare il progetto procedendo con la consegna formale.
             </p>
             <Button 
-              className="mt-6 bg-emerald-600 text-white hover:bg-emerald-700 w-full sm:w-auto px-8"
+              className="mt-6 bg-emerald-600 text-white hover:bg-emerald-700 w-full @sm:w-auto px-8"
               onClick={handleApprove}
               disabled={isApproving}
             >
