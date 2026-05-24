@@ -82,7 +82,7 @@ export function ChatBox({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [requestId]);
 
-  const showTypingIndicator = requestStatus === "analyzing" || (isStreamLoading && !object?.aiResponse);
+  const showTypingIndicator = isStreamLoading && !object?.aiResponse;
 
   useEffect(() => {
     if (scrollRef.current) {

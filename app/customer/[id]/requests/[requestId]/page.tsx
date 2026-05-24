@@ -109,7 +109,7 @@ export default async function CustomerProjectDetailPage({
                     </div>
                   </div>
                   <Link href={`?previewQuoteId=${scenario.id}`} className="w-full block">
-                    <Button variant="outline" className="w-full">
+                    <Button variant="secondary" className="w-full">
                       Apri Preventivo
                     </Button>
                   </Link>

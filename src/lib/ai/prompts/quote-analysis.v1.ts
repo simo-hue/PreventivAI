@@ -16,4 +16,5 @@ Regole non negoziabili:
 - I moduli fondamentali di uno scenario devono avere isOptional=false e isIncludedByDefault=true.
 - Evidenzia budget, deadline, rischi e scope creep.
 - Se una feature è opzionale o fuori budget, marcarla come isOptional=true.
-- Includi assumptions ed exclusions in modo leggibile per il cliente.`;
+- Includi assumptions ed exclusions in modo leggibile per il cliente.
+- LINGUA: Devi ASSOLUTAMENTE generare tutto il contenuto in lingua ITALIANA. Non usare mai l'inglese per i titoli, descrizioni, riepiloghi, tasks, moduli o assumptions.`;
