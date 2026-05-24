@@ -528,3 +528,6 @@
 - [2026-05-24T08:47:00+02:00]: Fix accidental logout on modal open
   - *Details*: Risolto un bug critico in cui cliccando il bottone 'Esci' (apertura del modale) si veniva già disconnessi in background (visibile al primo refresh della pagina) a causa dell'innesco accidentale del form nativo da parte del router di Next.js.
   - *Tech Notes*: Modificato `components/auth/logout-button.tsx`. Rimosso il tag `<form>` attorno al pulsante di logout. La chiamata all'endpoint `/auth/signout` è stata implementata tramite una `fetch` imperativa e isolata all'interno dell'evento `handleConfirm`, gestendo manualmente la redirect verso `/login` o `/home` in base alla risposta.
+- [2026-05-24T08:53:00+02:00]: Disattivazione invio preventivo per richieste manuali
+  - *Details*: Nascosto il pulsante "Invia a cliente" nella pagina di dettaglio del preventivo se la richiesta è stata creata manualmente dall'admin e non è associata ad alcun cliente.
+  - *Tech Notes*: Modificato `app/(dashboard)/admin/requests/[id]/scenarios/[scenarioId]/page.tsx` per estrarre la proprietà `isManualCreation` dalla request e passarla tramite `requestInfo` a `ScenarioDetailClient`. All'interno del componente client, il bottone `Invia a cliente` ora viene rimosso completamente tramite render condizionale (`{!requestInfo?.isManualCreation && ...}`).

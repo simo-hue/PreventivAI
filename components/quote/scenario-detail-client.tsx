@@ -18,6 +18,8 @@ import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 type RequestInfo = {
   id: string;
   title: string;
+  isManualCreation?: boolean;
+  userId?: string | null;
 };
 
 export function ScenarioDetailClient({
@@ -281,10 +283,12 @@ export function ScenarioDetailClient({
             <Download className="size-4 mr-2" aria-hidden="true" />
             PDF
           </Button>
-          <Button onClick={sendToChat} disabled={isSendingToChat || isEditing}>
-            {isSendingToChat ? <Loader2 className="size-4 mr-2 animate-spin" /> : <Send className="size-4 mr-2" aria-hidden="true" />}
-            Invia a cliente
-          </Button>
+          {!requestInfo?.isManualCreation && (
+            <Button onClick={sendToChat} disabled={isSendingToChat || isEditing}>
+              {isSendingToChat ? <Loader2 className="size-4 mr-2 animate-spin" /> : <Send className="size-4 mr-2" aria-hidden="true" />}
+              Invia a cliente
+            </Button>
+          )}
         </div>
       </div>
 

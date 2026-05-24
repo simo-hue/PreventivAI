@@ -22,7 +22,7 @@ export default async function ScenarioDetailPage({
       initialScenario={scenario}
       requestInfo={
         clientReq
-          ? { id: clientReq.id, title: clientReq.title }
+          ? { id: clientReq.id, title: clientReq.title, isManualCreation: clientReq.isManualCreation, userId: clientReq.userId }
           : null
       }
     />
