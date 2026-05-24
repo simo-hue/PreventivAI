@@ -8,6 +8,8 @@ import { Card, CardBody, CardHeader } from "@/components/ui/card";
 import { evaluateScenarioRisk } from "@/src/lib/quotes/risk-engine";
 import { formatCurrency, formatPercent } from "@/src/lib/utils/format";
 import type { StoredRequest } from "@/src/lib/demo/storage";
+import { DeliveryConfirmModal } from "./delivery-confirm-modal";
+import { useState } from "react";
 
 export function ScenarioDashboard({ initialData: request }: { initialData: StoredRequest }) {
   const scenarios = request?.analysis?.scenarios ?? [];
@@ -25,9 +27,39 @@ export function ScenarioDashboard({ initialData: request }: { initialData: Store
   }
 
   const analysis = request.analysis;
+  const approvedScenario = sortedScenarios.find((s) => s.isApproved);
+  const hasApproved = !!approvedScenario;
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDelivering, setIsDelivering] = useState(false);
+
+  async function handleConfirmDelivery() {
+    if (!request) return;
+    setIsDelivering(true);
+    try {
+      const res = await fetch(`/api/requests/${request.id}/status`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: "delivered" }),
+      });
+      if (res.ok) window.location.reload();
+    } catch {
+      alert("Errore di connessione");
+      setIsDelivering(false);
+    }
+  }
 
   return (
     <div className="space-y-5">
+      {approvedScenario && (
+        <DeliveryConfirmModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          onConfirm={handleConfirmDelivery}
+          isPending={isDelivering}
+          requestId={request.id}
+          scenarioId={approvedScenario.id}
+        />
+      )}
       <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
         <div>
           <div className="flex flex-wrap items-center gap-2">
@@ -51,17 +83,10 @@ export function ScenarioDashboard({ initialData: request }: { initialData: Store
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
-          {request.status === "quoted" && (
+          {request.status === "quoted" && hasApproved && (
             <Button
               variant="primary"
-              onClick={async () => {
-                const res = await fetch(`/api/requests/${request.id}/status`, {
-                  method: 'PUT',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ status: 'delivered' })
-                });
-                if (res.ok) window.location.reload();
-              }}
+              onClick={() => setIsModalOpen(true)}
             >
               Segna come Consegnato
             </Button>
@@ -116,6 +141,12 @@ export function ScenarioDashboard({ initialData: request }: { initialData: Store
                       <Badge variant={scenario.scenarioType === "lean" ? "success" : scenario.scenarioType === "premium" ? "warning" : "info"}>
                         {scenario.scenarioType === "lean" ? "Essenziale" : scenario.scenarioType === "premium" ? "Premium" : "Bilanciato"}
                       </Badge>
+                      {scenario.isApproved && (
+                        <Badge variant="success" className="gap-1 px-2.5">
+                          <CheckCircle2 className="size-3" />
+                          Confermato
+                        </Badge>
+                      )}
                     </div>
                     <p className="mt-2 text-sm leading-6 text-[var(--muted)]">
                       {scenario.description}
@@ -180,8 +211,6 @@ function MiniStat({ label, value }: { label: string; value: string }) {
     </div>
   );
 }
-
-import { useState } from "react";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function ImportantQuestionsSection({ questions, requestId }: { questions: any[]; requestId: string }) {

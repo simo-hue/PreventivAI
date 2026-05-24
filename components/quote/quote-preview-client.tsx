@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Download, Printer } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Download, Printer, CheckCircle2, Loader2 } from "lucide-react";
 import { Alert } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -20,6 +21,9 @@ export function QuotePreviewClient({
 }) {
   const request = initialRequest;
   const scenario = initialScenario;
+  const router = useRouter();
+  const [isApproved, setIsApproved] = useState(scenario?.isApproved ?? false);
+  const [isApproving, setIsApproving] = useState(false);
 
   async function exportPdf() {
     if (!request || !scenario) {
@@ -47,6 +51,26 @@ export function QuotePreviewClient({
     anchor.download = `${scenario.slug}.pdf`;
     anchor.click();
     URL.revokeObjectURL(url);
+  }
+
+  async function handleApprove() {
+    if (!scenario || isApproving) return;
+    setIsApproving(true);
+    try {
+      const response = await fetch(`/api/quote-scenarios/${scenario.id}/approve`, {
+        method: "POST",
+      });
+      if (response.ok) {
+        setIsApproved(true);
+        router.refresh();
+      } else {
+        alert("Errore durante l'approvazione del preventivo.");
+      }
+    } catch {
+      alert("Errore di rete.");
+    } finally {
+      setIsApproving(false);
+    }
   }
 
   if (!request || !scenario) {
@@ -82,6 +106,12 @@ export function QuotePreviewClient({
           <div className="flex flex-wrap gap-2">
             <Badge variant="info">{scenario.scenarioType}</Badge>
             <Badge variant="neutral">IVA esclusa</Badge>
+            {isApproved && (
+              <Badge variant="success" className="gap-1 px-2.5">
+                <CheckCircle2 className="size-3" />
+                Confermato
+              </Badge>
+            )}
           </div>
           <h1 className="mt-6 max-w-4xl text-4xl font-bold tracking-normal sm:text-5xl">
             {request.title}
@@ -192,6 +222,25 @@ export function QuotePreviewClient({
             <li className="rounded-lg border border-slate-200 p-4">Kickoff e pianificazione sprint.</li>
           </ol>
         </section>
+
+        {!isApproved && (
+          <section className="mt-10 rounded-2xl border border-emerald-200 bg-emerald-50 p-8 text-center shadow-sm">
+            <h2 className="text-2xl font-bold text-emerald-950">Sei soddisfatto della proposta?</h2>
+            <p className="mt-2 text-emerald-800">
+              Cliccando sul pulsante qui sotto approverai ufficialmente questo preventivo.
+              Il team verrà notificato e potrà sbloccare il progetto procedendo con la consegna formale.
+            </p>
+            <Button 
+              className="mt-6 bg-emerald-600 text-white hover:bg-emerald-700 w-full sm:w-auto"
+              size="lg"
+              onClick={handleApprove}
+              disabled={isApproving}
+            >
+              {isApproving ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : <CheckCircle2 className="mr-2 h-5 w-5" />}
+              {isApproving ? "Approvazione in corso..." : "Approva Preventivo"}
+            </Button>
+          </section>
+        )}
       </article>
     </main>
   );

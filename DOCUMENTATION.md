@@ -406,3 +406,31 @@
 
 - [2026-05-24T01:45:00+02:00]: Fix Scenario ID Overwrite in Pricing Engine
   - *Details*: Fixed a bug in priceScenarios where the scenario ID was being incorrectly overwritten with the scenario slug (e.g., lean-static-onepage). This caused the chat metadata to store the string slug instead of the database UUID, breaking the customer preview link. Recalculated scenarios now correctly preserve their original UUID.
+
+- [2026-05-24T01:48:00+02:00]: Implementazione Notifiche Email via Edge Functions
+  - *Details*: Creato un sistema professionale di notifiche email per aggiornare i clienti quando il preventivo è pronto e quando ci sono nuovi messaggi in chat. La logica gira interamente su Supabase Edge Functions con trigger diretti da database (webhooks pg_net) a zero dipendenze dal backend Next.js.
+  - *Tech Notes*:
+    - Implementata edge function Deno `supabase/functions/email-notifications/index.ts` usando API fetch di Resend e SDK Supabase con Service Role per aggirare RLS nel check email clienti.
+    - Template HTML in-line inclusi con design Tailwind premium.
+    - Ignorato il recapito email all'admin tramite filtro logico `ADMIN_EMAIL = 'admin@gmail.com'`.
+    - Creata migration `20260524020000_email_notification_webhooks.sql` per invocare webhooks in HTTP_POST con `pg_net` tramite trigger su `client_requests` (`status` change) e `chat_messages` (solo se `sender_id != created_by`).
+
+- [2026-05-24T02:00:00+02:00]: Customer Quote Approval & Admin Validation Flow
+  - *Details*: Added a button in the Quote Preview for customers to approve the scenario. Approving the scenario updates  in Supabase and displays a 'Confermato' badge. On the Admin side, the 'Segna come Consegnato' button is now disabled until a quote is approved. When clicked, it opens a Delivery Confirm Modal asking the admin to verify or modify the hours before finalizing the project delivery.
+  - *Tech Notes*: New API . Modified  and  to include . Created .
+
+- [2026-05-24T02:00:00+02:00]: Customer Quote Approval and Admin Validation Flow
+  - *Details*: Added a button in the Quote Preview for customers to approve the scenario. Approving the scenario updates is_approved in Supabase and displays a Confermato badge. On the Admin side, the Segna come Consegnato button is now disabled until a quote is approved. When clicked, it opens a Delivery Confirm Modal asking the admin to verify or modify the hours before finalizing the project delivery.
+  - *Tech Notes*: New API POST /api/quote-scenarios/[id]/approve. Modified PricedScenario and quote-repository.ts to include isApproved. Created DeliveryConfirmModal.
+
+- [2026-05-24 02:04:00 CEST]: Fix compilation errors (useState & Dialog missing)
+  - *Details*: Risolti gli errori di compilazione in scenario-dashboard e delivery-confirm-modal.
+  - *Tech Notes*: Rimosso import duplicato di useState da scenario-dashboard.tsx. Riscritto DeliveryConfirmModal utilizzando il DOM nativo e Tailwind per rimuovere la dipendenza inesistente a @/components/ui/dialog.
+
+- [2026-05-24 02:08:00 CEST]: Suppress Chat Polling Fetch Error
+  - *Details*: Nascosto il messaggio di errore "Failed to fetch" che appariva nella console del browser.
+  - *Tech Notes*: Modificato il blocco try/catch in `components/chat/chat-box.tsx` per ignorare silenziosamente gli errori di rete di tipo TypeError (come "Failed to fetch") durante il polling (ad es. quando il server di sviluppo viene riavviato), in modo da non inquinare la console.
+
+- [2026-05-24 02:22:00 CEST]: Fix Quote Approval State Sync
+  - *Details*: Risolto il problema per cui l'accettazione del preventivo da parte del customer non aggiornava in tempo reale il badge "Confermato" e gli altri stati della UI (sia lato customer che admin).
+  - *Tech Notes*: Modificata l'API route `/api/quote-scenarios/[id]/approve` aggiungendo `revalidatePath("/", "layout")` per invalidare tutta la cache Server Side in Next.js App Router (RSC cache). In questo modo la Admin dashboard riflette istantaneamente il cambiamento caricando dal DB lo stato `is_approved`. Aggiornato anche `QuotePreviewClient` aggiungendo `router.refresh()` in modo che il browser del customer ricarichi le modifiche al DOM (Route Cache client-side) in automatico al momento dell'approvazione.

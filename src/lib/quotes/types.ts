@@ -100,6 +100,7 @@ export type PricedScenario = Omit<QuoteScenarioFromAi, "modules"> & {
   modules: PricedModule[];
   totals: ScenarioTotals;
   roleBreakdown: PricedRoleBreakdown[];
+  isApproved?: boolean;
   displayOptions?: {
     showHours?: boolean;
     showHourlyRate?: boolean;

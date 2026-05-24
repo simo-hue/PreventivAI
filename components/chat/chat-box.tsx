@@ -63,7 +63,9 @@ export function ChatBox({
           setRequestStatus(data.status);
         }
       }
-    } catch (e) {
+    } catch (e: any) {
+      // Ignora l'errore se il server è irraggiungibile temporaneamente (es. restart del dev server)
+      if (e?.message === 'Failed to fetch' || e?.name === 'TypeError') return;
       console.error(e);
     } finally {
       setLoading(false);
