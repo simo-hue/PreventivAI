@@ -587,3 +587,7 @@
 - [2026-05-24 11:42:00 CEST]: Bugfix - UUID invalid input syntax for efforts & zeroed quote details
   - *Details*: Fixed a bug where editing quote details from the admin panel would fail to save and result in all quote hours and costs being set to 0. 
   - *Tech Notes*: The issue occurred because `recalculateScenario` in `pricing-engine.ts` was replacing the actual UUIDs of `roleRateCardId` with string literal IDs (like `rate-frontend-mid`) from the demo `officialRateCards`. When saving via `PUT /api/quote-scenarios/[id]/route.ts`, the `insert efforts` query failed with a UUID syntax error. Because Supabase JS executes sequentially without native transaction rollback, the preceding `delete` of existing efforts had already committed, leaving the quote with 0 efforts and 0 cost. Updated `recalculateScenario` and `priceTask` to properly preserve the existing `roleRateCardId` and `hourlyRateEur` if they are already present.
+
+- [2026-05-24 11:46:00 CEST]: Rimozione completa riferimenti mock da UI
+  - *Details*: Completata la rimozione del file mock `officialRateCards` dal componente client `scenario-detail-client.tsx` per garantire che tutti i prezzi calcolati nella UI provengano solo ed esclusivamente dal database di produzione (Supabase).
+  - *Tech Notes*: Aggiunta chiamata a `/api/admin/rate-cards` on mount per fetchare i rate_card reali da Supabase. `recalculateScenario` adesso processa la UI utilizzando solo i dati prelevati dal db, evitando in toto gli ID fittizi.

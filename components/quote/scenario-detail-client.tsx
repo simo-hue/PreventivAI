@@ -9,9 +9,9 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ButtonLink } from "@/components/ui/button";
 import { Card, CardBody, CardHeader } from "@/components/ui/card";
-import { DEFAULT_PM_PERCENTAGE, officialRateCards } from "@/src/lib/demo/rate-card";
+import { DEFAULT_PM_PERCENTAGE } from "@/src/lib/demo/rate-card";
 import { recalculateScenario } from "@/src/lib/quotes/pricing-engine";
-import type { PricedScenario } from "@/src/lib/quotes/types";
+import type { PricedScenario, RateCard } from "@/src/lib/quotes/types";
 import { formatCurrency, formatNumber, formatPercent } from "@/src/lib/utils/format";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 
@@ -49,12 +49,18 @@ export function ScenarioDetailClient({
     currency: string;
     riskBufferPercentage: number;
   } | null>(null);
+  const [dbRateCards, setDbRateCards] = useState<RateCard[]>([]);
 
-  // Carica le impostazioni di pricing dal server
+  // Carica le impostazioni di pricing e i rate card dal server
   useEffect(() => {
     fetch("/api/admin/settings")
       .then((r) => r.ok ? r.json() : null)
       .then((data) => { if (data) setPricingSettings(data); })
+      .catch(() => { });
+      
+    fetch("/api/admin/rate-cards")
+      .then((r) => r.ok ? r.json() : null)
+      .then((data) => { if (data) setDbRateCards(data); })
       .catch(() => { });
   }, []);
 
@@ -82,11 +88,11 @@ export function ScenarioDetailClient({
   }, [scenarioId, initialScenario]);
 
   const { recalculated, recalcError } = useMemo(() => {
-    if (!scenario) return { recalculated: null, recalcError: null };
+    if (!scenario || dbRateCards.length === 0) return { recalculated: null, recalcError: null };
     try {
       const recalculated = recalculateScenario(
         scenario,
-        officialRateCards,
+        dbRateCards,
         pricingSettings?.pmPercentage ?? DEFAULT_PM_PERCENTAGE,
         overrides,
         pricingSettings?.riskBufferPercentage ?? 0,
@@ -130,7 +136,7 @@ export function ScenarioDetailClient({
     try {
       const nextScenario = recalculateScenario(
         scenario,
-        officialRateCards,
+        dbRateCards.length > 0 ? dbRateCards : [],
         pricingSettings?.pmPercentage ?? DEFAULT_PM_PERCENTAGE,
         nextOverrides,
         pricingSettings?.riskBufferPercentage ?? 0,
