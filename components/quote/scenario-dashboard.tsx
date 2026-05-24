@@ -269,15 +269,16 @@ function ImportantQuestionsSection({ questions, requestId }: { questions: any[];
         }),
       });
 
-      await fetch(`/api/requests/${requestId}/analyze`, { method: "POST" });
+      // Avvia l'analisi in background senza bloccare l'UI
+      fetch(`/api/requests/${requestId}/analyze`, { method: "POST" }).catch(console.error);
       
       setAnsweringQuestion(null);
       setAnswerText("");
+      router.push("/admin/requests");
       router.refresh();
     } catch (e) {
       console.error(e);
       alert("Errore durante l'aggiornamento del preventivo.");
-    } finally {
       setIsAnswering(false);
     }
   }

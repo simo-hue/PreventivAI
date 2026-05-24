@@ -595,3 +595,7 @@
 - [2026-05-24 12:19:00 CEST]: Admin Direct Reply to Important Questions
   - *Details*: Aggiunta la possibilità per l'admin di rispondere direttamente alle 'Domande importanti' generando un aggiornamento silente del preventivo, senza che il messaggio risulti visibile nella chat.
   - *Tech Notes*: Aggiunto un modal custom in `components/quote/scenario-dashboard.tsx` per inserire la risposta alla domanda. Al submit, viene effettuata una chiamata POST a `/api/requests/[id]/chat` con un messaggio contenente `metadata: { isHidden: true }`, seguita immediatamente da una chiamata a `/api/requests/[id]/analyze` per scatenare la rigenerazione. In `components/chat/chat-box.tsx` i messaggi con tale metadata vengono filtrati in modo da non essere renderizzati nell'interfaccia della chat.
+
+- [2026-05-24 12:24:00 CEST]: Admin Reply Redirect
+  - *Details*: Modificato il comportamento dell'invio risposta alle domande importanti per reindirizzare immediatamente l'admin a /admin/requests.
+  - *Tech Notes*: Rimosso l'await dalla chiamata fetch a /api/requests/[id]/analyze in components/quote/scenario-dashboard.tsx, permettendo all'elaborazione di avvenire in background. Aggiunto router.push("/admin/requests") per una UX non bloccante.
