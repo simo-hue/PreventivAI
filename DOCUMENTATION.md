@@ -611,3 +611,7 @@
 - [2026-05-24 12:33:00 CEST]: Fix mappaggio isManualCreation
   - *Details*: Risolto un bug per cui il pulsante 'Invia all'utente' continuava ad apparire per le richieste create manualmente dall'admin.
   - *Tech Notes*: Aggiunto `isManualCreation: clientReq.isManualCreation` nell'oggetto `mappedRequest` in `app/(dashboard)/admin/requests/[id]/page.tsx`. Il campo, sebbene estratto correttamente dal DB e tipizzato, veniva perso durante la mappatura passata a `ScenarioDashboard`.
+
+- [2026-05-24 12:35:00 CEST]: Nascondi Checkbox Domande Importanti per Richieste Manuali
+  - *Details*: Quando una richiesta è creata manualmente dall'admin (isManualCreation = true), oltre a nascondere il pulsante 'Invia all'utente', vengono ora nascoste anche le relative checkbox accanto alle domande importanti per evitare confusione.
+  - *Tech Notes*: Aggiunto rendering condizionale dell'input di tipo checkbox in `ImportantQuestionsSection` all'interno di `scenario-dashboard.tsx` basato sulla prop `hideSendToUserButton`. Rimossa inoltre dinamicamente la classe `cursor-pointer` dalla label qualora le checkbox siano disattivate.

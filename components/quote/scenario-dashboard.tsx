@@ -314,13 +314,15 @@ function ImportantQuestionsSection({ questions, requestId, hideSendToUserButton 
           {questions.map(q => (
             <div key={q.question} className="flex flex-col rounded-md border border-[var(--border)] bg-white p-4 hover:bg-[var(--surface-strong)] transition-colors">
               <div className="flex items-start gap-3">
-                <label className="flex items-start gap-3 cursor-pointer flex-1">
-                  <input 
-                    type="checkbox" 
-                    className="mt-1 h-4 w-4 rounded border-slate-300 text-[var(--primary)] focus:ring-[var(--primary)]"
-                    checked={selected.includes(q.question)}
-                    onChange={() => toggle(q.question)}
-                  />
+                <label className={`flex items-start gap-3 flex-1 ${!hideSendToUserButton ? "cursor-pointer" : ""}`}>
+                  {!hideSendToUserButton && (
+                    <input 
+                      type="checkbox" 
+                      className="mt-1 h-4 w-4 rounded border-slate-300 text-[var(--primary)] focus:ring-[var(--primary)]"
+                      checked={selected.includes(q.question)}
+                      onChange={() => toggle(q.question)}
+                    />
+                  )}
                   <div className="w-full">
                     <p className="text-sm font-semibold">{q.question}</p>
                     <p className="mt-1 text-xs text-[var(--muted)]">{q.impact}</p>
