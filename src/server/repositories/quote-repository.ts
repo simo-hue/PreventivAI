@@ -522,3 +522,18 @@ export async function getScenarioById(scenarioId: string): Promise<any | null> {
     clientRequestId: s.client_request_id,
   };
 }
+
+export async function getApprovedScenariosForRequest(clientRequestId: string) {
+  const admin = createSupabaseAdminClient();
+  if (!admin) return [];
+
+  const { data, error } = await admin
+    .from("quote_scenarios")
+    .select("id, name, total_eur, created_at")
+    .eq("client_request_id", clientRequestId)
+    .eq("is_approved", true)
+    .order("created_at", { ascending: false });
+
+  if (error || !data) return [];
+  return data;
+}

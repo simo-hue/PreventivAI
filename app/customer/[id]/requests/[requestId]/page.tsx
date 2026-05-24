@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { getClientRequestByIdAndUserId } from "@/src/server/repositories/request-repository";
-import { getScenarioById } from "@/src/server/repositories/quote-repository";
+import { getScenarioById, getApprovedScenariosForRequest } from "@/src/server/repositories/quote-repository";
 import { FileText, ArrowLeft } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -27,6 +27,8 @@ export default async function CustomerProjectDetailPage({
   const request = await getClientRequestByIdAndUserId(requestId, id);
 
   if (!request) return notFound();
+
+  const approvedScenarios = await getApprovedScenariosForRequest(requestId);
 
   let previewScenario = null;
   const isUUID = (str: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(str);
@@ -88,16 +90,43 @@ export default async function CustomerProjectDetailPage({
 
         {/* Quotes Panel */}
         <div className="flex flex-col">
-          <h3 className="text-2xl font-bold text-slate-900 mb-6 px-1">Preventivi Ricevuti</h3>
-          <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-10 sm:p-14 text-center flex flex-col items-center justify-center min-h-[300px]">
-            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-slate-50 mb-6 border border-slate-100">
-              <FileText className="h-8 w-8 text-slate-300" />
+          <h3 className="text-2xl font-bold text-slate-900 mb-6 px-1">Preventivi Accettati</h3>
+          {approvedScenarios.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {approvedScenarios.map((scenario) => (
+                <div key={scenario.id} className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
+                  <div className="flex items-start gap-4 mb-4">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-green-50 text-green-600">
+                      <FileText className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-slate-900 line-clamp-2">{scenario.name}</h4>
+                      {scenario.created_at && (
+                        <p className="text-xs text-slate-500 mt-1">
+                          Accettato il {new Date(scenario.created_at).toLocaleDateString("it-IT")}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                  <Link href={`?previewQuoteId=${scenario.id}`} className="w-full block">
+                    <Button variant="outline" className="w-full">
+                      Apri Preventivo
+                    </Button>
+                  </Link>
+                </div>
+              ))}
             </div>
-            <p className="text-slate-500 mb-6 max-w-sm leading-relaxed">
-              La software house sta analizzando la tua richiesta. I preventivi appariranno qui non appena saranno pronti.
-            </p>
-            <Button variant="secondary" disabled className="min-w-[200px]">Nessun preventivo disponibile</Button>
-          </div>
+          ) : (
+            <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-10 sm:p-14 text-center flex flex-col items-center justify-center min-h-[300px]">
+              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-slate-50 mb-6 border border-slate-100">
+                <FileText className="h-8 w-8 text-slate-300" />
+              </div>
+              <p className="text-slate-500 mb-6 max-w-sm leading-relaxed">
+                Ancora nessun preventivo accettato. Se hai ricevuto dei preventivi, puoi visualizzarli e accettarli dalla chat.
+              </p>
+              <Button variant="secondary" disabled className="min-w-[200px]">Nessun preventivo accettato</Button>
+            </div>
+          )}
         </div>
       </div>
     </section>
