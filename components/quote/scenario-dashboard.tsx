@@ -269,6 +269,13 @@ function ImportantQuestionsSection({ questions, requestId }: { questions: any[];
         }),
       });
 
+      // Aggiorna subito lo stato a "analyzing" così la UI si aggiorna prima del redirect
+      await fetch(`/api/requests/${requestId}/status`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: "analyzing" }),
+      });
+
       // Avvia l'analisi in background senza bloccare l'UI
       fetch(`/api/requests/${requestId}/analyze`, { method: "POST" }).catch(console.error);
       

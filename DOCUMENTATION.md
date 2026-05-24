@@ -599,3 +599,7 @@
 - [2026-05-24 12:24:00 CEST]: Admin Reply Redirect
   - *Details*: Modificato il comportamento dell'invio risposta alle domande importanti per reindirizzare immediatamente l'admin a /admin/requests.
   - *Tech Notes*: Rimosso l'await dalla chiamata fetch a /api/requests/[id]/analyze in components/quote/scenario-dashboard.tsx, permettendo all'elaborazione di avvenire in background. Aggiunto router.push("/admin/requests") per una UX non bloccante.
+
+- [2026-05-24 12:26:00 CEST]: Sincronizzazione Stato UI al Redirect
+  - *Details*: Modificata la logica del redirect post-risposta per forzare lo stato 'analyzing' prima di ricaricare la pagina delle richieste.
+  - *Tech Notes*: Aggiunta una chiamata await sincrona a /api/requests/[id]/status in components/quote/scenario-dashboard.tsx per impostare lo stato ad 'analyzing' prima del router.push() e router.refresh(), eliminando la race-condition con l'endpoint asincrono di /analyze e assicurando che la tabella mostri immediatamente lo stato aggiornato.
