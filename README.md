@@ -1,5 +1,7 @@
 # PreventivAI
 
+[![Guarda il video](https://youtube.com)](https://youtu.be/ovGfJu0-i-E)
+
 Web app interna per software house che trasforma richieste cliente in preventivi tecnici modulari, verificabili ed esportabili.
 
 Documentazione completa: **[README_ESTESO.md](./README_ESTESO.md)**
